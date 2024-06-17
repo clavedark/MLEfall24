@@ -1,0 +1,93 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Maximum Likelihood, Fall 2024",
+    "section": "",
+    "text": "This is the course website for PLSC 606J, Maximum Likelihood Estimation, Fall 2024. The course is an advanced course in data science focusing on maximum likelihood methods and their applications in political science.\n\nSyllabus\nSlides\nCode\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site:\nCreated with Quarto.\nAbout me:\nProfessor of political science, PhD Florida State 1999. I’ve taught this class for a long time, but never the same way twice. I study models of political violence, collect data on protests and repression.\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "mlesyllabus24.html#seminar-description",
+    "href": "mlesyllabus24.html#seminar-description",
+    "title": "MLE Syllabus",
+    "section": "Seminar Description",
+    "text": "Seminar Description\nThis 4 credit hour seminar is a survey of maximum likelihood methods and their applications to empirical political questions. It presumes students have a detailed and intuitive knowledge of least squares, probability theory, basic skills in scalar and matrix algebra, and a basic understanding of calculus. The course will deal mainly in understanding the principles of maximum likelihood estimation, under what conditions we move away from least squares, and what particular models are appropriate given observed data. The seminar will focus on application and interpretation of ML models and linking theory to statistical models. The course emphasizes coding and data viz in R and Stata.\nThe class meets one time per week for three hours. My office hours are designed to be homework help hours where I’ll work in the grad lab with any of you who are working on the exercises. The most productive pathway for this class is for your to get in the habit of working together, and those office hours are a good time for this."
+  },
+  {
+    "objectID": "mlesyllabus24.html#course-purpose",
+    "href": "mlesyllabus24.html#course-purpose",
+    "title": "MLE Syllabus",
+    "section": "Course Purpose",
+    "text": "Course Purpose\nThis seminar fulfills the advanced quantitative methods requirement in the Ph.D. curriculum. The method of maximum likelihood underlies a majority of quantitative models in Political Science; this class teaches students to be astute consumers of such models, and how to implement and interpret ML models. These are crucial skills for dissertations in Political Science, and for producing publishable quantitative research."
+  },
+  {
+    "objectID": "mlesyllabus24.html#learning-objectives",
+    "href": "mlesyllabus24.html#learning-objectives",
+    "title": "MLE Syllabus",
+    "section": "Learning Objectives",
+    "text": "Learning Objectives\nStudents will encounter an array of maximum likelihood models in this course. By the end of the course, students will have mastered the theory of maximum likelihood sufficient to write and program likelihood functions in ; they will be able to choose, estimate, and interpret appropriate models, model specifications, and model evaluation tools given their data; and they will be able to produce sophisticated quantities of interest (e.g. predicted probabilities, expected values, confidence intervals) via a variety of techniques including simulation and end point transformation. Students will also be able to present model findings verbally and graphically."
+  },
+  {
+    "objectID": "mlesyllabus24.html#class-meetings-office-hours-assignments",
+    "href": "mlesyllabus24.html#class-meetings-office-hours-assignments",
+    "title": "MLE Syllabus",
+    "section": "Class Meetings, Office Hours, Assignments",
+    "text": "Class Meetings, Office Hours, Assignments\nThe course will meet this fall entirely in-person in the Social Science Experiment Lab on Wednesdays 9:40am-12:40pm.\nOffice hours are Mondays 1:30pm-3:30pm. I’ll likely hold these in the grad work room to help with your assignments. For an appointment, email me and we’ll sort out a time.\nAll assignments should be turned in on Brightspace - please submit ::\n\nPDFs generated from LaTeX or R Markdown (Quarto).\nannotated R scripts.\nwhere necessary, data.\n\nAssignments should be instantly replicable - running the code file should produce all models, tables, plots, etc."
+  },
+  {
+    "objectID": "mlesyllabus24.html#reading",
+    "href": "mlesyllabus24.html#reading",
+    "title": "MLE Syllabus",
+    "section": "Reading",
+    "text": "Reading\nThe reading material for the course is important because it often demonstrates application of various MLE models; seeing how folks apply these and how they motivate their applications is really informative, something you cannot miss. We often won’t directly discuss the readings, but don’t let that imply they’re not important. If I get the sense we’re not keeping up with reading, expect the syllabus to change to incorporate quizzes or other accountability measures.\nReading for the course will consist of several books and articles (listed by week below). The books listed below also have Amazon links - you’ll find most of these cheaper used online.\n\nRequired\n\nBox-Steffensmeier, Janet and Jones, Brad. 2004. Event History Modeling. Cambridge. ISBN 0521546737\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Sage Publications Inc. ISBN 0803973748\nWard, Michael D. and John S. Ahlquist. 2018 Maximum Likelihood for Social Science. Cambridge. ISBN 978-1316636824.\n\n\n\nRecommended\nUseful, but not required (though some required reading in the first one):\n\nGary King. 1998. Unifying Political Methodology. University of Michigan Press. ISBN 0472085549\nJ. Scott Long. 2014. Regression Models for Categorical Dependent Variables Using Stata. 3rd Ed. Stata Press. ISBN 1597181110 (this book is good for practical/applied examples even if R is your primary language)\n\nGary King’s book is regarded as seminal in developing ML applications in political science. Scott Long’s is a similarlyaccessible treatment of a host of ML models and applications (and the Stata book is a great applied companion). Together, these two books are probably the most important on the syllabus as they are both accessible, but comprehensive and technical enough to be useful. Ward and Ahlquist’s book is a new overview of applied ML in a political science setting. Box-Steffensmeier and Jones is a thorough and accessible treatment of hazard models in a variety of empirical settings.\n\n\nAdditional Resources\nOther useful books include:\n\nCameron, A. Colin and Trivedi, Pravin K. 1998. Regression Analysis of Count Data. Cambridge. ISBN 0521635675\nMaddala, Gregory. 1983. Limited Dependent and Qualitative Variables in Econometrics. Cambridge. ISBN 0521338255\nPaul D Allison - Event History Analysis : Regression for Longitudinal Event Data. Sage Publications Inc. ISBN 0803920555\nTim Futing Liao - Interpreting Probability Models : Logit, Probit, and Other Generalized Linear Models. Sage Publications Inc. ISBN 0803949995\nJohn H Aldrich and Forrest D Nelson - Linear Probability, Logit, and Probit Models. Sage Publications Inc. ISBN 0803921330\nFred C Pampel - Logistic Regression : A Primer. Sage Publications Inc. ISBN 0761920102\nVani Kant Borooah - Logit and Probit : Ordered and Multinomial Models. Sage Publications Inc. ISBN 0761922423\nScott R Eliason - Maximum Likelihood Estimation : Logic and Practice. Sage Publications Inc. ISBN 0803941072\nRichard Breen - Regression Models : Censored, Sample Selected, or Truncated Data. Sage Publications Inc. ISBN 0803957106\nKrishnan Namboodiri - Matrix Algebra : An Introduction. ISBN 0803920520"
+  },
+  {
+    "objectID": "mlesyllabus24.html#this-is-the-most-important-section-of-the-syllabus",
+    "href": "mlesyllabus24.html#this-is-the-most-important-section-of-the-syllabus",
+    "title": "Maximum Likelihood Syllabus",
+    "section": "This is the most important section of the syllabus",
+    "text": "This is the most important section of the syllabus\n\nReading\nIt will rarely be the case that we discuss all the readings in seminar. Their purposes are two-fold. First, the technical readings (King, Long, etc.) are to frame the derivations of the models and techniques. These are important because to understand how to interpret a model, you need a technical understanding of its origins. This is not to say you need to be able to derive these yourselves, or to perform complex mathematical computations. It is to say that if you carefully read about the models themselves, you will certainly find their interpretations easier. The mantra for this course is this - interpretation is everything. Without some understanding of how these models arise, you will find interpretation hard.\nSecond, the applied readings (i.e. articles) provide just that - application in a political, economic, or social context, and application in terms of interpretation of results. Some applications are nicely done, some less so. Not only are these useful examples of what to do and of what not to do, they will provide really useful models for your own efforts to apply these statistical models. Interpretation is everything.\nSo reading is up to you, and is crucial. As much as I hate to say this, if I get the sense at any point during the term you are not reading, I will absolutely begin weekly reading quizzes; or perhaps require weekly papers on the readings. Making them up will suck. Taking them will suck. Grading them will suck. There really isn’t much reading, and there’s just no excuse not to do it."
+  },
+  {
+    "objectID": "mlesyllabus24.html#how-to-read",
+    "href": "mlesyllabus24.html#how-to-read",
+    "title": "Maximum Likelihood Syllabus",
+    "section": "How to Read",
+    "text": "How to Read\nReading academic stuff is a bit different from most other reading. Especially since you’re reading large amounts in graduate school (and the rest of your academic lives), it’s important to think about what you’re trying to accomplish. With journal articles, the goal has to be to understand the novel claim the paper makes, to understand why that novel claim is interesting or novel (at least according to the author), to understand how the author assesses the evidence, and to understand what that evidence tells us. Most importantly, you should have two answers to each of these - what the author says, and what you think. The author may tell you the argument is important for some reason, and you might disagree - you might think it’s unimportant, or important for a different reason, or wrong, or whatever.\nReading technical stuff is yet another category, but equally important. The best way to read math models is to read them aloud (yes, out loud) for three reasons. First, it forces you to slow down as you read it - you talk slower than your eyes move. Second, it forces you to deal with every element of the model - in silence, your mind will just skim right over it to the next set of English words. Third, it engages two senses reading silently does not - vocalization and hearing. \\\nReading out loud is not going to make everything crystal clear - but it will open some pathways whereby math language isn’t completely foreign. Most importantly, doing so bridges the gap between the math and the English accounts that normally follow, and make those English accounts easier to make sense of."
+  },
+  {
+    "objectID": "mlesyllabus24.html#course-requirements-and-grades",
+    "href": "mlesyllabus24.html#course-requirements-and-grades",
+    "title": "MLE Syllabus",
+    "section": "Course Requirements and Grades",
+    "text": "Course Requirements and Grades\nThe seminar requires the following:\n\nProblem sets - 60% total\nMechanism papers - 40%\n\nPlease note that all written assignments must be submitted as PDFs either compiled in LaTeX or in  markdown (Quarto).\nYou’ll complete a series of problem sets, mostly applied. How many will depend on how things move along during the term. Regarding the problem sets - the work you turn in for the problem sets should clearly be your own, but I urge you to work together - doing so is a great way to learn and to overcome problems.\nThe mechanism papers are a series of three short papers you’ll write during the semester aimed at learning to identify and describe causal mechanisms, then at producing a causal mechanism. More on these early in the term.\nA word about completeness - attempt everything. To receive a passing grade in the course, you must finish all elements of the course, so all problem sets, all exams, papers, etc. To complete an element, you must at least attempt all parts of the element - so if a problem set has 10 problems, you must attempt all 10 or the assignment is incomplete, you’ve not completed every element of the course, and you cannot pass. I realize there may be problems you have trouble with and even get wrong, but you must try - the bottom line is don’t turn in incomplete work.\nGrades will be assigned on the following scale:\n\n\n\n\n\n\n\n\n\n\n\n\n\nGrade\nRange\nGrade\nRange\n\n\n\n\nA\n94-100%\nC+\n77-79%\n\n\nA-\n90–93%\nC\n73-76%\n\n\nB+\n87–89%\nC-\n70-72%\n\n\nB\n83-86%\nD\n60-69%\n\n\nB-\n80-82%\nF\n&lt;60%"
+  },
+  {
+    "objectID": "mlesyllabus24.html#course-policies",
+    "href": "mlesyllabus24.html#course-policies",
+    "title": "MLE Syllabus",
+    "section": "Course Policies",
+    "text": "Course Policies\n\nAttendance\nAttendance is expected, and is essential if you’re to succeed in this class.\n\n\nAcademic Integrity\nIdeas are the currency in academic exchange, so acknowledging where ideas come from is important. Acknowledging the sources of ideas also helps us identify an idea’s lineage which can be important for understanding how that line of thought has developed, and toward promoting future growth. As graduate students, you should have a good understanding of academic honesty and best practices. Here are details of Binghamton’s honesty policy."
+  },
+  {
+    "objectID": "mlesyllabus24.html#course-schedule",
+    "href": "mlesyllabus24.html#course-schedule",
+    "title": "MLE Syllabus",
+    "section": "Course Schedule",
+    "text": "Course Schedule\nWeek 1, Aug 24 – Likelihood Theory and ML Estimation\n\nGary King. 1998. Unifying Political Methodology. Chapter 1-4\nJ. Scott Long. 1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapters 1-2.\n\nWeek 2, Aug 31 –Binary Dependent Variables I - probit/logit, QI\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 1, 2, 4\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 3.    \n\nWeek 3, Sept 7 – Binary Dependent Variables II - variants (scobit, ordered, RE)\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 3, 5, 6, 7\n\n\n\nNagler (1994)\nKing and Zeng (2001)\nFranklin and Kosaki (1989)\nC. Zorn (2005)\n\nWeek 4, Sept 14 – Hazards I (discrete)\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 11 \nBeck, Katz, and Tucker (1998)\nCarter and Signorino (2010)\n\nWeek 5, Sept 21 – Assumptions and Specification I - heteroskedasticity, iid\n\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 5.\nFranklin (1991)\nAlvarez and Brehm (1995)\nClark and Nordstrom (2005)\n\nWeek 6, Sept 28 – Assumptions and Specification II - interactions, variables, measurement of \\(y\\)\n\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 5.\nClark, Nordstrom, and Reed (2008)\nClarke and Stone (2008)\nBerry, Golder, and Milton (2012)\nBrambor, Clark, and Golder (2006)\n\nWeek 7, Oct 5 – No class, Yom Kippur\nWeek 8, Oct 12 – Choice Models I (Unordered Dependent Variables) - MNL, MNP, CL (IIA)\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 9\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 6.\nAlvarez and Nagler (1998)\nLacy and Burden (1999)\nC. J. W. Zorn (1996)\n\nWeek 9, Oct 19– Choice Models II (Unordered Dependent Variables continued, and systems of eqs, ordered)\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 8\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 5.\nFranklin and Kosaki (1989)\n\nWeek 10, Oct 26 – Event Count Models I - poisson, over/under dispersion\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 10\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 8.1, 8.2.\nGowa (1998)\nFordham (1998)\n\nWeek 11, Nov 2 – Event Count Models II - negative binomial, zero-altered\n\nJ. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Chapter 8.3-8.7.\nC. J. W. Zorn (1998)\nClark (2003)\n\nWeek 12, Nov 9 – Hazard Models II - parametric, semi-parametric models\n\nWard & Alhlquist, 2018. Maximum Likelihood for Social Science. Chapter 11\nJanet Box-Steffensmeier and Brad Jones. 2004. Event History Modeling. Chs. 1-4\nJ. M. Box-Steffensmeier, Arnold, and Zorn (1997)\n\nWeek 13, Nov 16 – Hazard Models III - parametric models, special topics\n\nJanet Box-Steffensmeier and Brad Jones. 2004. Event History Modeling. Chs. 5-11\nC. J. W. Zorn (2000)\nBennett and Stam (1996)\nJ. Box-Steffensmeier, Reiter, and Zorn (2003)\n\nWeek 14, Nov 23 – no class, Thanksgiving \\\nWeek 15, Dec 7 – Censored/Truncated Variables, Samples - selection models\n\nJ. Scott Long. 1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapter 7\nReed (2000)\nSignorino (1999)\nTimpone (1998)"
+  },
+  {
+    "objectID": "code.html",
+    "href": "code.html",
+    "title": "Code",
+    "section": "",
+    "text": "Back to top"
+  }
+]

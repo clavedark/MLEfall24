@@ -1,0 +1,301 @@
+---
+title: "MLE Syllabus"
+subtitle: "PLSC 606J, Fall 2024"
+bibliography: refs606.bib
+format:
+  html:
+    embed-resources: true
+  pdf: default
+---
+
+```{r setup, include=FALSE ,echo=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+
+library(tidyverse)
+library(ggplot2)
+library(tibble)
+library(pander)
+
+```
+
+<!-- ::: {.grid .course-details .course-details-smaller} -->
+
+<!-- ::: g-col-6 -->
+
+::: {layout-ncol="2"}
+### Instructor
+
+-   {{< fa user >}}   [{{< var instructor.name >}}]({{< var instructor.url >}})
+-   {{< fa university >}}   {{< var instructor.office >}}
+-   {{< fa envelope >}}   <a href="mailto:dclark@binghamton.edu">dclark@binghamton.edu</a>
+-   {{< fa brands github >}}   [{{< var instructor.gitname >}}]({{< var instructor.github >}})
+-   office hours: M 1:30-3:30pm
+
+### Course details
+
+-   {{< fa calendar-alt >}}   {{< var course.semester >}}
+-   {{< fa calendar >}}   {{< var course.day >}}
+-   {{< fa clock >}}   {{< var course.time >}}
+-   {{< fa globe >}}   {{< var course.location >}}
+:::
+
+
+## Seminar Description
+
+This 4 credit hour seminar is a survey of maximum likelihood methods and their applications to empirical political questions.  It presumes students have a detailed and intuitive knowledge of least squares, probability theory, basic skills in scalar and matrix algebra, and a basic understanding of calculus.  The course will deal mainly in understanding the principles of maximum likelihood estimation, under what conditions we move away from least squares, and what particular models are appropriate given observed data.  The seminar will focus on application and interpretation of ML models and linking theory to statistical models. The course emphasizes coding and data viz in R and Stata.
+
+The class meets one time per week for three hours. My office hours are designed to be homework help hours where I'll work in the grad lab with any of you who are working on the exercises. The most productive pathway for this class is for your to get in the habit of working together, and those office hours are a good time for this.
+
+## Course Purpose
+
+This seminar fulfills the advanced quantitative methods requirement in the Ph.D. curriculum. The method of maximum likelihood underlies a majority of quantitative models in Political Science; this class teaches students to be astute consumers of such models, and how to implement and interpret ML models. These are crucial skills for dissertations in Political Science, and for producing publishable quantitative research. 
+
+## Learning Objectives
+
+Students will encounter an array of maximum likelihood models in this course. By the end of the course, students will have mastered the theory of maximum likelihood sufficient to write and program likelihood functions in {{< fa brands r-project >}}; they will be able to choose, estimate, and interpret appropriate models, model specifications, and model evaluation tools given their data; and they will be able to produce sophisticated quantities of interest (e.g. predicted probabilities, expected values,  confidence intervals) via a variety of techniques including simulation and end point transformation. Students will also be able to present model findings verbally and graphically. 
+
+## Class Meetings, Office Hours, Assignments
+
+The course will meet this fall entirely in-person in the Social Science Experiment Lab on Wednesdays 9:40am-12:40pm. 
+
+Office hours are Mondays 1:30pm-3:30pm. I'll likely hold these in the grad work room to help with your assignments. For an appointment, email me and we'll sort out a time. 
+
+All assignments should be turned in on Brightspace - please submit :: 
+ 
+- PDFs generated from *LaTeX* or R Markdown (Quarto).
+- annotated R scripts.
+- where necessary, data.
+
+
+Assignments should be instantly replicable - running the code file should produce all models, tables, plots, etc. 
+
+
+## Reading
+
+The reading material for the course is important because it often demonstrates application of various MLE models; seeing how folks apply these and how they motivate their applications is really informative, something you cannot miss. We often won't directly discuss the readings, but don't let that imply they're not important. If I get the sense we're not keeping up with reading, expect the syllabus to change to incorporate quizzes or other accountability measures.
+
+Reading for the course will consist of several books and articles (listed by week below). The books listed below also have Amazon links - you'll find most of these cheaper used online.
+
+#### Required
+
+- [Box-Steffensmeier, Janet and Jones, Brad. 2004. Event History Modeling. Cambridge. ISBN 0521546737](https://www.amazon.com/Event-History-Modeling-Scientists-Analytical/dp/0521546737/ref=sr_1_1?crid=1XQMW395P7PK0&dchild=1&keywords=box-steffensmeier&qid=1596734468&sprefix=box+steffens%2Caps%2C166&sr=8-1)
+
+- [J. Scott Long. 1997. Regression Models for Categorical and Limited Dependent Variables. Sage Publications Inc. ISBN 0803973748](https://www.amazon.com/Regression-Categorical-Dependent-Quantitative-Techniques/dp/0803973748/ref=sr_1_1?dchild=1&keywords=scott+long&qid=1596733806&sr=8-1)
+
+- [Ward, Michael D. and John S. Ahlquist. 2018 Maximum Likelihood for Social Science. Cambridge. ISBN 978-1316636824.](https://www.amazon.com/Maximum-Likelihood-Social-Science-Strategies/dp/1316636828/ref=sr_1_1?crid=65LDKPR9JRPZ&keywords=9781107185821&qid=1657540931&sprefix=9781107185821%2Caps%2C162&sr=8-1)
+
+#### Recommended 
+
+Useful, but not required (though some required reading in the first one):
+
+- [Gary King. 1998. Unifying Political Methodology. University of Michigan Press. ISBN 0472085549](https://www.amazon.com/Unifying-Political-Methodology-Likelihood-Statistical/dp/0472085549/ref=sr_1_1?dchild=1&keywords=gary+king&qid=1596734023&s=books&sr=1-1)
+
+
+- [J. Scott Long. 2014. Regression Models for Categorical Dependent Variables Using Stata. 3rd Ed. Stata Press. ISBN 1597181110 (this book is good for practical/applied examples even if R is your primary language)](https://www.amazon.com/Regression-Models-Categorical-Dependent-Variables/dp/1597181110/ref=sr_1_3?dchild=1&keywords=j+scott+long&qid=1596733960&s=books&sr=1-3)
+
+
+
+Gary King's book is regarded as seminal in developing ML applications in political science.  Scott Long's is a similarlyaccessible treatment of a host of ML models and applications (and the Stata book is a great applied companion).  Together, these two books are probably the most important on the syllabus as they are both accessible, but comprehensive and technical enough to be useful.  Ward and Ahlquist's book is a new overview of applied ML in a political science setting.  Box-Steffensmeier and Jones is a thorough and accessible treatment of hazard models in a variety of empirical settings.  
+
+#### Additional Resources
+
+Other useful books include:
+
+- Cameron, A. Colin and Trivedi, Pravin K. 1998. Regression Analysis of Count Data. Cambridge. ISBN 0521635675
+
+- Maddala, Gregory. 1983. Limited Dependent and Qualitative Variables in Econometrics. Cambridge. ISBN 0521338255
+
+- Paul D Allison  - Event History Analysis : Regression for Longitudinal Event Data. Sage Publications Inc. ISBN 0803920555
+
+- Tim Futing Liao  - Interpreting Probability Models : Logit, Probit, and Other Generalized Linear Models. Sage Publications Inc. ISBN 0803949995
+
+- John H Aldrich and Forrest D Nelson  - Linear Probability, Logit, and Probit Models. Sage Publications Inc. ISBN 0803921330
+
+- Fred C Pampel  - Logistic Regression : A Primer. Sage Publications Inc. ISBN 0761920102
+
+- Vani Kant Borooah  - Logit and Probit : Ordered and Multinomial Models. Sage Publications Inc. ISBN 0761922423
+
+- Scott R Eliason  - Maximum Likelihood Estimation : Logic and Practice. Sage Publications Inc. ISBN 0803941072
+
+- Richard Breen  - Regression Models : Censored, Sample Selected, or Truncated Data. Sage Publications Inc. ISBN 0803957106
+
+- Krishnan Namboodiri  - Matrix Algebra : An Introduction. ISBN 0803920520
+
+
+
+## Course Requirements and Grades
+
+The seminar requires the following:
+
+-   Problem sets - 60% total
+-   Mechanism papers - 40%
+
+Please note that all written assignments must be submitted as PDFs either compiled in *LaTeX* or in {{< fa brands r-project >}} markdown (Quarto).
+
+You'll complete a series of problem sets, mostly applied. How many will depend on how things move along during the term. Regarding the problem sets - the work you turn in for the problem sets should clearly be your own, but I urge you to work together - doing so is a great way to learn and to overcome problems.
+
+The mechanism papers are a series of three short papers you'll write during the semester aimed at learning to identify and describe causal mechanisms, then at producing a causal mechanism. More on these early in the term.
+
+A word about completeness - attempt everything. To receive a passing grade in the course, you must finish all elements of the course, so all problem sets, all exams, papers, etc. To complete an element, you must at least attempt all parts of the element - so if a problem set has 10 problems, you must attempt all 10 or the assignment is incomplete, you've not completed every element of the course, and you cannot pass. I realize there may be problems you have trouble with and even get wrong, but you must try - the bottom line is don't turn in incomplete work. 
+
+
+
+
+Grades will be assigned on the following scale:
+
+```{r grades, include=FALSE}
+
+grading <- tibble::tribble(
+  ~Grade, ~Range,  ~Grade1, ~Range1,
+  "A",  "94-100%", "C+", "77-79%",
+  "A-", "90–93%",  "C", "73-76%",
+  "B+", "87–89%",  "C-",  "70-72%",
+  "B",  "83-86%",  "D", "60-69%" ,
+  "B-",  "80-82%" , "F", "<60%"
+)
+```
+
+<div class="centered-table">
+
+```{r show-grades-table, echo=FALSE, results="asis"}
+grading %>%
+  pandoc.table(justify = "lclc", 
+               col.names = c("Grade", "Range", "Grade", "Range"))
+```
+
+<div>
+
+## Course Policies
+
+### Attendance
+
+Attendance is expected, and is essential if you're to succeed in this class.
+
+### Academic Integrity
+
+Ideas are the currency in academic exchange, so acknowledging where ideas come from is important. Acknowledging the sources of ideas also helps us identify an idea's lineage which can be important for understanding how that line of thought has developed, and toward promoting future growth. As graduate students, you should have a good understanding of academic honesty and best practices. Here are details of [Binghamton's honesty policy](https://www.binghamton.edu/academics/provost/faculty-resources/honesty.html){target="_blank"}.
+
+## Course Schedule
+
+Week 1, Aug 24 --  Likelihood Theory and ML Estimation
+
+-  Gary King. 1998. *Unifying Political Methodology*. Chapter 1-4
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapters 1-2.
+
+ Week 2, Aug 31 --Binary Dependent Variables I - probit/logit, QI
+
+
+-  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 1, 2, 4
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 3.
+<!-- -  @javeline2003role -->
+<!-- -  @fearon2003ethnicity -->
+<!-- -  @ward2007disputes -->
+<!-- -  @kingajps00clarify -->
+
+
+ Week 3, Sept 7 -- Binary Dependent Variables II - variants (scobit, ordered, RE)
+
+-  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 3, 5, 6, 7
+
+<!-- -  @kingisq07 -->
+-  @Nagler94
+-  @kingzengio01
+-  @franklinkosaki
+-  @zorn2005solution
+
+
+
+ Week 4, Sept 14 -- Hazards I (discrete)
+
+-  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 11
+<!-- -  @berryberry -->
+-  @becktuck
+-  @carter2010back
+
+
+
+ Week 5, Sept 21 -- Assumptions and Specification I - heteroskedasticity, iid
+
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
+-  @franklinhet
+-  @alvarezbrehmhet
+-  @clarknordstromjop05
+
+
+ Week 6, Sept 28 -- Assumptions and Specification II - interactions, variables, measurement of $y$
+
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
+-  @clarketalajps08
+-  @clarkestoneapsr08
+-  @berry2012improving
+-  @brambor2006understanding
+
+
+
+
+ Week 7, Oct 5 -- No class, Yom Kippur 
+
+ Week 8, Oct 12 -- Choice Models I (Unordered Dependent Variables) - MNL, MNP, CL (IIA)
+
+-  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 9
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 6.
+-  @alvareznaglercollide
+-  @lacyburden
+-  @zorniia
+
+
+
+ Week 9, Oct 19-- Choice Models II (Unordered Dependent Variables continued, and systems of eqs, ordered)
+
+-  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 8
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
+-  @franklinkosaki
+
+
+
+ Week 10, Oct 26  -- Event Count Models I - poisson, over/under dispersion
+
+-  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 10
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 8.1, 8.2.
+
+-  @gowa98
+-  @fordhamjcr
+
+
+Week 11, Nov 2 -- Event Count Models II - negative binomial, zero-altered
+
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 8.3-8.7.
+-  @zorn98
+-  @clarkstrategic
+
+
+ Week 12, Nov 9 -- Hazard Models II - parametric, semi-parametric models
+
+-  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 11
+-  Janet Box-Steffensmeier and Brad Jones. 2004. *Event History Modeling*. Chs. 1-4
+
+-  @boxapsr
+
+
+ Week 13, Nov 16 -- Hazard Models III - parametric models, special topics
+
+-  Janet Box-Steffensmeier and Brad Jones. 2004. *Event History Modeling*. Chs. 5-11
+-  @zorn2000
+-  @benstam96
+-  @jcrspecialissuezorn
+
+
+ Week 14, Nov 23  -- no class, Thanksgiving \\
+
+ Week 15, Dec 7  -- Censored/Truncated Variables, Samples - selection models
+
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapter 7
+
+-  @reed2000
+-  @signorinoapsr
+-  @timpone
+
+
+# References {.unnumbered}
