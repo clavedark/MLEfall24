@@ -179,12 +179,12 @@ Ideas are the currency in academic exchange, so acknowledging where ideas come f
 
 ## Course Schedule
 
-Week 1, Aug 24 --  Likelihood Theory and ML Estimation
+Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 
 -  Gary King. 1998. *Unifying Political Methodology*. Chapter 1-4
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapters 1-2.
 
- Week 2, Aug 31 --Binary Dependent Variables I - probit/logit, QI
+ Week 2, Aug 28 --Binary Dependent Variables I - probit/logit, QI
 
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 1, 2, 4
@@ -195,7 +195,7 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 <!-- -  @kingajps00clarify -->
 
 
- Week 3, Sept 7 -- Binary Dependent Variables II - variants (scobit, ordered, RE)
+ Week 3, Sept 4 -- Binary Dependent Variables II - variants (scobit, ordered, RE)
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 3, 5, 6, 7
 
@@ -207,7 +207,7 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 
 
 
- Week 4, Sept 14 -- Hazards I (discrete)
+ Week 4, Sept 11 -- Hazards I (discrete)
 
 -  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 11
 <!-- -  @berryberry -->
@@ -216,7 +216,7 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 
 
 
- Week 5, Sept 21 -- Assumptions and Specification I - heteroskedasticity, iid
+ Week 5, Sept 18 -- Assumptions and Specification I - heteroskedasticity, iid
 
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
 -  @franklinhet
@@ -224,7 +224,7 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 -  @clarknordstromjop05
 
 
- Week 6, Sept 28 -- Assumptions and Specification II - interactions, variables, measurement of $y$
+ Week 6, Sept 25 -- Assumptions and Specification II - interactions, variables, measurement of $y$
 
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
 -  @clarketalajps08
@@ -235,9 +235,9 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 
 
 
- Week 7, Oct 5 -- No class, Yom Kippur 
+ Week 7, Oct 2 -- No class, Yom Kippur 
 
- Week 8, Oct 12 -- Choice Models I (Unordered Dependent Variables) - MNL, MNP, CL (IIA)
+ Week 8, Oct 9 -- Choice Models I (Unordered Dependent Variables) - MNL, MNP, CL (IIA)
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 9
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 6.
@@ -247,7 +247,7 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 
 
 
- Week 9, Oct 19-- Choice Models II (Unordered Dependent Variables continued, and systems of eqs, ordered)
+ Week 9, Oct 16-- Choice Models II (Unordered Dependent Variables continued, and systems of eqs, ordered)
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 8
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
@@ -255,7 +255,7 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 
 
 
- Week 10, Oct 26  -- Event Count Models I - poisson, over/under dispersion
+ Week 10, Oct 23  -- Event Count Models I - poisson, over/under dispersion
 
 -  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 10
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 8.1, 8.2.
@@ -264,14 +264,14 @@ Week 1, Aug 24 --  Likelihood Theory and ML Estimation
 -  @fordhamjcr
 
 
-Week 11, Nov 2 -- Event Count Models II - negative binomial, zero-altered
+Week 11, Oct 30 -- Event Count Models II - negative binomial, zero-altered
 
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 8.3-8.7.
 -  @zorn98
 -  @clarkstrategic
 
 
- Week 12, Nov 9 -- Hazard Models II - parametric, semi-parametric models
+ Week 12, Nov 6 -- Hazard Models II - parametric, semi-parametric models
 
 -  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 11
 -  Janet Box-Steffensmeier and Brad Jones. 2004. *Event History Modeling*. Chs. 1-4
@@ -279,7 +279,7 @@ Week 11, Nov 2 -- Event Count Models II - negative binomial, zero-altered
 -  @boxapsr
 
 
- Week 13, Nov 16 -- Hazard Models III - parametric models, special topics
+ Week 13, Nov 13 -- Hazard Models III - parametric models, special topics
 
 -  Janet Box-Steffensmeier and Brad Jones. 2004. *Event History Modeling*. Chs. 5-11
 -  @zorn2000
@@ -287,15 +287,18 @@ Week 11, Nov 2 -- Event Count Models II - negative binomial, zero-altered
 -  @jcrspecialissuezorn
 
 
- Week 14, Nov 23  -- no class, Thanksgiving \\
-
- Week 15, Dec 7  -- Censored/Truncated Variables, Samples - selection models
-
+ Week 14, Nov 20  -- Censored/Truncated Variables, Samples - selection models
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapter 7
 
 -  @reed2000
 -  @signorinoapsr
 -  @timpone
+
+
+Week 15, Nov 27  -- no class, Thanksgiving 
+
+Week 16, Dec 4 -- Review
+
 
 
 # References {.unnumbered}
