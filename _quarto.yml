@@ -6,6 +6,8 @@ website:
   back-to-top-navigation: true
   reader-mode: true
   navbar:
+    background: "#005A43"
+    # foreground: "#A7DA92"
     left:
       - href: index.qmd
         text: Home
@@ -15,8 +17,8 @@ website:
       - code.qmd
 
     tools:
-      - icon: twitter
-        href: https://twitter.com/clavedark
+      # - icon: twitter
+        # href: https://twitter.com/clavedark
       - icon: github
         menu:
           - text: repo
@@ -24,7 +26,7 @@ website:
 
 format:
   html:
-    theme:
+    theme: 
       light: flatly
       dark: darkly
     css: styles.css

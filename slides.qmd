@@ -2,5 +2,6 @@
 title: "Slides"
 ---
 
-<!-- [Course overview](overview24.qmd) -->
+[Binomial Models](binarymodels24.qmd)
 
+[Prediction Methods](prediction24.qmd)

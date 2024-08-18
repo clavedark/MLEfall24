@@ -1,0 +1,512 @@
+# Create highchart
+hchart(df, "line", hcaes(x = x, y = normal), name = "Normal CDF") %>%
+hc_add_series(df, "line", hcaes(x = x, y = logistic), name = "Logistic CDF") %>%
+hc_add_series(df, "line", hcaes(x = x, y = linear), name = "Linear Function") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x")) %>%
+hc_yAxis(title = list(text = "Probability / Value"),
+min = 0, max = 1) %>%
+hc_tooltip(shared = TRUE, crosshairs = FALSE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+# Create highchart
+hchart(df, "line", hcaes(x = x, y = normal), name = "Normal CDF") %>%
+hc_add_series(df, "line", hcaes(x = x, y = logistic), name = "Logistic CDF") %>%
+hc_add_series(df, "line", hcaes(x = x, y = linear), name = "Linear Function") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x")) %>%
+hc_yAxis(title = list(text = "Probability / Value"),
+min = 0, max = 1) %>%
+hc_tooltip(shared = TRUE, crosshairs = TRUE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+hchart(df, "line", hcaes(x = x, y = normal), name = "Normal CDF") %>%
+hc_add_series(df, "line", hcaes(x = x, y = logistic), name = "Logistic CDF") %>%
+hc_add_series(df, "line", hcaes(x = x, y = linear), name = "Linear Function") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x")) %>%
+hc_yAxis(title = list(text = "Probability / Value"),
+min = 0, max = 1) %>%
+hc_tooltip(enabled=FALSE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+###this approach is interesting
+library(highcharter)
+# Generate data
+x <- seq(-5, 5, by = 0.1)
+normal_cdf <- pnorm(x)
+logistic_cdf <- plogis(x)
+linear <- (x + 5) / 10
+# Create highchart
+hc <- highchart() %>%
+hc_chart(type = "line") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x"), min = -5, max = 5) %>%
+hc_yAxis(title = list(text = "Probability / Value"), min = 0, max = 1) %>%
+hc_tooltip(shared = TRUE, crosshairs = TRUE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+hc <- highchart() %>%
+hc_chart(type = "line") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x"), min = -5, max = 5) %>%
+hc_yAxis(title = list(text = "Probability / Value"), min = 0, max = 1) %>%
+hc_tooltip(shared = TRUE, crosshairs = TRUE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+# Generate data
+x <- seq(-5, 5, by = 0.1)
+normal_cdf <- pnorm(x)
+logistic_cdf <- plogis(x)
+linear <- (x + 5) / 10
+# Create highchart
+hc <- highchart() %>%
+hc_chart(type = "line") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x"), min = -5, max = 5) %>%
+hc_yAxis(title = list(text = "Probability / Value"), min = 0, max = 1) %>%
+hc_tooltip(shared = TRUE, crosshairs = TRUE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+hc
+# Add series with animation
+hc <- hc %>%
+hc_add_series(
+data = lapply(seq_along(x), function(i) list(x[i], normal_cdf[i])),
+name = "Normal CDF",
+animation = list(duration = 2000)
+) %>%
+hc_add_series(
+data = lapply(seq_along(x), function(i) list(x[i], logistic_cdf[i])),
+name = "Logistic CDF",
+animation = list(duration = 20000)
+) %>%
+hc_add_series(
+data = lapply(seq_along(x), function(i) list(x[i], linear[i])),
+name = "Linear Function",
+animation = list(duration = 8000)
+)
+hc
+x <- seq(-5, 5, by = 0.1)
+dseq <- lapply(seq_along(x), function(j) list(z=x[j], logit=plogis(x[j])))
+dfseq <- do.call(rbind.data.frame, dseq)
+ggplot(dfseq, aes(x=z)) +
+geom_line(aes(y=logit, color="Logistic CDF")) +
+geom_line(aes(y=pnorm(z), color="Normal CDF")) +
+geom_line(aes(y=(z+5)/10, color="Linear Function")) +
+labs(title="Comparison of CDFs and Linear Function",
+x="x", y="Probability / Value") +
+scale_color_manual(values=c("blue", "red", "green")) +
+theme_minimal()
+# Generate data
+x <- seq(-5, 5, by = 0.1)
+normal_cdf <- pnorm(x)
+logistic_cdf <- plogis(x)
+linear <- (x + 5) / 10
+# Create highchart
+hc <- highchart() %>%
+hc_chart(type = "line") %>%
+hc_title(text = "Comparison of CDFs and Linear Function") %>%
+hc_xAxis(title = list(text = "x"), min = -5, max = 5) %>%
+hc_yAxis(title = list(text = "Probability / Value"), min = 0, max = 1) %>%
+hc_tooltip(shared = TRUE, crosshairs = TRUE) %>%
+hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal")
+hc
+hc <- hc %>%
+hc_add_series(
+data = normal_cdf,
+name = "Normal CDF",
+pointStart = -5,
+pointInterval = 0.1,
+animation = list(duration = 8000)
+) %>%
+hc_add_series(
+data = logistic_cdf,
+name = "Logistic CDF",
+pointStart = -5,
+pointInterval = 0.1,
+animation = list(duration = 8000)
+) %>%
+hc_add_series(
+data = linear,
+name = "Linear Function",
+pointStart = -5,
+pointInterval = 0.1,
+animation = list(duration = 8000)
+)
+hc
+log_loss <- function(y, p) {
+sum(-(y * log(p) + (1 - y) * log(1 - p)))
+}
+#simulate and graph the log loss function; as the predicted probability approaches the true value of y (0,1), the loss function approaches zero, ie there is less loss as it approaches the true value (0,1)
+y <- rep(0, n= 100)
+p <- seq(0, .99, by = 0.01)
+loss0 <- sapply(p, log_loss, y = y)
+y <- rep(1, n=100)
+loss1 <- sapply(p, log_loss, y = y)
+#plot and annotate lines
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal() +
+annotate('text', x = 0.5, y = 0.5, label = 'y = 0', color = 'blue') +
+annotate('text', x = 0.5, y = 0.3, label = 'y = 1', color = 'red')
+#plot and annotate lines
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal()
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal() +
+annotate('text', x = 0.5, y = 0.5, label = 'y = 0', color = 'blue')
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal() +
+annotate('text', x = 0.5, y = 0.5, label = 'y = 0')
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal() +
+annotate('text', x = 0.5, y = 0.5, label = "y = 0")
+e lines
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal()
+#plot and annotate lines
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal() +
+annotate("text", x = .5, y = .5, label = "Some text")
+ggplot() +
+geom_line(aes(x = p, y = loss0), color = 'blue') +
+geom_line(aes(x = p, y = loss1), color = 'red') +
+xlab('Predicted Probability') +
+ylab('Log Loss') +
+ggtitle('Log Loss for Binary Classification') +
+theme_minimal() +
+annotate("text", x=.05, y=-.05, label="2,147 Predictions out of bounds", color="red")
+rm(list = ls())
+# Sample data
+set.seed(123)
+data <- data.frame(
+Semester = rep(c("Fall 2023", "Spring 2024"), each = 50),
+Instructor = rep(c("Smith", "Johnson", "Brown", "Davis", "Wilson"), each = 10),
+Department = rep(c("Math", "English", "Science", "History", "Art"), each = 10),
+A = sample(0:20, 100, replace = TRUE),
+`A-` = sample(0:20, 100, replace = TRUE),
+`B+` = sample(0:20, 100, replace = TRUE),
+B = sample(0:20, 100, replace = TRUE),
+`B-` = sample(0:20, 100, replace = TRUE),
+`C+` = sample(0:20, 100, replace = TRUE),
+C = sample(0:20, 100, replace = TRUE),
+`C-` = sample(0:20, 100, replace = TRUE),
+D = sample(0:20, 100, replace = TRUE),
+F = sample(0:20, 100, replace = TRUE)
+)
+library(shiny)
+library(dplyr)
+library(ggplot2)
+library(DT)
+instructors <- unique(data$Instructor[data$Semester == input$semester])
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+View(data)
+data <- data %>%
+fill(Department)
+library(tidyverse)
+data <- data %>%
+fill(Department)
+View(data)
+mydf <- data.frame(X = c('a', NA, NA, 'b', NA, NA, 'c'), Y =rep(1,7))
+View(mydf)
+mydf %>% fill(X)
+View(mydf)
+mydf <- data.frame(X = c('a', NA, NA, 'b', NA, NA, 'c'), Y =rep(1,7))
+mydf %>% fill(X)
+View(mydf)
+mydf <- data.frame(X = c('a', NA, NA, 'b', NA, NA, 'c'), Y =rep(1,7))
+mydf %>% tidyverse::fill(X)
+library(tidyr)
+mydf <- data.frame(X = c('a', NA, NA, 'b', NA, NA, 'c'), Y =rep(1,7))
+mydf %>% tidyverse::fill(X)
+mydf <- data.frame(X = c('a', NA, NA, 'b', NA, NA, 'c'), Y =rep(1,7))
+mydf %>% tidyr::fill(X)
+View(mydf)
+mydf %>% tidyr::fill(X)
+mydf %>% fill(X)
+mydf <- mydf %>% fill(X)
+View(mydf)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>%
+fill(Department)
+View(data)
+View(data)
+data <- data %>% fill(Department, Instructor)
+View(data)
+mydf <- data.frame(X = c('a', NA, NA, 'b', NA, NA, 'c'), Y =rep(1,7))
+View(mydf)
+mydf <- mydf %>% fill(X)
+View(mydf)
+library(tidyr)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% fill(Department, Instructor)
+View(data)
+View(data)
+data <- data %>% mutate(Department=ifelse(is.na(Department), "", Department))
+View(data)
+data <- data %>% mutate(Department=ifelse(is.na(Department), "NA", Department))
+View(data)
+table(data$Department)
+data <- data %>% mutate(Department=ifelse("", "NA", Department))
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+View(data)
+data <- data %>% mutate(Department=ifelse(Department=="", "NA", Department))
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", is.na(), Department))
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department))
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor)
+data <- data %>% fill(Department, Instructor)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+View(data)
+data <- data %>% fill(Department, Instructor)
+View(data)
+set.seed(123)
+df <- data.frame(
+Semester = rep(c("Fall 2023", "Spring 2024"), each = 50),
+Instructor = rep(c("Smith", "Johnson", "Brown", "Davis", "Wilson"), each = 10),
+Department = rep(c("Math", "English", "Science", "History", "Art"), each = 10),
+A = sample(0:20, 100, replace = TRUE),
+`A-` = sample(0:20, 100, replace = TRUE),
+`B+` = sample(0:20, 100, replace = TRUE),
+B = sample(0:20, 100, replace = TRUE),
+`B-` = sample(0:20, 100, replace = TRUE),
+`C+` = sample(0:20, 100, replace = TRUE),
+C = sample(0:20, 100, replace = TRUE),
+`C-` = sample(0:20, 100, replace = TRUE),
+D = sample(0:20, 100, replace = TRUE),
+F = sample(0:20, 100, replace = TRUE)
+)
+View(df)
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+View(data)
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+dept <- data %>%
+filter(Semester == input$semester, Instructor == input$instructor) %>%
+pull(Department) %>%
+unique()
+View(data)
+dept <- data %>%
+filter(Semester == "Fall 2023", Instructor == "Chen, Zu Y.") %>%
+pull(Department) %>%
+unique()
+dept
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+rm(dept)
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- data %>% fill(Department, Instructor)
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+View(data)
+data <- data %>% rename(X.A..=A-)
+data <- data %>% rename('X.A..'='A-')
+data <- data %>% rename(c('X.A..'='A-'))
+data <- data %>% rename(c('A-'='X.A..'))
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- data %>% fill(Department, Instructor)
+data <- data %>% rename(c('A-'='X.A..', 'B+'='B.', 'B-'='B..1', 'C+'='C.',  'C-'='C..1'))
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- data %>% fill(Department, Instructor)
+data <- data %>% order(Instructor)
+data <- data[order(Instructor)]
+data <- data[order(Instructor),]
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- data %>% fill(Department, Instructor) %>%
+arrange(Instructor)
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- data %>% fill(Department, Instructor) %>%
+arrange(Instructor)
+data <- data %>% rename(c('A-'='X.A..', 'B+'='B.', 'B-'='B..1', 'C+'='C.',  'C-'='C..1'))
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% mutate(Department=ifelse(Department=="", NA, Department), Instructor=ifelse(Instructor=="", NA, Instructor))
+data <- data %>% fill(Department, Instructor) %>%
+arrange(Instructor)
+data <- data %>% rename(c('A-'='X.A..', 'B+'='B.', 'B-'='B..1', 'C+'='C.',  'C-'='C..1'))
+write.csv(data, "~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv", row.names=FALSE)
+rm(data)
+rm(df)
+rm(mydf)
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+View(data)
+data <- read.csv("~/documents/deansoffice/projects/gradedistributions/gradescompiled.csv")
+data <- data %>% rename(c('A-'='A.', 'B+'='B.', 'B-'='B..1', 'C+'='C.',  'C-'='C..1'))
+rm(ls)
+rm()
+rm(data)
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+shiny::runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('~/Documents/deansoffice/projects/gradedistributions/gradedistributions')
+setwd("~/")
+runApp('Documents/deansoffice/projects/gradedistributions/gradedistributions')
+runApp('Documents/deansoffice/projects/gradedistributions/gradedistributions')
+pwd
+getwd()
+setwd(here)
+setwd(~/documents/deansoffice/projects/gradedistributions/gradedistributions/)
+setwd("~/documents/deansoffice/projects/gradedistributions/gradedistributions/")
+getwd()
+runApp()
+runApp()
+data <- read.csv("gradescompiled.csv")
+runApp()
+rm()
+rm(data)
+runApp()
+getwd()
+here::here()
+runApp()
+runApp()

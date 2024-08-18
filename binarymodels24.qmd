@@ -1,0 +1,570 @@
+---
+title: "Binary Response Models"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+   html: default
+editor: source
+embed-resources: true
+cache: true
+filters:
+  - parse-latex
+---
+
+
+
+<!-- render 2 types at same time; terminal "quarto render file.qmd" -->
+<!-- https://quarto.org/docs/output-formats/html-multi-format.html -->
+
+<!-- tables, smaller font and striping -->
+<style>
+table, th, td {
+    font-size: 18px;
+}
+tr:nth-child(odd) {
+  background-color: # f2f2f2;
+}
+</style>
+
+<!-- <script src="https://cdn.jsdelivr.net/gh/ncase/nutshell/nutshell.js"></script> -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+
+```
+
+
+# Binary $y$ variables
+
+## Questions
+
+  - How can we model a binary $y$ variable?
+  - Does OLS (the **linear probability model**) work sufficiently well?
+  - How can we build a maximum likelihood model? 
+
+# The Linear Probability Model
+
+
+The main justification for the LPM is that OLS is unbiased (by the Gauss Markov theorem). But $\ldots$
+
+  - predictions are nonsensical (linear, unbounded, measures of $\hat{y}$ rather than $y^*$). Despite the (mis)named Linear Probability Model, the quantities are not probabilities. 
+ 
+  - disturbances are non-normal, and heteroskedastic - this threatens inference.
+
+  - relation or mapping of $x\beta$ and $y$ are the wrong functional form (linear). 
+
+## Example - Democratic Peace data
+
+
+As a running example, I'll use the Democratic Peace data to estimate logit and probit models. These come from @onealrussett97's well-known study in *ISQ*. The units are dyad-years; the $y$ variable is the presence or absence of a militarized dispute, and the $x$ variables include a measure of democracy (the lowest of the two Polity scores in the dyad), and a set of controls. The principle expectation here is that as the lowest democracy score in the dyad increases, the probability of a militarized dispute decreases. 
+
+
+
+### Predictions out of bounds
+
+This figured plots the predictions from a logit and OLS model. Unsurprisingly, the logit predictions are probabilities, so are in the $[0,1]$ interval. The OLS predictions are not, and are often out of bounds. 
+
+```{r warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
+
+m1 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="logit"), data=dp )
+logitpreds <- predict(m1, type="response")
+
+m2 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="probit"), data=dp )
+mols <-lm(dispute ~ border+deml+caprat+ally, data=dp )
+olspreds <- predict(mols)
+
+df <- data.frame(logitpreds, olspreds, dispute=as.factor(dp$dispute))
+
+ggplot(df, aes(x=logitpreds, y=olspreds, color=dispute)) + 
+  geom_point()+
+  labs(title="Predictions from Logit and OLS", x="Logit Predictions", y="OLS Predictions")+
+  geom_hline(yintercept=0)+
+  theme_minimal() +
+  scale_color_manual(values=c("#005A43", "#6CC24A")) +
+  annotate("text", x=.05, y=-.05, label="2,147 Predictions out of bounds", color="red")
+
+```
+
+Here's the distribution of predictions from the OLS model - you'll note the modal density is around .04 (which is the sample frequency of $y$.), but that a substantial and long tail are negative, so out of probability bounds. 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+ggplot(df, aes(x=olspreds)) + 
+  geom_density(alpha=.5)+
+  labs(title="Density of OLS Predictions", x="Predictions", y="Density")+
+  theme_minimal()+
+geom_vline(xintercept=0, linetype="dashed")
+
+
+
+```
+
+### Heteroskedastic Residuals
+
+The residuals from the OLS model appear heteroskedastic, and the distribution is not normal. In fact, the distribution appears more binomial, clustered around zero and one. This shouldn't be surprising since the $y$ variable only takes on values of zero and one, and since we compute the residuals by $u = y - \hat{y}$.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+df <- data.frame(df, mols$residuals)
+ 
+ggplot(df, aes(x=mols.residuals, color=dispute)) + 
+  geom_density()+
+  labs(title="Density of OLS Residuals", x="Residuals", y="Density")+
+  theme_minimal()+
+    scale_color_manual(values=c("#005A43", "#6CC24A")) +
+  geom_vline(xintercept=0, linetype="dashed")
+
+
+
+
+
+```
+
+## When is the LPM Appropriate?
+
+The best answer is *never*. 
+
+
+![](zorntweet.png)
+
+There seems to be a mild trend in the discipline to rehabilitate the LPM though it's not clear why - that is, it's hard to find statements about the advantages of doing so in any particular setting, or about the disadvantages of estimating a logit or probit model that would lead us to prefer the LPM.
+
+![](snoop.jpeg)
+
+
+OLS is a rockin' estimator, but it's just not well suited to limited $y$ variables. Efforts to rehabilitate the LPM are like putting lipstick on a pig. 
+
+
+
+# Limited Dependent Variables
+ 
+**Limited $y$ variables** are $y$ variables where our measurement is limited by the realities of the world. Such variables are rarely normal, often not continuous, and often observable indicators of unobservable things - this is all true of binary variables. 
+
+Limited dependent variables are usually limited in the sense that we cannot observe the range of the variable or the characteristic of the variable we want to observe. We are limited to observing $y_i$, and so must estimate $y_i^*$. 
+
+::: {.callout-note title="Important Concept"}
+It's important to note that the problem is our data, not the OLS linear model. That model is simple and powerful. Our data are incomplete or limited realizations of the things we are interested in studying; those limitations push us away from the linear model.
+
+:::
+
+
+## Examples of Limited DVs
+
+  - binary variables: 0=peace, 1=war; 0=vote, 1=don't vote.
+ 
+  - unordered or nominal categorical variables: type of car you prefer: Honda, Toyota, Ford, Buick; policy choices; party or candidate choices.
+  
+  - ordered variables that take on few values: some survey responses.
+ 
+  - discrete count variables; number of episodes of scarring torture in a country-year, 0, 1, 2, 3,  \ldots, $\infty$; the number of flawed computer chips produced in a factory in a shift; the number of times a person has been arrested; the number of self-reported extramarital affairs; number of visits to your primary care doctor.
+ 
+  - time to failure; how long a civil war lasts; how long a patient survives disease; how long a leader survives in office.
+
+
+## Binary $y$ variables 
+
+Generally, we think of a binary variable as being the observable manifestation of some latent, unobserved continuous variable. 
+  
+If we could adequately observe (and measure) the underlying continuous variable, we'd use some form of OLS regression to analyze that variable. But because we have limited observation, we turn to maximum likelihood methods to estimate a model that allows to use $y$, but generate estimates of $y^*$, the variable we wish we could measure.
+ 
+
+# Building a model for maximum likelihood
+
+So let's build a model for a binary $y$ variable. In general, here's how we're going to approach this task with *any* limited $y$ variable, binary or otherwise: we'll take this same approach to write likelihood functions for count variables, ordered variables, etc.
+
+
+  - Observe $y$, consider its distribution, write down the PDF. 
+  - Write the joint probability of the data, using the chosen probability distribution.
+  - Write the joint probability as a likelihood:
+  - Simplify - take logs, etc.
+  - Parameterize
+  - Write in the link function, linking the systematic component of the model to the latent variable, $\tilde{y}$; we're mapping the linear prediction onto the probability space.
+
+
+## A nonlinear model for binary data
+
+So $y$ is binary, and we've established the linear model is not appropriate. The observed variable, $y$, appears to be binomial (iid): 
+
+$$ y \sim f_{binomial}(\pi_i)$$
+
+$$ y = \left\{ \begin{array}{ll}
+         1, & \mbox{} \pi_{i}\\
+         0, & \mbox{} 1-\pi_{i}
+         \end{array}
+     \right. $$
+
+$$ \pi_i = F(x_i\widehat{\beta}) $$
+$$1- \pi_i=1-F(x_i\widehat{\beta})$$
+
+<!-- $$ \pi_i = \frac{1}{1+exp(-x\beta)}$$ -->
+
+
+
+
+## Binomial Likelihood
+
+Write the binomial density: 
+
+$$ Pr(y=1| \pi) = \pi_i^{y_i} (1-\pi_i)^{1-y_i} $$
+
+
+
+
+Write the joint probability as a likelihood: 
+
+$$\mathcal{L} (\pi |\ y) = \prod \limits_{i=1}^{n} \left[ \pi_i^{y_i} (1-\pi_i)^{1-y_i}\right]$$ 
+
+
+
+Take the log of that likelihood: 
+
+$$\ln \mathcal{L} (\pi| \ y) = \sum \limits_{i=1}^{n}  \left[ y_i \ln ( \pi_i) +  (1-y_i) \ln(1-\pi_i)\right]$$
+
+
+
+## Parameterize the model
+
+Parameterize $\pi_i$ - make $\pi_i$ a function of some variables and their slope effects, $x\beta$ - this is the *systematic* component of the model:
+
+$$\pi_i= F(x \beta)$$
+
+This is the binomial log-likelihood function.
+
+$$\ln \mathcal{L} (\pi| \ y) = \sum \limits_{i=1}^{n}  \left[ y_i \ln (F(x_i\widehat{\beta})) +  (1-y_i) \ln(1-F(x_i\widehat{\beta}))\right]$$
+
+But we need to fill in $F$, the link function.
+
+
+## Link Function
+
+We parameterized $\pi_i$:
+
+$$\pi_i= F(x \beta)$$
+
+and now need to choose an appropriate link function for $F$ such that:
+
+  -  our prediction of $\widehat{\pi_i}$ is bounded [0,1].
+  - $x_i \widehat{\beta}$ can range over the interval $[-\infty, +\infty]$ and map onto the [0,1] interval.
+
+
+There's a large number of sigmoid shaped probability functions that will satisfy these needs. 
+
+::: {.callout-note title="Important Concept"}
+The link function maps or transforms the linear prediction on the sigmoid probability space, and obeys the bounds of 0,1.
+:::
+
+The most commonly used link functions are the standard normal (probit)}
+
+$$Pr(y_i=1 | X) = \Phi(x_i\widehat{\beta}) $$
+
+and the logistic (logit) CDFs. 
+
+$$Pr(y_i=1 | X) = \frac{1}{1+exp^{-(x_i\widehat{\beta})}} $$
+
+Here are the logistic and Normal CDFs: 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#| label: fig-cdfs
+
+z <- seq(-5,5,.1)
+l <- seq(0,1,.01)
+s1 <- 1/(1+exp(-z))
+s2 <- pnorm(z)
+
+df <- data.frame(z=z, l=l, s1=s1, s2=s2)
+
+ggplot(df, aes(x=z, y=l)) + 
+  geom_line(aes(x=z, y=l), color="black", linetype="dashed" )+
+  geom_line(aes(x=z, y=s1), color="#005A43")+
+  geom_line(aes(x=z, y=s2), color="#6CC24A")+
+  labs(title="Logistic and Normal CDFs", x=expression(x*beta), y="Pr(y=1)")+
+  theme_minimal() +
+  annotate("text", x=1.3, y=.7, label="logistic", color="black")+
+  annotate("text", x=-.2, y=.15, label="normal", color="black")
+
+
+```
+
+Note the sigmoid functions approach the limits at decreasing rates; the fastest rate of change is at $y=.5$, a point around which the curves are symmetric. The point $y=.5$ is the transition point below which we'd predict a zero, above which we'd predict a one if we were interested in classifying cases into zeros and ones.  Classification is a common use for models like these, say distinguishing spam from non-spam emails, or predicting the presence or absence of a disease. More on this later.
+
+
+## Probit and Logit LLFs
+
+Probit - link between $x\hat{\beta}$ and $Pr(y=1)$ is standard normal CDF:
+$$
+\ln \mathcal{L} (Y|\beta) = \sum_{i=1}^{N} y_i \ln \Phi(\mathbf{x_i \beta})+ (1-y_i) \ln[1-\Phi(\mathbf{x_i \beta})] \nonumber
+$$
+
+Logit  (logistic CDF):
+
+$$
+\ln \mathcal{L} (Y|\beta) = \sum_{i=1}^{N} \left\{ y_i \ln \left(\frac{1}{1+e^{-\mathbf{x_i \beta}}}\right)+ (1-y_i) \ln \left[1-\left(\frac{1}{1+e^{-\mathbf{x_i \beta}}}\right)\right] \right\}\nonumber
+$$
+
+
+
+
+ 
+
+
+
+ 
+# Binary response interpretation
+
+  - Signs and significance - all the usual rules apply. 
+  - Quantities of interest - most commonly $Pr(y=1|X)$; or marginal effects. 
+  - Measures of uncertainty (e.g. confidence intervals) are a must (as always). 
+
+For details on prediction approaches, methods, and code, please see the [predictions](https://clavedark.github.io/MLEfall24/prediction24.html) notes.
+
+## Predicted probabilities
+
+In the nonlinear model, the most basic quantity is 
+
+$$F(x\widehat{\beta})$$ 
+
+where $F$ is the link function, mapping the linear prediction onto the probability space. 
+
+For the logit, the predicted probability is
+
+$$Pr(y=1) = \frac{1}{1+exp(-x\widehat{\beta})}$$
+
+For the probit, the predicted probability is
+
+$$Pr(y=1) = \Phi(x\widehat{\beta})$$
+
+Again, simply using the link function to map the linear prediction onto the probability space.
+
+
+
+## Marginal Effects
+
+In the linear model, the marginal effect of $x$ is $\widehat{\beta}$. That is, the effect of a one unit change in $x$ on $y$ is $\widehat{\beta}$. 
+
+
+$$
+\frac{\partial \widehat{y}}{\partial x_k}= \frac{\partial x \widehat{\beta}}{\partial x_k} \nonumber \\  \nonumber \\
+= \widehat{\beta} \nonumber 
+$$
+
+The marginal effect is constant with respect to $x_k$. Take a look:
+
+```{r warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+x <- seq(0,10,.1)
+y <- 2*x
+df <- data.frame(x=x, y=y)
+
+ggplot(df, aes(x=x, y=y)) + 
+  geom_line()+
+  labs(title="Marginal Effect of x on y", x="x", y="y")+
+  theme_minimal() +
+  annotate("text", x=5, y=15, label="y = 2x", color="black")+
+  geom_segment(aes(x = 5, xend = 5, y = 0, yend = 10), color = "red")+
+  geom_segment(aes(x = 10, xend = 10, y = 0, yend = 20), color = "red")
+
+```
+ 
+The effect of $x$ on $y$ is 2 - it's the same at $x=5$ and at $x=10$. 
+
+In the **nonlinear model**, the marginal effect of $x_k$ depends on where $x\widehat{\beta}$ lies with respect to the probability distribution $F(\cdot)$. 
+
+$$
+\frac{\partial Pr(y=1)}{\partial x_k}= \frac{\partial F(x\widehat{\beta})}{\partial x_k} \nonumber \\  \nonumber \\
+=  \frac{\partial F(x\widehat{\beta})}{\partial x\widehat{\beta}} \cdot \frac{\partial (x\widehat{\beta})}{\partial x_k}  \nonumber 
+$$
+
+Both of these terms simplify \ldots
+
+Remember that 
+
+$$
+\frac{\partial (x\widehat{\beta})}{\partial x} = \widehat{\beta} \nonumber
+$$
+
+and 
+$$
+\frac{\partial F(x\widehat{\beta})}{\partial x\widehat{\beta}} = f(x\widehat{\beta}) \nonumber
+$$
+
+where the derivative of the CDF is the PDF.
+
+Putting these together gives us:
+
+$$
+\frac{\partial F(x\widehat{\beta})}{\partial x\widehat{\beta}} = f(x\widehat{\beta}) \widehat{\beta} \nonumber
+$$ 
+
+This is $\widehat{\beta}$ weighted by or measured at the ordinate on the PDF - the ordinate is the height of the PDF associated with a value of the $x$ axis.
+
+::: {.callout-note title="Important Concept"}
+The effect of $x$ on $Pr(y=1)$ is not constant; it will be large for some values of $x$ and small for others. This makes sense if we think about the sigmoid functions - the slope of the curve is steepest at $y=.5$, and flattens as we move away from that point toward either limit. Take another look at @fig-cdfs
+:::
+
+
+
+### Logit Marginal Effects
+
+::: {.column-margin}
+Recall $\Lambda$ is the logistic CDF = $$1/(1+exp(-x_i\widehat{\beta}))$$. 
+
+$\lambda$ is the logit PDF $$1/(1+exp(-x_i\widehat{\beta}))^2$$
+
+Also, remember that 
+
+
+$$\frac{e^{x_i\widehat{\beta}}}{1+e^{x_i\widehat{\beta}}} = \frac{1}{1+e^{-x_i\widehat{\beta}}}$$ 
+:::
+
+
+$$
+\begin{align}
+\frac{\partial \Lambda(x\widehat{\beta})}{\partial x\widehat{\beta}} = \lambda(x\widehat{\beta}) \widehat{\beta} \\
+= \frac{e^{x_i\widehat{\beta}}}{(1+e^{x_i\widehat{\beta}})^2} \widehat{\beta}  \\
+=\frac{e^{x_i\widehat{\beta}}}{1+e^{x_i\widehat{\beta}}} \frac{1}{1+e^{x_i\widehat{\beta}}} \widehat{\beta}  \\
+=\Lambda(x_i\widehat{\beta}) \frac{1+e^{x_i\widehat{\beta}}-e^{x_i\widehat{\beta}}}{1+e^{x_i\widehat{\beta}}} \widehat{\beta}   \\
+=\Lambda(x_i\widehat{\beta}) 1-\frac{e^{x_i\widehat{\beta}}}{1+e^{x_i\widehat{\beta}}} \widehat{\beta}  \\
+=\Lambda(x_i\widehat{\beta}) (1-\Lambda(x_i\widehat{\beta})) \widehat{\beta}  
+\end{align}
+$$
+
+So this last line indicates the marginal effect of $x$ is the probability of a one times the probability of a zero times $\widehat{\beta}$.
+
+This is useful because the largest value this can take on is .25 $(Pr(y_i=1)=0.5 \cdot Pr(y_i=0)=0.5= 0.25)$ - therefore, the maximum marginal effect any $x$ can have is $0.25 \widehat{\beta}$. 
+
+Looking at the democratic peace model below, the coefficient on democracy is -.071, so the largest effect democracy can have on the probability of a militarized dispute is $0.25 \cdot -.071 = -.01775$.
+
+```{r, warning=FALSE, message=FALSE, results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+library(stargazer)
+
+stargazer(m1,m2, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: Dispute", dep.var.labels.include=FALSE,  covariate.labels=c("Shared Border", "Democracy", "Capabilities Ratio", "Allies"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+```
+
+
+In the probit model, the marginal effect is: 
+
+$$
+\frac{\partial \Phi(x\widehat{\beta})}{\partial x\widehat{\beta}} = \phi(x\widehat{\beta}) \widehat{\beta} \nonumber
+$$
+
+The ordinate at the maximum of the standard normal PDF is 0.3989 - rounding to 0.4, we can say that the maximum marginal effect of any $\widehat{\beta}$ in the probit model is $0.4\widehat{\beta}$.
+
+
+The ordinate is at the maximum where $z=0$; recall this is the standard normal, so $x_i\widehat{\beta}=z$. When $z=0$,
+
+$$Pr(z)=\frac{1}{\sqrt{2 \pi}} \exp \left[\frac{-(z)^{2}}{2}\right] \nonumber \\ \nonumber\\
+=\frac{1}{\sqrt{2 \pi}} \nonumber\\
+\approx .4 \nonumber $$
+
+So the maximum marginal effect of any $x$ in the probit model is $0.4\widehat{\beta}$. 
+
+
+## Logit Odds Interpretation
+
+The odds are given by the probability an event occurs divided by the probability it does not:
+
+$$
+\Omega(X) = \frac{Pr(y=1)}{1-Pr(y=1)} \nonumber
+= \frac{\Lambda(X\widehat{\beta})}{(1-\Lambda(X\widehat{\beta}))} \nonumber 
+$$
+
+## Logit Log-odds
+
+Logging \ldots
+
+$$\ln \Omega(X) = \ln \left(\frac{\Lambda(X\widehat{\beta})}{(1-\Lambda(X\widehat{\beta}))}\right) =X\widehat{\beta} $$
+
+
+$$
+\frac{\partial \ln \Omega}{\partial X} = \widehat{\beta} \nonumber
+$$
+
+Which shows the change in the log-odds given a change in $X$ is constant (and therefore linear). This quantity is sometimes called "the logit."
+
+
+
+## Logit Odds Ratios
+
+Odds ratios are very useful: 
+
+$$
+\frac{ \Omega x_k + 1}{\Omega x_k} =exp(\widehat{\beta_k}) \nonumber
+$$
+
+comparing the difference in odds between two values of $x_k$; note the change in value does not have to be 1.  
+
+$$
+\frac{ \Omega x_k + \iota}{\Omega x_k} =exp(\widehat{\beta_k}* \iota) \nonumber
+$$
+
+
+
+
+Not only is it simple to exponentiate $\widehat{\beta_k}$, but the interpretation is that $x$ increases/decreases $Pr(y=1)$ by that factor, $exp(\widehat{\beta_k})$, and more usefully, that:
+
+
+$$
+100*(exp(\widehat{\beta_k})-1) \nonumber
+$$
+
+is the percentage change in the odds given a one unit change in $x_k$.
+
+So a logit coefficient of .226
+
+$$
+100*(exp(.226)-1) =25.36 \nonumber
+$$
+
+Produces a 25.36% increase in the odds of $y$ occurring.
+
+

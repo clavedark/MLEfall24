@@ -46,7 +46,7 @@ library(pander)
 
 This 4 credit hour seminar is a survey of maximum likelihood methods and their applications to empirical political questions.  It presumes students have a detailed and intuitive knowledge of least squares, probability theory, basic skills in scalar and matrix algebra, and a basic understanding of calculus.  The course will deal mainly in understanding the principles of maximum likelihood estimation, under what conditions we move away from least squares, and what particular models are appropriate given observed data.  The seminar will focus on application and interpretation of ML models and linking theory to statistical models. The course emphasizes coding and data viz in R and Stata.
 
-The class meets one time per week for three hours. My office hours are designed to be homework help hours where I'll work in the grad lab with any of you who are working on the exercises. The most productive pathway for this class is for your to get in the habit of working together, and those office hours are a good time for this.
+The class meets one time per week for three hours. My office hours are designed to be homework help hours where I'll work in the grad lab with any of you who are working on the exercises. The most productive pathway for this class is for you to get in the habit of working together, and those office hours are a good time for this.
 
 ## Course Purpose
 
@@ -132,7 +132,7 @@ The seminar requires the following:
 -   Problem sets - 60% total
 -   Mechanism papers - 40%
 
-Please note that all written assignments must be submitted as PDFs either compiled in *LaTeX* or in {{< fa brands r-project >}} markdown (Quarto).
+Please note that all written assignments must be submitted as PDFs either compiled in *LaTeX* or in R markdown (Quarto).
 
 You'll complete a series of problem sets, mostly applied. How many will depend on how things move along during the term. Regarding the problem sets - the work you turn in for the problem sets should clearly be your own, but I urge you to work together - doing so is a great way to learn and to overcome problems.
 
@@ -179,13 +179,7 @@ Ideas are the currency in academic exchange, so acknowledging where ideas come f
 
 ## Course Schedule
 
-Week 1, Aug 21 --  Likelihood Theory and ML Estimation
-
--  Gary King. 1998. *Unifying Political Methodology*. Chapter 1-4
--  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapters 1-2.
-
- Week 2, Aug 28 --Binary Dependent Variables I - probit/logit, QI
-
+Week 1, Aug 21 -- Binary $y$ Variables I - probit/logit, QI
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 1, 2, 4
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 3.
@@ -195,7 +189,13 @@ Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 <!-- -  @kingajps00clarify -->
 
 
- Week 3, Sept 4 -- Binary Dependent Variables II - variants (scobit, ordered, RE)
+
+Week 2, Aug 28 --  Likelihood Theory and ML Estimation
+
+-  Gary King. 1998. *Unifying Political Methodology*. Chapter 1-4
+-  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables}. Chapters 1-2.
+
+ Week 3, Sept 4 -- Binary $y$ Variables II - symmetry, fit, diagnostics, prediction
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 3, 5, 6, 7
 
@@ -207,7 +207,7 @@ Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 
 
 
- Week 4, Sept 11 -- Hazards I (discrete)
+ Week 4, Sept 11 -- Binary $y$ Variables III (discrete hazards)
 
 -  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 11
 <!-- -  @berryberry -->
@@ -216,7 +216,7 @@ Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 
 
 
- Week 5, Sept 18 -- Assumptions and Specification I - heteroskedasticity, iid
+ Week 5, Sept 18 -- Binary $y$ Variables IV - variance, order 
 
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
 -  @franklinhet
@@ -224,7 +224,7 @@ Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 -  @clarknordstromjop05
 
 
- Week 6, Sept 25 -- Assumptions and Specification II - interactions, variables, measurement of $y$
+ Week 6, Sept 25 -- Assumptions and Specification - interactions, functional form, measurement of $y$
 
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 5.
 -  @clarketalajps08
@@ -237,7 +237,7 @@ Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 
  Week 7, Oct 2 -- No class, Yom Kippur 
 
- Week 8, Oct 9 -- Choice Models I (Unordered Dependent Variables) - MNL, MNP, CL (IIA)
+ Week 8, Oct 9 -- Choice Models I (Unordered $y$ Variables) - MNL, MNP, CL (IIA)
 
 -  Ward \& Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 9
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 6.
@@ -255,7 +255,7 @@ Week 1, Aug 21 --  Likelihood Theory and ML Estimation
 
 
 
- Week 10, Oct 23  -- Event Count Models I - poisson, over/under dispersion
+ Week 10, Oct 23  -- Event Count Models I - poisson, dispersion
 
 -  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 10
 -  J. Scott Long.  1997. *Regression Models for Categorical and Limited Dependent Variables*. Chapter 8.1, 8.2.
@@ -271,7 +271,7 @@ Week 11, Oct 30 -- Event Count Models II - negative binomial, zero-altered
 -  @clarkstrategic
 
 
- Week 12, Nov 6 -- Hazard Models II - parametric, semi-parametric models
+ Week 12, Nov 6 -- Continuous Time Hazard Models I - parametric, semi-parametric models
 
 -  Ward & Alhlquist, 2018. *Maximum Likelihood for Social Science*. Chapter 11
 -  Janet Box-Steffensmeier and Brad Jones. 2004. *Event History Modeling*. Chs. 1-4
@@ -279,7 +279,7 @@ Week 11, Oct 30 -- Event Count Models II - negative binomial, zero-altered
 -  @boxapsr
 
 
- Week 13, Nov 13 -- Hazard Models III - parametric models, special topics
+ Week 13, Nov 13 -- Continuous Time Hazard Models II - parametric models, special topics
 
 -  Janet Box-Steffensmeier and Brad Jones. 2004. *Event History Modeling*. Chs. 5-11
 -  @zorn2000

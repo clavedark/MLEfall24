@@ -1,0 +1,497 @@
+---
+title: "Prediction Methods for MLE Models"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+   html: default
+editor: source
+embed-resources: true
+cache: true
+filters:
+  - parse-latex
+---
+
+
+
+<!-- render 2 types at same time; terminal "quarto render file.qmd" -->
+<!-- https://quarto.org/docs/output-formats/html-multi-format.html -->
+
+<!-- tables, smaller font and striping -->
+<style>
+table, th, td {
+    font-size: 18px;
+}
+tr:nth-child(odd) {
+  background-color: # f2f2f2;
+}
+</style>
+
+<!-- <script src="https://cdn.jsdelivr.net/gh/ncase/nutshell/nutshell.js"></script> -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+
+```
+
+
+
+
+
+# Predictions in MLE Models
+Most MLE models are nonlinear, so their coefficients are not their marginal effects. As a result, most MLE models require a transformation of the linear prediction to generate quantities of interest. The methods outlined here apply to most MLE applications; the immediate interest and examples here use binary response models. These slides will form a foundation for prediction in other types of models we encounter.
+
+
+## Binary response models
+
+Probit and logit coefficients **are** directly interpretable in the senses that 
+
+
+ - We can interpret direction.
+ - We can interpret statistical difference from zero.
+ - We can say the largest marginal effect of $x \approx 0.4\cdot\widehat{\beta}$ for the probit model.
+ - We can say the largest marginal effect of $x \approx 0.25\cdot\widehat{\beta}$ for the logit model. 
+ - We can say that $exp(\widehat{\beta_k})-1$ is the percentage change in the odds that $y=1$, for the logit model.
+ 
+
+
+It's still the case that we often want other **quantities of interest** like probabilities, and that requires the straightforward transformations of the linear prediction, $F(x_i\widehat{\beta})$.
+
+Let's look briefly at the intuition of the "maximum marginal effect" in the logit model.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+z <- seq(-5,5,.1)
+ncdf <- pnorm(z)
+npdf <- dnorm(z)
+lcdf <- plogis(z)
+lpdf <- dlogis(z)
+
+df <- data.frame(ncdf=ncdf, npdf=npdf, lcdf=lcdf, lpdf=lpdf, z=z)
+
+ggplot(df, aes(x=z, y=ncdf), color="black") +
+  geom_line() +
+  geom_line(aes(x=z, y=lcdf), color="green") +
+  geom_line(aes(x=z, y=npdf), color="black") +
+  geom_line(aes(x=z, y=lpdf), color="green") +
+  geom_hline(yintercept = .3989, linetype="dashed") +
+  geom_hline(yintercept = .25, linetype="dashed") +
+  labs(x="z", y="Pr(y=1)") +
+  theme_minimal() +
+  annotate("text", x = 2.5, y = .36, label = "Normal", color = "black") +
+  annotate("text", x = 2.5, y = .22, label = "Logistic", color = "black") 
+
+
+
+
+
+```
+
+The highest points on the PDFs indicate the maximum marginal effect of $x$ on $Pr(y=1)$ in the logit and probit models. 
+
+
+# Approaches to prediction
+
+It's important to note that these approaches and most of the technique described in these slides the same in most other MLE models and in the linear OLS model. 
+
+  - **At-Means Predictions** - set variables to means/medians/modes, vary $x$ of interest, generate effect.
+  
+  - **Average Effects** - set $x$ of interest to value of interest leaving all other variables at real values, then predict, average, then repeat at next value of interest. 
+
+
+
+
+
+## At-Means Predictions
+
+At-means predictions are what they sound like - effects with independent variables set at central tendencies. These are sometimes called "adjusted predictions." 
+
+ - estimate model.
+ - create out of sample data.
+ - vary $x$ of interest; set all other $x$ variables to appropriate central tendencies - hence the "at Means."
+ - generate QIs in out of sample data.
+
+
+
+
+
+
+## Average Effects
+
+Average Marginal Effects are in-sample but create a counterfactual for a variable of interest, assuming the entire sample looks like that case.
+
+For instance, suppose a model of wages with covariates for education and gender. We might ask the question *what would the predictions look like if the entire sample were male, but otherwise looked as it does?* Alternatively, *what would the predictions look like if the entire sample were female, but all other variables the same as they appear in the estimation data?*
+
+To answer these, we'd change the gender variable to *male*, generate $x{\widehat{\beta}}$ for the entire sample, and take the average, then repeat with the gender variable set to *female*.
+
+
+To generate Average Effects,
+
+  - estimate model.
+  - in estimation data, set variable of interest to a particular value for the entire estimation sample. 
+  - generate QIs (expected values, standard errors).
+  - take average of QIs, and save.
+  - repeat for all values of variable of interest, and plot. 
+
+
+
+# Methods for Quantities of Interest
+
+Again, these are the same as in the linear model:
+
+  - direct computation - generate $F(x\widehat{\beta})$ for interesting values of $x$ (either as At-Means or Average Effects). 
+  - simulation of $\widehat{\beta}$
+  - simulation of QI.
+
+
+## At-means predictions (logit)
+
+Here's an example of at-means predictions for a logit model of the democratic peace. FIrst, let's look at the model estimates: 
+
+```{r, warning=FALSE, message=FALSE, results='asis' }
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
+
+m1 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="logit"), data=dp )
+
+stargazer(m1, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: Dispute", dep.var.labels.include=FALSE,  covariate.labels=c("Shared Border", "Democracy", "Capabilities Ratio", "Allies"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+
+
+```
+
+As with any nonlinear model, we need to compute a linear prediction, $x\widehat{\beta}$, and then transform that to a probability. For at-means predictions, we'll vary democracy across its range, holding the remaining variables at appropriate central tendency (e.g, mode for dummy variables, median for categorical or skewed variables, etc.) Take a look at the code:
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
+
+m1 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="logit"), data=dp )
+logitpreds <- predict(m1, type="response")
+
+m2 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="probit"), data=dp )
+
+#new data frame for MEM prediction
+mem <- data.frame(deml= c(seq(-10,10,1)), 
+                  border=0, caprat=median(dp$caprat), ally=0)
+
+# type="link" produces the linear predictions; transform by hand below w/EPT
+mem  <-data.frame(mem, predict(m1, type="link", newdata=mem, se=TRUE))
+
+mem <- cbind(mem,lb=plogis(mem$fit-1.96*mem$se.fit),
+             ub=plogis(mem$fit+1.96*mem$se.fit), 
+             p=plogis(mem$fit))
+
+ggplot(mem, aes(x=deml, y=p)) +
+  geom_line() +
+  geom_ribbon(data=mem, aes(x=deml, ymin=lb, ymax=ub),fill = "grey30", alpha = .4, ) +
+  labs(x="Polity Score", y="Pr(Dispute) (95% confidence interval)")
+
+
+```
+
+
+
+## Average effects (logit)
+
+Average effects are often a better choice because they represent the data more completely than central tendency can (in the at-mean effects). Here are average effects (using the logit estimates) across the range of polity, and for pairs of states that share borders and those that do not.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+#avg effects
+
+#identify the estimation sample
+dp$used <- TRUE
+dp$used[na.action(m1)] <- FALSE
+dpesample <- dp %>%  filter(used=="TRUE")
+
+polity <- 0
+medxbd0 <- 0
+ubxbd0 <- 0
+lbxbd0 <- 0
+# medse <- 0
+# medxbd1 <- 0
+# ubxbd1 <- 0
+# lbxbd1 <- 0
+
+for(i in seq(1,21,1)){
+  dpesample$border<- 0
+  dpesample$deml <- i-11
+  polity[i] <- i-11
+  allpreds <- data.frame(predict(m1, type= "response", se.fit=TRUE, newdata = dpesample))  
+  medxbd0[i] <- median(allpreds$fit, na.rm=TRUE)
+  ubxbd0[i] <- median(allpreds$fit, na.rm=TRUE)+1.96*(median(allpreds$se.fit, na.rm=TRUE))
+  lbxbd0[i] <- median(allpreds$fit, na.rm=TRUE)-1.96*(median(allpreds$se.fit, na.rm=TRUE))
+}
+  
+noborder <- data.frame(polity, medxbd0, ubxbd0, lbxbd0)
+  
+for(i in seq(1,21,1)){
+  dpesample$border<- 1
+  dpesample$deml <- i-11
+  polity[i] <- i-11
+  allpreds <- data.frame(predict(m1, type= "response", se.fit=TRUE, newdata = dpesample))  
+  medxbd0[i] <- median(allpreds$fit, na.rm=TRUE)
+  ubxbd0[i] <- median(allpreds$fit, na.rm=TRUE)+1.96*(median(allpreds$se.fit, na.rm=TRUE))
+  lbxbd0[i] <- median(allpreds$fit, na.rm=TRUE)-1.96*(median(allpreds$se.fit, na.rm=TRUE))
+}
+  
+border <- data.frame(polity, medxbd0, ubxbd0, lbxbd0)
+  
+
+
+ggplot() +
+  geom_ribbon(data=noborder, aes(x=polity, ymin=lbxbd0, ymax=ubxbd0),fill = "grey30", alpha = .4, ) +
+  geom_line(data=noborder, aes(x=polity, y=medxbd0))+
+  geom_ribbon(data=border, aes(x=polity, ymin=lbxbd0, ymax=ubxbd0),fill = "grey30", alpha = .4, ) +
+  geom_line(data=border, aes(x=polity, y=medxbd0))+
+  labs ( colour = NULL, x = "Polity Score", y =  "Pr(Dispute)" )+
+  theme_minimal()+
+  ggtitle("Average Effects")
+
+
+```
+
+## Simulation 
+
+Simulation is an especially good approach for nonlinear models: 
+
+  - estimate the model.
+  - $m$ times (say, 1000 times), simulate the distribution of $\widehat{\beta}$.
+  - generate the $m$ linear predictions, $x\widehat{\beta}$.
+  - transform by the appropriate link function (logistic, standard normal CDF).
+  - identify the 2.5, 50, and 97.5 percentiles.
+  - plot against $x$. 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+#draws from multivariate normal using logit model estimates
+simL <- data.frame(MASS::mvrnorm(1000, coef(m1), vcov(m1)))
+#draws from multivariate normal using probit model estimates
+simP <- data.frame(MASS::mvrnorm(1000, coef(m2), vcov(m2)))
+
+#Logit predictions
+logitprobs <- data.frame(dem= numeric(0) , lb=numeric(0), med= numeric(0), ub=numeric(0))
+for (i in seq(1,21,1)) {
+simpreds <- quantile(simL$X.Intercept.+ simL$border*0+simL$deml*(i-11)+simL$caprat*median(dp$caprat)+simL$ally*0, probs=c(.025, .5, .975))
+logitprobs[i,] <- data.frame(dem=i, lb=plogis(simpreds[1]), med=plogis(simpreds[2]), ub=plogis(simpreds[3]))
+}
+
+#Probit predictions
+probitprobs <- data.frame(dem= numeric(0) , lb=numeric(0), med= numeric(0), ub=numeric(0))
+for (i in seq(1,21,1)) {
+simpreds <- quantile(simP$X.Intercept.+ simP$border*0+simP$deml*(i-11)+simP$caprat*median(dp$caprat)+simP$ally*0, probs=c(.025, .5, .975))
+probitprobs[i,] <- data.frame(dem=i, lb=pnorm(simpreds[1]), med=pnorm(simpreds[2]), ub=pnorm(simpreds[3]))
+}
+
+logit <- ggplot() +
+  geom_ribbon(data=logitprobs, aes(x=dem, ymin=lb, ymax=ub),fill = "grey30", alpha = .4, ) +
+  geom_line(data=logitprobs, aes(x=dem, y=med))+
+  labs ( colour = NULL, x = "Polity Score", y =  "Pr(Dispute)" )+
+  theme_minimal()+
+  ggtitle("Logit Predictions")
+
+probit <- ggplot() +
+  geom_ribbon(data=probitprobs, aes(x=dem, ymin=lb, ymax=ub),fill = "grey30", alpha = .4, ) +
+  geom_line(data=probitprobs, aes(x=dem, y=med))+
+  labs ( colour = NULL, x = "Polity Score", y =  "Pr(Dispute)" )+
+  theme_minimal()+
+  ggtitle("Probit Predictions")
+
+logit+probit
+  
+
+
+```
+
+## Simulating combinations of binary variables
+
+Let's look at the differences among the four combinations of the binary variables, border and ally. 
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+## simulating for binary combinations ----
+
+m1 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="logit"), data=dp )
+
+#draws from multivariate normal using logit model estimates
+simL <- data.frame(MASS::mvrnorm(1000, coef(m1), vcov(m1)))
+
+
+logitprobs <- data.frame(b0a0= numeric(0) , b1a0=numeric(0), b0a1= numeric(0), b1a1=numeric(0))
+
+  b0a0 <- plogis(simL$X.Intercept.+ simL$border*0+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*0)
+b1a0 <- plogis(simL$X.Intercept.+ simL$border*1+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*0)
+b0a1 <- plogis(simL$X.Intercept.+ simL$border*0+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*1)
+b1a1 <- plogis(simL$X.Intercept.+ simL$border*1+simL$deml*-7+simL$caprat*median(dp$caprat)+simL$ally*1)
+
+logitprobs <- data.frame(b0a0, b1a0, b0a1, b1a1)
+
+ggplot() +
+  geom_density(data=logitprobs, aes(x=b0a0), fill="grey30", alpha = .4, ) +
+  geom_density(data=logitprobs, aes(x=b1a0), fill="grey30", alpha = .4, ) +
+  geom_density(data=logitprobs, aes(x=b0a1), fill="grey30", alpha = .4, ) +
+  geom_density(data=logitprobs, aes(x=b1a1), fill="grey30", alpha = .4, ) +
+  labs ( colour = NULL, x = "Pr(Dispute)", y =  "Density" ) +
+  theme_minimal()+
+  annotate("text", x = .07, y = 150, label = "No border, not allies", color = "black") +
+  annotate("text", x = .13, y = 70, label = "Border, not allies", color = "black") +
+  annotate("text", x = .04, y = 200, label = "No border, allies", color = "black") +
+  annotate("text", x = .09, y = 50, label = "Border, allies", color = "black") +
+  ggtitle("Logit Predictions")
+
+```
+ 
+
+# Uncertainty
+
+So far, we hve focused on generating a predicted value from the model. Let's think about generating measures of uncertainty for those predicted values. 
+
+This section examines ways to compute standard errors, and ways to use those to compute confidence intervals.
+
+
+
+
+## ML Standard Errors of Linear Predictions
+
+One commonly used measure of uncertainty is the standard error of the linear prediction, $X\widehat{\beta}$. 
+
+Consider the linear prediction
+
+$$X \widehat{\beta} $$
+
+under maximum likelihood theory:
+
+$$var(X \widehat{\beta}) = \mathbf{X V X'} $$
+
+an $N x N$ matrix, where $V$ is the var-cov matrix of ${\widehat{\beta}}$.  The main diagonal contains the variances of the $N$ predictions. The standard errors are: 
+
+$$se(X \widehat{\beta}) = \sqrt{diag(\mathbf{X V X'})} $$
+
+which is an $N x 1$ vector. So now we have a column vector of standard errors for the linear prediction, $X\widehat{\beta}$. Like the linear predictions, these are *not* transformed into probabilities, so when we compute confidence intervals, we need to map the upper and lower bounds onto the probability space. 
+
+$$F(X \widehat{\beta} - c*s.e.) \leq F(X \widehat{\beta}) \leq F(X \widehat{\beta} + c* s.e.)$$
+
+## Delta Method standard errors
+
+The maximum likelihood method is appropriate for monotonic functions of $X \widehat{\beta}$, e.g. logit, probit. In other models (e.g., multinomial logit), the function is not monotonic in $X \widehat{\beta}$ so we use the Delta Method - this creates a linear approximation of the function. @greene2012econometric (693ff) gives this as a general derivation of the variance:
+
+$$Var[F(X \widehat{\beta})] = f(\mathbf{x'\widehat{\beta}})^2 \mathbf{x' V x} $$
+
+where this would generate variances for whatever $F(X \widehat{\beta})$ is, perhaps a predicted probability. 
+
+
+### Delta method standard errors for Logit
+
+For the logit, the delta standard errors are given by:
+
+$$F(X \widehat{\beta}) * (1-F(X \widehat{\beta}) * \mathbf(X V X')$$
+
+$$ = f(X \widehat{\beta})  *  \mathbf{\sqrt{X V X'}}$$
+
+
+or
+
+$$ p * (1-p) * stdp$$
+
+where $stdp$ is the standard error of the linear prediction.
+
+
+
+## SEs of Predictions for linear combinations
+
+A common circumstance that requires joint hypothesis tests is the case of polynomials (which are themselves interactions):
+
+ $$y = \widehat{\beta}_0 + \widehat{\beta}_1 x_1 + \widehat{\beta}_2 x_{1}^2  + \varepsilon $$
+
+The question is whether $\widehat{\beta}_1 = \widehat{\beta}_2  = 0$ - the marginal effect is:
+
+$$ \widehat{\beta}_1 + 2 \widehat{\beta}_2x_1$$
+
+and requires the standard error for $\widehat{\beta}_1+\widehat{\beta}_2$, which is:
+
+$$ \sqrt{var(\widehat{\beta}_1) + 4x_{1}^{2}var(\widehat{\beta}_2) +  4x_1 cov(\widehat{\beta}_1, \widehat{\beta}_2)  }$$
+
+
+
+## CIs - End Point Transformation
+
+Generate upper and lower bounds using either ML or Delta standard errors, such that 
+
+$$F(X \widehat{\beta} - c*s.e.) \leq F(X \widehat{\beta}) \leq F(X \widehat{\beta} + c* s.e.)$$
+
+  - estimate the model, generate the linear prediction, and the standard error of the linear prediction using the either ML or Delta.
+  - generate linear boundary predictions, $x{\widehat{\beta}} \pm c * \text{st. err.}$ where $c$ is a critical value on the normal, eg. $z=1.96$. 
+  - transform the linear prediction and the upper and lower boundary predictions by $F(\cdot)$.
+  - With ML standard errors, EPT boundaries will obey distributional boundaries (ie, won't fall outside 0-1 interval for probabilities); the linear end point predictions are  symmetric, though they will not be symmetric in nonlinear models.
+  - With delta standard errors, bounds may not obey distributional boundaries. 
+
+
+## Simulating confidence intervals, I
+ 
+
+  - draw a sample with replacement of size $\tilde{N}$ from the estimation sample.
+  - estimate the model parameters in that bootstrap sample.
+  - using the bootstrap estimates, generate quantities of interest (e.g. $x\widehat{\beta}$)
+ repeat $j$ times.
+  - collect all these bootstrap QIs and use either percentiles or standard deviations to measure uncertainty.
+
+
+## Uncertainty: Simulating confidence intervals, II
+ 
+
+  - estimate the model.
+  - generate a large sample distribution of parameters (e.g. using drawnorm).
+  - generate quantities of interest for the distribution of parameters.
+  - use either percentiles or standard deviations of the QI to measure uncertainty.
+
+
+
+

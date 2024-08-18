@@ -1,0 +1,1170 @@
+---
+title: "Likelihood"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+   html: default
+   # revealjs:
+   #   output-file: multivariate24s.html
+editor: source
+embed-resources: true
+cache: true
+filters:
+  - parse-latex
+---
+
+
+<!-- render 2 types at same time; terminal "quarto render file.qmd" -->
+<!-- https://quarto.org/docs/output-formats/html-multi-format.html -->
+
+<!-- tables, smaller font and striping -->
+<style>
+table, th, td {
+    font-size: 18px;
+}
+tr:nth-child(odd) {
+  background-color: # f2f2f2;
+}
+</style>
+
+<!-- <script src="https://cdn.jsdelivr.net/gh/ncase/nutshell/nutshell.js"></script> -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+
+```
+
+
+# Motivating MLE
+
+---
+
+
+# ML, OLS?
+ 
+
+- Why do we turn to maximum likelihood instead of OLS, especially given the simplicity and robustness of OLS?
+
+
+
+- Our data can't meet the OLS assumptions; $y$ is often **limited*** such that we observe $y$ but really want to measure $y^*$. 
+
+
+
+- $y^*$ is often a continuous (unlimited) variable we wish we could measure - if we could, we'd use OLS to estimate its correlates.
+
+
+
+- OLS asks us to make the data satisfy the model. MLE asks us to build a model based on the data. Since our data often don't satisfy the OLS assumptions, MLE offers a flexible alternative.
+
+
+
+
+---
+
+
+
+# Limited observability
+
+For example, we might be interested in what leads citizens to vote in elections. 
+
+- we observe an individual either does (1) or does not (0) turn out to vote. 
+- what we'd like to know is the probability that individual votes. 
+
+ Our ability to observe the latent variable, $y^*$ is limited.
+
+ 
+
+
+``` {r include=FALSE}
+library(gganimate)
+z <-runif(1000, min = -4, max = 4)
+
+dx <- c(-4, 4)
+dy <- c(0, 1)
+d <- data.frame(dx, dy)
+
+ncdf <- pnorm(z, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+cdf <- data.frame(ncdf, z)
+```
+
+---
+
+
+# Limited observability
+
+```{r, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+z <- seq(-5,5,.1)
+l <- seq(0,1,.01)
+s1 <- 1/(1+exp(-z))
+s2 <- pnorm(z)
+
+df <- data.frame(z=z, l=l, s1=s1, s2=s2)
+
+ggplot(df, aes(x=z, y=l)) + 
+  geom_line(aes(x=z, y=l), color="black")+
+  geom_line(aes(x=z, y=s1), color="red")+
+  geom_line(aes(x=z, y=s2), color="green")+
+  labs(title="Rates of change", x="z", y="F(z)")+
+  theme_minimal()+
+  transition_reveal(z)
+
+
+```
+
+
+<!-- ```{r} -->
+<!-- #| echo: true -->
+<!-- #| code-fold: true -->
+<!-- #| code-summary: "code" -->
+
+
+<!-- # Generate data -->
+<!-- x <- seq(-5, 5, by = 0.1) -->
+<!-- normal_cdf <- pnorm(x) -->
+<!-- logistic_cdf <- plogis(x) -->
+<!-- linear <- (x + 5) / 10 -->
+
+<!-- # Create highchart -->
+<!-- hc <- highchart() %>% -->
+<!--   hc_chart(type = "line") %>% -->
+<!--   hc_title(text = "Comparison of CDFs and Linear Function") %>% -->
+<!--   hc_xAxis(title = list(text = "x"), min = -5, max = 5) %>% -->
+<!--   hc_yAxis(title = list(text = "Probability / Value"), min = 0, max = 1) %>% -->
+<!--   hc_tooltip(shared = TRUE, crosshairs = TRUE) %>% -->
+<!--   hc_legend(align = "center", verticalAlign = "bottom", layout = "horizontal") -->
+
+<!-- # Add series with animation -->
+<!-- hc <- hc %>% -->
+<!--   hc_add_series( -->
+<!--     data = lapply(seq_along(x), function(i) list(x[i], normal_cdf[i])), -->
+<!--     name = "Normal CDF", -->
+<!--     animation = list(duration = 2000) -->
+<!--   ) %>% -->
+<!--   hc_add_series( -->
+<!--     data = lapply(seq_along(x), function(i) list(x[i], logistic_cdf[i])), -->
+<!--     name = "Logistic CDF", -->
+<!--     animation = list(duration = 20000) -->
+<!--   ) %>% -->
+<!--   hc_add_series( -->
+<!--     data = lapply(seq_along(x), function(i) list(x[i], linear[i])), -->
+<!--     name = "Linear Function", -->
+<!--     animation = list(duration = 8000) -->
+<!--   ) -->
+
+<!-- hc -->
+<!-- ``` -->
+
+
+# ML
+
+ML asks us to think of the data as given and to imagine the model that might best represent the _Data Generating Process._
+
+- In OLS, the *model* is fixed - the assumptions about $\epsilon$ are given. 
+- In ML, the *data* are fixed - we construct a model that reflects the nature of the data.
+- What we assume about the unobservables is informed by what we know about the observables, the $y$ variable. 
+- A useful way to describe $y$ is to characterize its observed distribution. 
+- Once we know the distribution of $y$, we can begin building a model based on that distribution. 
+
+
+
+---
+
+# Limited Dependent Variables
+
+We are limited in what we can observe and/or measure in $y$. E.g., we observe an individual voting or not; we cannot observe the chances an individual votes. 
+
+- The $y$ variable has both observed and latent qualities; label the latent variable $\widetilde{y}$. 
+
+- Often, we are more interested in this latent variable. We are more interested in the latent chance of voting than the observed behavior.
+
+- $\widetilde{y}$ is the variable we *wish* we could measure. 
+
+
+
+---
+
+# Limited Dependent Variables 
+
+
+- The latent and observed variables are often distributed differently. Observed voting $y=(0,1)$; latent variable $Pr(y=1)$.
+
+- Linking $X$ variables to the latent $\widetilde{y}$ requires rescaling; this is often because changes in $\widetilde{y}$ given $X$ are nonlinear. 
+
+- Besides, $\widetilde{y}$ is unobserved - so we have to generate it from the model.
+
+- To link $X$ with $\widetilde{y}$ or $y$, we assume their relationship follows some distribution; we call this the *link distribution*.
+
+---
+
+
+# The big point
+
+Our data are often limited, and not suitable for OLS. OLS asks us to transform data to make it meet the model assumptions (this is Generalized Least Squares); MLE builds  the model assumptions based on the data.
+
+---
+
+# Building an ML estimator
+
+What do we need to build an ML estimator? 
+
+- $Y$ variable distribution.
+
+- use that distribution to write a function connecting $x\beta$ (the linear estimates), to $Y$.
+
+- use another another function to *link* the linear prediction, $x\beta$ to $\tilde{y}$, to map the linear prediction onto the latent variable we wish we could measure.
+
+
+
+---
+
+# Warning
+
+I'm foreshadowing here, so don't come unglued if the next slide seems foreign.
+
+
+---
+
+
+# For example
+
+- $Y = (0,1)$, does an individual vote or not. This is binary, discrete, let's say binomial.
+
+- $\tilde{Y}$ is the latent probability an individual votes. Wish we could measure this, use OLS. :(
+
+- Write a function based on $Y$:  $\pi^y (1-\pi)^{(1-y)}$ ,  the binomial.
+
+- $\pi$ is given by some $X$ variables we think affect voting - so $\pi = x\beta$.
+
+- So substitute for $\pi$ \ldots $(x\beta)^y (1-x\beta)^{(1-y)}$
+
+- Now, link the linear prediction to $\tilde{Y}$ - map $x\beta$ onto the Pr(vote). How about using the Standard Normal CDF $\Phi$?
+
+$\Phi(x\beta)^y  \Phi(1-x\beta)^{(1-y)}$ - this is now the core of the Probit.
+ 
+ 
+---
+
+# Coming up next
+
+That's what we want to be able to do - so in the coming parts, we'll:
+
+
+- review ML theory, using Gary King's notation.
+
+- build a likelihood function, and compare to OLS.
+
+- look at the technology of ML - how do we actually get estimates from a likelihood function?
+
+
+---
+
+# Likelihood Theory
+
+Probability and Likelihood differ from one another principally by how they treat the data and model in relation to one another.  
+
+Probability theory presumes some given model (or set of parameters) and seeks to estimate the data, given those parameters.  
+
+---
+
+# Likelihood
+
+King (pp. 9, 14) puts it this way:
+
+$$Y\sim f(y|\theta,\alpha)$$
+
+and
+
+$$\theta = G(X,\beta)$$
+
+so our data, $Y$ has a probability distribution given by parameters $\theta, \alpha$, and $\theta$ is a function of some variables, $X$ and their parameters, $\beta$.  
+
+ 
+---
+
+# Likelihood
+
+All of this comprises the *model* in King's lingo, so a basic probability statement appears as:
+
+$$Pr(y|\mathcal{M}) \equiv Pr(\mathrm{data|model})$$
+
+This is a conditional probability resting on two conditions:
+
+- The data are random and unknown.
+
+-  The model *is* known.  
+
+
+Uh oh. The model is known? The data aren't? This works in many probability settings. What is the probability of  rolling 3 threes in 6 rolls of a six-sided die? What is the probability you draw an ace from a standard deck of cards? In cases like these, the model is known even before we observe events (data). 
+
+
+---
+
+# Likelihood
+
+In cases like these, the model's parameters are known and fixed. In our applications, the model and its parameters are the unknowns, but the events or data are known, fixed, and given. 
+
+Suppose I flip a coin to decide whether I roll a 20-sided die, or a 6-sided die. You do not observe any of this - I only tell you I rolled a 4 - which die did I roll? This is the problem we try to deal with in ML - what is the data generating process that most likely produced the observed data. Unlike the simple die roll, the model isn't known. Instead, there are many possible models that could have produced the data. 
+
+
+---
+
+# Inverse Probability 
+
+Given these conditions, the more sensible model would be:
+
+$$Pr(\mathcal{M}|y)$$
+
+This is the *inverse probability* model - but it requires knowledge (or strong assumptions) regarding an important element of the (unknown) model, $\theta$.  Even Bayes can't really do this. 
+
+---
+
+# Likelihood
+
+Likelihood estimates the model, $\mathcal{M}$ given the data, but assumes that $\theta$ can take on different values, representing different (competing) hypothetical models.
+
+The set of $\theta$'s are the competing models or *data generating processes* that could have produced the observed data set.
+
+---
+
+
+# Likelihood 
+
+Keeping with King's notation, the likelihood axiom is:
+
+$$L(\tilde{\theta}|y,\mathcal{M}*)\equiv L(\tilde{\theta}|y) $$
+$$=k(y)Pr(y|\tilde{\theta})$$
+$$\propto Pr(y|\tilde{\theta})$$
+
+
+where $\tilde{\theta}$ represents the hypothetical value of $\theta$ (rather than its true value).  
+
+---
+
+# Likelihood
+
+
+The term $k(y)$ (known as the "constant of proportionality") is a constant across all the hypothetical values of $\tilde{\theta}$ (and thus drops out) but is the key to the likelihood axiom; it represents the functional form through which the data ($y$) shape $\tilde{\theta}$ and thus allow us to estimate the likelihood as a measure of relative (instead of absolute) uncertainty; our uncertainty in this case is relative to the other possible functions of $y$ and the hypothetical values of $\tilde{\theta}$.  
+
+As King (p. 61) puts it , $k(y)$ "measures the relative likelihood of a specified hypothetical model $\tilde{\beta}$ producing the data we observed."
+
+It turns out that the likelihood of observing the data is proportional to the probability of observing the data. 
+
+---
+
+# Take Away Points
+
+- We want to know the probability (the model) of observing some data; if we find the model parameters with the highest likelihood of generating the observed data, we also know the probability because the two are proportional.
+
+
+- Likelihoods are always negative; they do not have a scale or specific meaning; they do not transform into probabilities or anything familiar.  
+
+
+- We find the parameter values that produce the largest likelihood values; those parameters that maximize the likelihood then can be translated into sensible quantities - they can be mapped onto $\tilde{y}$, giving us a measure of the variable we wish we had.  
+
+
+- In OLS, we compute parameter estimates that minimize the sum (squared) distance of all the observed points to the predicted points - we minimize the errors in this fashion. 
+
+- The technology of MLE is trial and error - choose some values for $\tilde{\theta}$, compute the likelihood, then repeat. Compare all the likelihoods - the values of $\tilde{\theta}$ that produced the highest likelihood value are the ones that most likely generated the observed data. 
+
+ 
+---
+
+# Likelihood: a linear model
+
+Suppose you have data, $Y$, where:
+
+ 
+$$Y\sim N(\mu,\sigma^{2})$$ 
+$$E(Y)=\mu$$
+
+$$var(Y)=\sigma^{2}$$
+
+
+
+ $Y$ is distributed normally with appropriate distribution parameters that measure the moments of $Y$.
+
+ Given these data, we want to know what values of  $\mu, \sigma^2$ most likely produced the data. 
+
+---
+
+# Writing the Likelihood
+
+Since we've determined $Y$ is normal, write the Normal PDF.
+
+
+$$Pr(Y=y_{i})=\frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{\left[\frac{-(y_{i}-\mu_{i})^{2}}{2\sigma^{2}}\right]}$$
+
+
+---
+
+# Writing the Likelihood
+
+We're interested in the *joint* probability of sample the observations, the probability the data result from a particular *Data Generating Process*.  Assuming the observations in the data are independent of one another, the joint density is equal to the product of the marginal probabilities:
+
+
+$$Pr(A~ \mathrm{and}~ B)=Pr(A)\cdot Pr(B)$$
+
+so the joint probability of $Y$ is given by 
+
+
+$$Pr(Y=y_{i} \forall i) = L(Y|\mu, \sigma^{2})= \prod\limits_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{\left[\frac{-(y_{i}-\mu_{i})^{2}}{2\sigma^{2}}\right]}$$
+
+
+
+---
+
+# Writing the Likelihood
+
+But this assumes the parameters are given - they're the unknowns. Since the likelihood is proportional to the probability of the data given the parameters, we can write a likelihood function:
+
+
+$$\mathcal{L}(\mu, \sigma^{2}|Y) = k(y)\prod\limits_{i=1}^{n} f_{normal}(Y|\mu, \sigma^{2}) \propto \prod\limits_{i=1}^{n} f_{normal}(Y|\mu, \sigma^{2})$$
+
+$$= \prod\limits_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^{2}}}e^{\left[\frac{-(y_{i}-\mu_{i})^{2}}{2\sigma^{2}}\right]}$$
+
+
+---
+
+
+# Writing the Log Likelihood
+
+Adding is easier than multiplying; since we can transform the likelihood function by any monotonic form, we can take its natural log to replace the products with summations:
+
+$$\ln \mathcal{L} (\mu, \sigma^{2}|Y) = \ln \prod\limits_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{\left[\frac{-(y_{i}-\mu_{i})^{2}}{2\sigma^{2}}\right]}$$
+
+$$= \sum \ln \left[\frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{\left[\frac{-(y_{i}-\mu_{i})^{2}}{2\sigma^{2}}\right]} \right]$$
+
+
+$$=\sum\left( -\frac{1}{2}(\ln(2\pi))-\frac{1}{2}(\ln(\sigma^{2}))-\frac{1}{2\sigma^{2}}\left[\sum\limits_{i=1}^{n}(y_{i}-\mu)^{2}\right] \right)$$
+
+
+---
+
+# The Linear model
+
+It should be pretty evident this is the linear model. 
+
+- we started with data that looked normal; continuous, unbounded, infinitely differentiable. 
+
+- assuming normality, we wrote a LLF in terms of the **distribution parameters** $\mu, \sigma^2$.
+
+- but we want $\mu$ itself to vary with some $X$ variables; $y$ isn't just characterized by a grand mean, but by a set of of conditional means given by $X$. 
+
+- so we need to  _parameterize_ the model - write the distribution parameter as a function of some variables.
+
+- generally, this is to declare $\theta = F(x\beta)$.
+
+- in the linear/normal case, to declare $\mu=F(x\beta)$. Of course, $F$ is linear, we just write  $\mu=x\beta$.
+
+- in the LLF, substitute  $x\beta$ for $\mu$, and now we're taking the difference between $y$ and $x\beta$, squaring those differences, and weighting them by the variance. 
+
+
+---
+
+
+
+To put it all together $\ldots$
+
+$$\ln L(\mu, \sigma^{2}|Y) = \ln \prod\limits_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^{2}}} exp \left[\frac{-(y-x\beta)^{2}}{2\sigma^{2}}\right] $$
+$$= \sum \ln \left\{\frac{1}{\sqrt{2 \pi \sigma^{2}}} exp \left[\frac{-(y-x\beta)^{2}}{2\sigma^{2}}\right]\right\}$$
+
+$$= \sum\left(-\frac{1}{2}(\ln(2\pi)) -\frac{1}{2}(\ln(\sigma^{2})) -\frac{1}{2\sigma^{2}}\left[\sum\limits_{i=1}^{n}(y-x\beta)^{2}\right] \right)$$
+
+
+
+Does this look familiar? A lot like deriving OLS, eh?
+
+
+---
+
+# Linear regression in ML
+
+This is the Normal (linear) log-likelihood function. It presumes some data, $\mathbf{Y}$ and some unknowns $\mathbf{\beta, \sigma^2}$. You should note the kernel of the function is the sum of the squared differences of $y$ and $x\beta$.
+
+
+$$\ln\mathcal{L} =\sum\left(-\frac{1}{2}(\ln(2\pi)) -\frac{1}{2}(\ln(\sigma^{2})) -\frac{1}{2\sigma^{2}}\left[\sum\limits_{i=1}^{n}(y-x\beta)^{2}\right] \right)$$
+
+
+It turns out if we take the derivative of this function with respect to $\beta$ and $\sigma^2$, the result is the ML estimator, and the OLS estimator. They're the same.
+
+
+# Linearity
+
+This model is linear - our estimates, $x\beta$ map directly onto $y$ - there is no latent variable, $\tilde{y}$ to map onto - so $x\beta = \widehat{y}$. 
+
+Note that this is not because $y$ is normal. Rather, the fact that $y$ is continuous and contains a lot of information and is not limited makes it more likely $y$ is normal. 
+
+Though ML is most often used in cases where $y$ is limited (so OLS is inappropriate), it's important to see that we can estimate the linear model using either technology (OLS, ML) and get the same estimates.
+
+
+
+# Building a Model, Given Some Data
+  
+Now, we have enough tools to go about building a model from scratch. 
+
+Suppose we are interested in the number of soldiers who die from being kicked by a mule in the Prussian army in the late 19th century, and we have some theory that explains what makes such deaths more or less frequent. How can we go about building a statistical model of mule kick deaths? 
+
+How would you begin thinking about the DGP and a statistical model? Let's look at a summary of the data. 
+
+
+```{=latex}
+
+\begin{tiny}
+\begin{table}[!ht]  
+\begin{threeparttable}  \label{tab:mulekick}
+\caption[numbered]{Summary of Deaths by Horse or Mule Kick, Prussian Army\tnote{\dag}}
+\begin{tabular*}{5cm}{ccr} 
+\hline \hline \\
+\# of Deaths &&Frequency \\ \\
+        0  & & 144   \\             
+        1  & & 91    \\              
+        2  & & 32    \\              
+        3  & & 11    \\              
+        4  & & 2    \\  \\
+           & & N=280 \\ \\ \hline \hline               
+  \end{tabular*}
+  \begin{tablenotes}   See von Bortkiewicz, L. (1898).  Das Gesetz der Kleinen Zahlen. Leipzig: Teubner.  \end{tablenotes}
+  \end{threeparttable}
+  \end{table}
+\end{tiny}
+
+```
+
+```{r}
+library(vcd)
+data("VonBort")
+horse<-data.frame(VonBort)
+horsesum <- horse %>% group_by(deaths) %>% count(deaths) %>% ungroup()
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+hchart(horsesum, "column", hcaes(x=deaths, y=n)) %>% 
+  hc_title(text="Deaths by Horse or Mule Kick") %>% 
+  hc_subtitle(text="Prussian Army, 19th Century") %>% 
+  hc_yAxis(title="Frequency") %>% 
+  hc_colors("#005A43") %>%
+  hc_xAxis(title="Deaths") %>% 
+  hc_legend(enabled=FALSE) %>% 
+  hc_tooltip(pointFormat = "Deaths: {point.x}<br>Frequency: {point.y}") %>% 
+  hc_credits(enabled=TRUE, text="Source: von Bortkiewicz, L. (1898). Das Gesetz der Kleinen Zahlen. Leipzig: Teubner.") 
+
+
+```
+
+
+## How would you characterize the variable measuring deaths by mule kick? 
+
+  - Variable measures events.
+  - Events are discrete, not continuous. 
+  - Are events correlated or independent? 
+  - Variable is bounded. 
+
+  - Would OLS be appropriate? 
+  - What specific problems do we need to accommodate here?
+
+
+Given what we know about the dependent variable itself, we can begin to think about an appropriate model:
+ 
+  -  The model must accommodate a discrete dependent variable. 
+  -  We might have two quantities of interest - the expected number of events ($E[Y]$), and the probability of any given number of events ($Pr(Y=j)$).
+  - We need to make sure that the $X$ variables we think cause increases or decreases in the number of deaths cannot produce nonsensical effects (predictions less than zero, for instance).
+
+
+
+So we need to think about two different things here - the distribution of $\epsilon$ based on the observed distribution of $y$, and the link between the $X$ variables and $\widetilde{y}$, the latent quantity of interest.
+
+ 
+  - What distribution might describe the frequency of mule kick deaths? 
+  - Needs to be discrete. 
+  - Needs to characterize rare events - at most we see about four per period, so relatively rare. 
+  - Needs to have a lower bound at zero (since we can't observe negative numbers of deaths), and upper bound at $+\infty$
+
+<!-- poisson pdf -->
+$$Pr(Y=y_{i})=\frac{e^{-\lambda}\lambda^{y_{i}}}{y_{i}!}$$
+
+## The Poisson Distribution
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+#simulate and plot the poisson distribution at 3 different values of the mean
+
+set.seed(123)
+n <- 1000
+lambda <- c(1, 5, 10)
+poisson <- rpois(n, lambda[1])
+poisson2 <- rpois(n, lambda[2])
+poisson3 <- rpois(n, lambda[3])
+
+df <- data.frame(poisson, poisson2, poisson3)
+
+ggplot(df, aes(x=poisson)) + 
+  geom_histogram(aes(y=..density..), bins=20, fill="blue", alpha=0.5) + 
+  geom_density(aes(y=..density..), color="blue") + 
+  geom_histogram(data=df, aes(x=poisson2, y=..density..), bins=20, fill="red", alpha=0.5) + 
+  geom_density(data=df, aes(x=poisson2, y=..density..), color="red") + 
+  geom_histogram(data=df, aes(x=poisson3, y=..density..), bins=20, fill="green", alpha=0.5) + 
+  geom_density(data=df, aes(x=poisson3, y=..density..), color="green") + 
+  labs(title="Poisson Distribution", x="Deaths", y="Density") + 
+  theme_minimal() + 
+  theme(legend.position="none")
+
+```
+
+
+Thinking in terms of the data, let's write a likelihood function, the joint probability for all $i$ observations in the sample, $n$:
+
+$$
+L(\lambda)= \prod_{i=1}^{n} \left[\frac{e^{-\lambda}\lambda^{y_i}}{y_i!} \right]
+$$
+
+
+Take the natural log of the likelihood function:
+
+$$
+\ln L(\lambda)= \ln \left\{\prod_{i=1}^{n} \left[\frac{e^{-\lambda}\lambda^{y_i}}{y_i!} \right] \right\}\nonumber \\
+\ln L(\lambda)= \sum_{i=1}^{n} \left[-\lambda + y_i \ln(\lambda) - \ln(y_i!) \right] 
+$$
+
+
+
+
+What about the $X$ variables? Parameterize the model with respect to those variables such that they influence the mean, $\lambda$. So let's make $\lambda$ a function of the $X$ variables and their effects, $\beta$, such that,
+
+$$
+E[Y|X]=\lambda =F(\beta X)
+$$
+
+where $F(\beta X)$ is some link function, $F$ correctly scaling $\beta X$ to $y$, and $\widetilde{y}$. Remembering that we cannot have negative predictions, suppose we let $F$ be the exponential distribution which is nonnegative, unbounded to the right, and nonlinear with respect to changes at the limit. 
+
+Putting all this together using the exponential distribution as the link, we have:
+
+$$
+E[Y|X]=\lambda =e^{X\beta} \\
+\ln L(\lambda)= \ln \left\{\prod_{i=1}^{n} \left[\frac{e^{-e^{\beta X}}  e^{(\beta X)^{y_i}}}{y_i!} \right] \right\} \\
+\ln L(\lambda)= \sum_{i=1}^{n} \left[-e^{\beta X} + y_i \ln(\beta X) - \ln(y_i!) \right] 
+$$
+
+
+
+Let's derive another LLF - note that we start with the data and move toward the model. Suppose we have data on the number of civil wars in Africa over a ten year period, and the data are as follows:  
+
+$Y$ = \{5 0 1 1 0 3 2 3 4 1\} 
+
+
+$$
+Y \sim f_{poisson}(\lambda)=  \frac{e^{-\lambda}\lambda^{y_{i}}}{y_{i}!}\nonumber
+$$
+
+
+
+ The likelihood is given by the joint density 
+ 
+ ($L(y_{1},y_{2},y_{3}\ldots y_{10})$):
+
+$$
+L(\lambda|Y) = \prod\limits_{i=1}^{10} f(y_{i},\lambda)=  \prod\limits_{i=1}^{10} \frac{e^{-\lambda}\lambda^{y_{i}}}{y_{i}!}\nonumber \\ \nonumber \\
+= \frac{e^{-10\lambda}\lambda^{\sum{y_{i}}}}{\prod y_{i}!}\nonumber \\ \nonumber \\
+= \frac{e^{-10\lambda}\lambda^{20}}{207360}\nonumber 
+$$
+
+
+Here's what we know so far: 
+
+ we begin with some data, $Y$. We want to find the model most likely responsible for generating these data. 
+ consider the distribution of $y$ - describe that distribution.
+ write a log-likelihood function for the sample; it should characterize the distribution of $y$, and should **link** the linear prediction ($x\beta$) with the quantity of interest, $\tilde{y}$.
+
+
+So, we have data, and we have a likelihood function - what do we do with them? 
+
+
+
+## Estimation Technology: OLS
+
+Recall that the technology of OLS is to assume a normally distributed error term, minimize the sum of those squared errors analytically using calculus. 
+
+
+## Estimation Technology: MLE
+
+The technology of ML is to maximize the LLF with respect to $\beta$. We can do this in several different ways:
+
+  - analytic methods - use calculus. Some/many models do not have analytical or closed form solutions. 
+  - numerical methods - use an algorithm to estimate starting values for $\theta$, then hill climb until the first derivative is zero, and the second derivative is negative. This is iterative, trying values, looking at the derivatives. This is what nearly all ML estimation uses - there are many different algorithms for doing this.
+ <!-- grid search - given priors about where $\theta$ lies, plug in different values of $\theta$ in smaller and smaller grids to isolate the maximum. This is plug-and-chug, evaluate, then do the same out more decimal values to refine. -->
+
+
+### Analytic Methods 
+
+With some functions, we can solve for the unknowns directly:
+
+\begin{eqnarray} 
+\ln L(\lambda|Y) =\ln \left[ \prod\limits_{i=1}^{N} \frac{e^{-\lambda}\lambda^{y_{i}}}{y_{i}!}\right]\nonumber \\ \nonumber \\
+=-N \lambda+ \sum(y_{i}) \ln(\lambda) - \sum(\ln(y_{i}!)) \nonumber
+\end{eqnarray}
+
+ Taking the derivative with respect to $\lambda$ and setting equal to zero:
+
+$$
+\frac{\partial \ln L}{\partial \lambda}=-N \lambda+ \sum(y_{i}) \ln(\lambda) - \sum(\ln(y_{i}!)) \nonumber \\ \nonumber  \\
+0=-N + \frac{\sum y_{i}}{\lambda} \nonumber\\ \nonumber \\
+\widehat{\lambda}= \frac{\sum y_{i}}{N} \nonumber
+$$
+
+
+ This is just the sample mean of course:
+
+$$
+\ln L(\lambda|Y) = \ln \left[ \frac{e^{-10\lambda}\lambda^{20}}{207360}\right] \nonumber \\
+= -10 \lambda+ 20 \ln(\lambda) - \ln(207360) \nonumber 
+$$
+
+and now find the derivative of the log-likelihood, again with respect to $\lambda$:
+
+$$
+\frac{\partial \ln L}{\partial \lambda}= -10 \lambda+ 20 \ln(\lambda) - \ln(207360) \nonumber 
+=-10 + \frac{20}{\lambda} \nonumber\\ \nonumber \\
+\widehat{\lambda}= \frac{20}{10} \nonumber \\
+\widehat{\lambda}= 2 \nonumber
+$$
+
+so the value of $\lambda$ that maximizes the likelihood of observing the civil war data is 2.
+
+
+With some functions, we can solve for the unknowns directly. Stick with me these next couple slides b/c they end in an important point about MLE-OLS.
+
+## Normal (linear) LLF: 
+
+$$
+= -\frac{N}{2}(\ln(2\pi)) -\frac{N}{2}(\ln(\sigma^{2})) -\frac{1}{2\sigma^{2}}\left[\sum\limits_{i=1}^{n}(y_{i}-\mu)^{2}\right] \nonumber
+$$
+
+Notice $N$ in the numerator; recall the rule of summation that $\sum\limits_{i=1}^{n}a= n\cdot a$.   
+
+
+
+Now, take the derivative of the log-likelihood with respect to each of the parameters in turn (ignoring constant terms and terms that pertain exclusively to the other parameter).
+
+$$
+\frac{\partial \ln L}{\partial \mu}= \frac{1}{\sigma^{2}}\sum(y_{i}-\mu)=0 \nonumber\\
+=\sum(y_{i}-\mu) = \sum y_{i}- \sum \mu  \nonumber\\
+=\sum y_{i}- N \mu = 0 \nonumber \\
+\mu=\frac{\sum y_{i}}{N} = \widehat{y}\nonumber
+$$
+
+
+we can also solve  for $\sigma^{2}$, getting
+
+$$
+\frac{\partial \ln L}{\partial \sigma^{2}}= -\frac{N}{2 \sigma^{2}}+\frac{1}{2 \sigma^{4}} +\sum(y_{i}-\mu)=0 \nonumber\\ \nonumber\\
+=-\frac{N}{2}\sigma^{2}+\frac{1}{2}\sum(y_{i}-\bar{y})^{2}= 0 \nonumber\\ \nonumber\\ 
+\ldots
+\widehat{\sigma^{2}}=\frac{\sum(y_{i}-\bar{y})^{2}}{N} \nonumber
+$$
+
+This is a biased estimator of $\sigma^{2}$; $\sigma^{2}$ is underestimated because the denominator should be $N-1$.
+
+The same thing in matrix notation: 
+
+$$ln\mathcal{L}(y | X, \beta, \sigma^2) = -\frac{N}{2} ln(2\pi) - \frac{N}{2} ln(\sigma^2) -\frac{1}{2} \left[ \frac{(y-X\beta)'(y-X\beta)}{\sigma^2} \right] $$
+
+rewriting to isolate the parameters: 
+
+$$
+ln\mathcal{L}(y | X, \beta, \sigma^2) = -\frac{N}{2} ln(2\pi) - \frac{N}{2} ln(\sigma^2) -\frac{1}{2\sigma^2} \left[ yy'- 2y' X\beta +\beta' X' X\beta) \right] 
+$$
+
+
+Take derivatives of $\ln \mathcal{L}$ w.r.t. $\beta$ and $\sigma^2$ (and skipping a lot here):
+
+$$\frac{\partial ln \mathcal{L}}{\partial \beta} = \frac{1}{\sigma^2} (X'y - X'X \beta)$$
+
+setting equal to zero \ldots
+
+$$ \frac{1}{\sigma^2} (X'y - X'X \beta) = 0$$
+$$X'X \beta = X'y$$
+$$\widehat{\beta} = (X'X)^{-1} X' y $$
+
+\ldots going through the same thing for $\sigma^2$ gives us:
+
+$$\widehat{\sigma^2} = \frac{e'e}{N}$$
+
+
+So aside from seeing how analytic methods work, we have also seen that the BLUE OLS estimator is the ML estimator for $\beta$, and that the variance estimate in ML is biased downward (the denominator is always too large by $k-1$). This difference disappears in large samples.
+
+
+Why do we leave OLS if these are the same? Because this is the rare case defined by normal data which both satisfies the OLS requirement for a normal disturbance, and permits MLE estimation with a normal LLF. With non-normal data, OLS and ML estimators diverge quite a lot. 
+
+
+## Numerical Methods
+
+Numerical methods are computationally intensive ways to plug in possible parameter values, generate a log likelihood, and then use calculus to evaluate whether the that value is a maximum. We use numerical methods when no analytic or ``closed form'' solution exists. 
+
+Do this by evaluating:
+
+  - the first derivative of the LLF - by finding the point on the function where a tangent line has a slope equal to zero, we know we've found an inflection point. 
+  - the second derivative of the LLF - if the rate of change in the function at the very next point is increasing, it's a minimum; decreasing, it's a maximum.  
+  - the Hessian matrix - the matrix of second derivatives - tells us the curvature of the LLF, or the rate of change.
+
+
+
+ Suppose that we have the event count data reported above representing civil wars in 
+Africa, and that we want to compute the likelihood of $\lambda|Y$.  We can compute the likelihood using numerical methods; one specific technique is a *grid search procedure*.  Just as we might try different values for $x$ when graphing a function, $f(x)$ in algebra, we will insert possible values for $\lambda$ into the log-likelihood function in such a way that we can identify an apparent maximum (a value for $\lambda$ for which the log-likelihood is at its largest compared to contiguous values of $\lambda$).  Put another way, we take a guess at the value of $\lambda$, compute the log-likelihood, and take another guess at $\lambda$, compute the log-likelihood and compare the two estimates of the likelihood; we repeat this process until a pattern emerges such that we can discern a maximum value.
+
+ The log-likelihood function for the poisson distributed data on civil wars is
+
+$$
+\ln L(\lambda|Y)= \ln \left[\frac{e^{-10\lambda}\lambda^{20}}{207360}\right] \nonumber  \\ \nonumber \\
+= -10 \lambda+ 20 \ln(\lambda) - \ln(207360) \nonumber 
+$$
+
+ Suppose we make some guesses regarding the value of $\lambda$, plug them into the function and compare the resulting values of the log-likelihood:
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code" 
+
+#iterate over lambda, create data frame of lambda and log-likelihood
+lambda <- seq(0.1, 3.5, by=0.1)
+llf <- NULL
+for (i in 1:length(lambda)){
+  L <- -10*lambda[i] + 20*log(lambda[i]) - log(207360)
+  llf <- data.frame(rbind(llf, c(lambda=lambda[i], ll=L)))
+}
+
+#highchart with reference line at maximum value of the log-likelihood
+highchart() %>% 
+  hc_add_series(llf, "line", hcaes(x=lambda, y=ll)) %>% 
+  hc_title(text="Log-Likelihood Estimates") %>% 
+  hc_subtitle(text="Civil Wars in Africa") %>% 
+ hc_xAxis(title = list(text = "Lambda"), plotLines = list(list(value = 2, color="red"))) %>%
+  hc_yAxis(title = list(text = "log-likelihood"), plotLines = list(list(value = max(llf$ll), color="red"))) %>%
+  hc_tooltip(pointFormat = "Lambda: {point.x}<br>Log-Likelihood: {point.y}") %>% 
+  hc_colors("#005A43") 
+
+
+
+```
+
+
+ We can see that the largest value of the likelihood is where $\lambda$ = 2; similarly, 2 is the value of $\lambda$ that maximizes the log-likelihood as well.  And not surprisingly, notice that we have arrived at the same solution we produced in the analytic example above.    
+
+## How numerical methods work
+
+  - Choose starting values of $\beta$ (sometimes from OLS) to estimate the log-likelihood.
+  - Take the derivative of the log-likelihood with respect to the parameters to find the gradient}.  The gradient (or the gradient matrix, a $kxk$ matrix) tells us the direction of the slope of a line tangent to the curve at the point of the log-likelihood estimate.
+ 
+  -  If the gradient is positive (if the matrix is positive definite), then $ln \mathcal{L}$ is increasing in $\beta$ - the slope is increasing, so increase our estimate of $\beta$ and try again.
+  - If the gradient is negative (if the matrix is negative definite), the $ln \mathcal{L}$ is decreasing in $\beta$ - the slope is decreasing, so we've passed the maximum; choose a smaller value for $\beta$ and try again.
+  - As the log-likelihood approaches  the maximum, the gradient approaches zero - the slope of the line tangent to the curve at the point of the log-likelihood estimate is approaching zero, indicating we're reaching the maximum of the function.  Stop the search and evaluate the estimates of $\beta$ that produced the zero gradient.
+
+ - Throughout this process, we need to evaluate the second derivatives in order to figure out the rate at which the slope is changing; this helps us tell how close or far we are from the maximum.  The second derivative describes the curvature of the LLF, or the rate of change. 
+ 
+  - The matrix of second derivatives (the Hessian matrix) or its approximation also provide the source of our estimates of the variance, and thus the standard errors.
+
+
+
+The first derivative  tells us the direction in which the function is changing.  This is obviously important since we're trying to find the maximum. 
+
+Think of this as trying to figure out when you're exactly at the top of a hill.  The slope (the grade, the gradient) is positive while you're climbing to the top, it's zero at the top, and it's negative on the way down the other side.  
+
+
+But is the hill flat or steep?  If it's flat, then the change in the slope between point A and point B is likely to be very small - this, of course, can make it difficult to know exactly when we're at the top (the maximum).  On the other hand, if the hill is very steep, the change in the slope between two points is pretty substantial.  Put another way, the rate of change in the slope is larger (faster) the steeper the slope; it's smaller (slower) the flatter the slope.
+ 
+
+ This matters to maximization because the second derivatives tell us how big (or small) a step we should take up the hill as we try to find the top.  Suppose that the function is very flat; as indicated above, the change in the slope between two points would be small, so we can take larger steps in order to try to find the maximum.  The second derivatives would tell us that the rate of change is very small, so we should take larger steps.
+ 
+
+The software performing the estimation will choose the next value of $\beta$ a bit further away from the last value it tried.  On the other hand, if the second derivatives are large so the rate of change is fast, we want to take relatively small steps so we don't step right over the maximum.  In any case, that's the intuition for why we need to know the matrix of second derivatives.
+
+## Variance-Covariance matrix
+
+Estimating the second derivatives can be a real nightmare in estimation, but it's important not only for finding the maximum of the function (and therefore in estimating the $\beta$s), but for computing the variance-covariance matrix as well.  Here are our options:
+
+  - Find the Hessian.  The Hessian is a $kxk$ matrix of the second derivatives of the log-likelihood function with respect to $\beta$, where the second derivatives are on the main diagonal.  Commonly estimated using  the  Newton-Raphson algorithm.
+  - Find the  information matrix.  This is the negative of the expected value of the Hessian matrix, computed using the  method of scoring.   
+  - Outer product approximation, where we sum the squares of the first derivatives (thus avoiding the second derivatives all together).  This is computed using the  Berndt, Hall, Hall, and Hausman} or  BHHH algorithm.
+
+
+
+## Grid Search
+
+Grid search is another method for  maximization. The process is to iteratively try values for the parameters of interest, refining those values as the log-likelihood gets larger and larger. In general, we plug in values for the parameters, compute the likelihood, then identify the largest LL value - the parameters that produce that value are our answer.  
+
+This method is instructive for how numerical methods work, but not practical in most applications with more than a couple of unknowns. 
+
+
+# From Model to Grid Search 
+
+Here's a final example, beginning where we motivate a model based on the data, $Y$, which is binary. 
+
+  -  The binary variable appears to be binomial, so the error structure will appear binomial as well.
+  - We need to connect the $\mathbf{X\beta}$s with the latent $Y$, a probability in a reasonable way. 
+  - we need a link function that will fit the binomial family and ensure the disturbances are distributed on the unit (probability) interval. If we do this, it will also return predictions that remain within that unit interval.
+  
+  Formally, we need to arrive at $\pi_i=F(\mathbf{x_i \beta})$. 
+
+
+## Latent Variable Motivation
+
+There are a couple of (related) ways to motivate the model. Let's assume a latent quantity we're interested, denoted $y^*$, but our observations of $y$ are limited to successes ($y_i=1$) and failures ($y_i=0$).
+
+$$
+y^{*}=\mathbf{x_i \beta}+\epsilon_i \nonumber
+$$
+
+for $y^{*}$, the latent variable,
+
+$$
+ y_{i} = \left\{ \begin{array}{ll}
+         1, & \mbox{if $y^{*}_{1}>\kappa$} \\
+         0, & \mbox{if $y^{*}_{1} \leq \kappa$}
+         \end{array}
+     \right. 
+$$
+
+where $\kappa$ is an unobserved threshold. 
+
+
+Make probabilities statements, 
+
+$$
+Pr(y_i=1) = Pr(y^{*}_{1}>\kappa) \nonumber \\ \nonumber \\
+=Pr(\mathbf{x_i \beta}+\epsilon_i>\kappa) \nonumber \\ \nonumber \\
+=Pr(\epsilon_i>\kappa-\mathbf{x_i \beta}) \nonumber 
+$$
+
+Normalizing $\kappa=0$, 
+
+$$
+Pr(y_i=1)=Pr(\epsilon_i>-\mathbf{x_i \beta}) \nonumber 
+$$
+
+
+
+
+
+$$
+Pr(y_i=1)=Pr(\epsilon_i>-\mathbf{x_i \beta}) \nonumber \\ \nonumber \\
+=1-F(-\mathbf{x_i \beta}) \nonumber 
+$$
+
+assuming $F$ is symmetric, with unit variance,
+
+$$
+\pi_i= Pr(y_i=1)=1-F(-\mathbf{x_i \beta}) = F(\mathbf{x_i \beta}) \\   \nonumber \\
+1-\pi_i=Pr(y_i=0)= 1-F(\mathbf{x_i \beta})
+$$
+
+
+
+
+## Binomial Likelihood Function
+
+The observed data are binary, assumed binomial ($\pi$), $y_i=0,1$. The likelihood function must have two parts, one for cases where $y_i=0$, the other for cases where $y_i=1$. Recalling that $\pi=F(\mathbf{x_i \beta})$, and $1-\pi= 1-F(\mathbf{x_i \beta})$,
+
+$$
+Pr(y_1,y_2,y_3 \ldots y_n) =  \prod_{y=1}F(\mathbf{x_i \beta}) \prod_{y=0}[1-F(\mathbf{x_i \beta})]\nonumber 
+$$
+
+This is the joint probability we observe all the data, $Y$, simultaneously. We can rewrite this as the likelihood of observing the data given $\beta$,
+
+$$
+\mathcal{L} (Y|\beta) =  \prod_{i=1}^{N} [F(\mathbf{x_i \beta})]^{y_i} [1-F(\mathbf{x_i \beta})]^{1-y_i}\nonumber
+$$
+
+
+And take the natural log
+
+$$
+\ln(\mathcal{L} (Y|\beta)) = \ln( \prod_{i=1}^{N} [F(\mathbf{x_i \beta})]^{y_i} [1-F(\mathbf{x_i \beta})]^{1-y_i})\nonumber \\ \nonumber \\
+= \sum_{i=1}^{N} y_i \ln F(\mathbf{x_i \beta})+ (1-y_i) \ln[1-F(\mathbf{x_i \beta})] \nonumber
+$$
+
+Note the two parts of the LLF corresponding to the limited observations in the data, 0,1.
+
+
+## Choosing a Link
+
+Let's make this a probit model by assuming the link to the latent variable is standard normal, so $F(\cdot)\sim N_{i.i.d.}(0,1)$: 
+
+$$
+\ln \mathcal{L} (Y|\beta) = \sum_{i=1}^{N} y_i \ln \Phi(\mathbf{x_i \beta})+ (1-y_i) \ln[1-\Phi(\mathbf{x_i \beta})] \nonumber
+$$
+
+Logit would look like this:
+
+$$
+\ln \mathcal{L} (Y|\beta) = \sum_{i=1}^{N} \left\{ y_i \ln \left(\frac{1}{1+e^{-\mathbf{x_i \beta}}}\right)+ (1-y_i) \ln \left[1-\left(\frac{1}{1+e^{-\mathbf{x_i \beta}}}\right)\right] \right\}\nonumber
+$$
+
+
+## Estimation 
+
+Ideally, we'd like just to estimate by finding the values of $\beta$ that maximize the log-likelihood function, and do so analytically (i.e., using calculus). This is what we do in OLS, though with respect to minimizing the sum of the squared residuals. But because the solution is non-linear in $\beta$, there is no closed form or simple analytic solution.   
+
+As a result, ML models produce estimates of $\beta$ by using numerical optimization methods. These are generally iterative attempts to narrow down the range in which the maximum lies by plugging in different values of $\beta$ until the range is so small, we can safely say we've maximized the function using those values of $\beta$.
+
+
+## Maximization
+
+Suppose we have binary data that look like this: 
+
+\begin{scriptsize}
+\begin{table}[!ht]
+\begin{tabular}{llllllllllllllllllll}
+0 &  0&  0 &  0 &  0 &  0 &  0 &  0&   0   &0&   1 &  1   &1&   1 &  1  & 1  & 1&   1  & 1 &  1 \\
+\end{tabular}
+\end{table}
+\end{scriptsize}
+
+
+Our question is what is the distribution parameter most likely responsible for having generated these observed data. 
+
+
+We need to plug a hypothetical value for the distribution parameter into the log-likelihood function, compute log-likelihoods for each observation, then do the same thing with other hypothetical values. Whichever value produces the biggest log-likelihoods is the value most likely responsible for producing the data we have. 
+
+What do we mean by distribution parameter? Well, in the LLF below, we've referred to our unknown as $F(\mathbf{x_i \beta})$, but we really mean we need an estimate of the parameter $\Theta$ which represents the effects of the $X$s via the functional form we've imposed by assuming a distribution of $\epsilon$. In this particular case (for simplicity) we don't have any $X$ variables. 
+
+$$
+\ln(\mathcal{L} (Y|\Theta)) = \sum_{i=1}^{N} y_i \ln F(\mathbf{\Theta})+ (1-y_i) \ln[1-F(\mathbf{\Theta})] \nonumber
+$$
+
+ 
+
+Here's what we'll do: 
+
+  - choose some hypothetical values of $\Theta$; since this is binary, and our latent variable a probability, let's choose values from .2 to .8. 
+  - compute $N$ log-likelihoods for each value of $\Theta$; N=20, and we have 7 values of $\Theta$. 
+  - sum the $N$ log-likelihoods for each value of $\Theta$; so we'll end up with 7 summed log-likelihoods.
+  - evaluate the summed log-likelihoods, and see which is largest.
+  - declare the value of $\Theta$ that produced that largest summed log-likelihood as the parameter most likely to have generated the data.
+ 
+
+Let $\Theta=.2$:
+
+$$
+\ln(\mathcal{L}_{i=1} (Y|\Theta)) = 0 *\ln (.2)+ (1-0) \ln[1-.2] =-0.2231\nonumber \\
+\ln(\mathcal{L}_{i=2} (Y|\Theta)) = 0 *\ln (.2)+ (1-0) \ln[1-.2]=-0.2231 \nonumber \\
+\ln(\mathcal{L}_{i=3} (Y|\Theta)) = 0 *\ln (.2)+ (1-0) \ln[1-.2]=-0.2231 \nonumber \\
+\vdots \nonumber \\
+\ln(\mathcal{L}_{i=11} (Y|\Theta)) = 1 *\ln (.2)+ (1-1) \ln[1-.2] =-1.609\nonumber \\
+\ln(\mathcal{L}_{i=12} (Y|\Theta)) = 1 *\ln (.2)+ (1-1) \ln[1-.2]=-1.609 \nonumber \\
+\ln(\mathcal{L}_{i=13} (Y|\Theta)) = 1 *\ln (.2)+ (1-1) \ln[1-.2] =-1.609\nonumber \\
+\vdots \nonumber \\
+\sum_{i=1}^{20}=-18.32100 \nonumber
+$$
+
+Let $\Theta=.3$:
+
+
+$$
+\ln(\mathcal{L}_{i=1} (Y|\Theta)) = 0 *\ln (.3)+ (1-0) \ln[1-.3] =-0.3567\nonumber \\
+\ln(\mathcal{L}_{i=2} (Y|\Theta)) = 0 *\ln (.3)+ (1-0) \ln[1-.3]=-0.3567 \nonumber \\
+\ln(\mathcal{L}_{i=3} (Y|\Theta)) = 0 *\ln (.3)+ (1-0) \ln[1-.3]=-0.3567 \nonumber \\
+\vdots \nonumber \\
+\ln(\mathcal{L}_{i=11} (Y|\Theta)) = 1 *\ln (.3)+ (1-1) \ln[1-.3] =-1.204\nonumber \\
+\ln(\mathcal{L}_{i=12} (Y|\Theta)) = 1 *\ln (.3)+ (1-1) \ln[1-.3]=-1.204\nonumber \\
+\ln(\mathcal{L}_{i=13} (Y|\Theta)) = 1 *\ln (.3)+ (1-1) \ln[1-.3] =-1.204\nonumber \\
+\vdots \nonumber \\
+\sum_{i=1}^{20}=-15.60700 \nonumber
+$$
+
+
+
+
+
+Let $\Theta=.4$:
+
+
+$$
+\ln(\mathcal{L}_{i=1} (Y|\Theta)) = 0 *\ln (.4)+ (1-0) \ln[1-.5] =-0.5108\nonumber \\
+\ln(\mathcal{L}_{i=2} (Y|\Theta)) = 0 *\ln (.4)+ (1-0) \ln[1-.5]=-0.5108 \nonumber \\
+\ln(\mathcal{L}_{i=3} (Y|\Theta)) = 0 *\ln (.4)+ (1-0) \ln[1-.5]=-0.5108 \nonumber \\
+\vdots \nonumber \\
+\ln(\mathcal{L}_{i=11} (Y|\Theta)) = 1 *\ln (.4)+ (1-1) \ln[1-.4] =-0.9163\nonumber \\
+\ln(\mathcal{L}_{i=12} (Y|\Theta)) = 1 *\ln (.4)+ (1-1) \ln[1-.4]=-0.9163\nonumber \\
+\ln(\mathcal{L}_{i=13} (Y|\Theta)) = 1 *\ln (.4)+ (1-1) \ln[1-.4] =-0.9163\nonumber \\
+\vdots \nonumber \\
+\sum_{i=1}^{20}=-14.2711636 \nonumber
+$$
+
+
+
+
+Let $\Theta=.5$:
+
+
+$$
+\ln(\mathcal{L}_{i=1} (Y|\Theta)) = 0 *\ln (.5)+ (1-0) \ln[1-.5] =-0.6931\nonumber \\
+\ln(\mathcal{L}_{i=2} (Y|\Theta)) = 0 *\ln (.5)+ (1-0) \ln[1-.5]=-0.6931 \nonumber \\
+\ln(\mathcal{L}_{i=3} (Y|\Theta)) = 0 *\ln (.5)+ (1-0) \ln[1-.5]=-0.6931 \nonumber \\
+\vdots \nonumber \\
+\ln(\mathcal{L}_{i=11} (Y|\Theta)) = 1 *\ln (.5)+ (1-1) \ln[1-.5] =-0.6931\nonumber \\
+\ln(\mathcal{L}_{i=12} (Y|\Theta)) = 1 *\ln (.5)+ (1-1) \ln[1-.5]=-0.6931\nonumber \\
+\ln(\mathcal{L}_{i=13} (Y|\Theta)) = 1 *\ln (.5)+ (1-1) \ln[1-.5] =-0.6931\nonumber \\
+\vdots \nonumber \\
+\sum_{i=1}^{20}=-13.8629436 \nonumber
+$$
+
+
+Let's compare what we have so far: 
+
+$$llf_{.2}<llf_{.3}<llf_{.4}<llf_{.5}$$
+
+You can probably see some symmetry here due to the fact that half the data are ones, half zeros, so completing:\\~\\
+
+
+$llf_{.2}<llf_{.3}<llf_{.4}<llf_{.5}>llf_{.6}>llf_{.7}>llf_{.8}$ \\~\\
+
+
+
+
+So $\Theta=.5$ produces the largest log-likelihood (-13.86) and thus is the parameter most likely to have produced the observed data.
+
+
+# Properties of MLEs
+ 
+  - Consistency  - though maximum likelihood estimators are not necessarily unbiased estimators, they are consistent asymptotically.  So as the sample size increases, the estimates increasingly resemble the actual population parameters.  As a result, MLEs are good large sample estimators, though defining *large* is not at all straightforward. 
+ 
+  - Asymptotic Normality - the MLEs (the parameters) are themselves distributed according to the standard multivariate normal,  no matter what distributional assumptions you make in your model or about your data.  This is great because, since MLEs are always normally distributed, we can always describe them using z-scores.
+  
+  - Asymptotic Efficiency - the MLE has the smallest asymptotic variance of any estimators that are also consistent and asymptotically normal.  See King, p. 80.
+  
+  - Invariance  - if $\hat{\Theta_{ML}}$ is the vector of ML estimates, and $g(\Theta)$ is a continuous function of $\Theta$, the $g(\hat{\Theta_{ML}})$ is a consistent estimator of $g(\Theta)$. So if we transform variables, we can retransform the estimates without losing interpretive ability.
+
+
+
