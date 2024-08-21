@@ -56,6 +56,18 @@ This seminar fulfills the advanced quantitative methods requirement in the Ph.D.
 
 Students will encounter an array of maximum likelihood models in this course. By the end of the course, students will have mastered the theory of maximum likelihood sufficient to write and program likelihood functions in {{< fa brands r-project >}}; they will be able to choose, estimate, and interpret appropriate models, model specifications, and model evaluation tools given their data; and they will be able to produce sophisticated quantities of interest (e.g. predicted probabilities, expected values,  confidence intervals) via a variety of techniques including simulation and end point transformation. Students will also be able to present model findings verbally and graphically. 
 
+## {{< fa brands r-project >}} Resources
+
+There are lots of good, free {{< fa brands r-project >}} resources online.  Here are a few:
+
+-   [Modern Statistics with R](https://www.modernstatisticswithr.com)
+-   [R for Data Science](https://r4ds.had.co.nz/)
+-   [R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/)
+-   [R Graphics Cookbook](https://r-graphics.org/)
+-   [Advanced R](https://adv-r.hadley.nz/)
+-   [R Markdown Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/)
+-   [Data Science:A First Introduction](https://datasciencebook.ca)
+
 ## Class Meetings, Office Hours, Assignments
 
 The course will meet this fall entirely in-person in the Social Science Experiment Lab on Wednesdays 9:40am-12:40pm. 
