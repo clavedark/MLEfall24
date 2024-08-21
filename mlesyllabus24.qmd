@@ -67,6 +67,7 @@ There are lots of good, free {{< fa brands r-project >}} resources online.  Here
 -   [Advanced R](https://adv-r.hadley.nz/)
 -   [R Markdown Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/)
 -   [Data Science:A First Introduction](https://datasciencebook.ca)
+- [The Big Book of R](https://www.bigbookofr.com)
 
 ## Class Meetings, Office Hours, Assignments
 
