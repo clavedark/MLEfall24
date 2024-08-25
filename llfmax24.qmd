@@ -1,0 +1,666 @@
+---
+title: "Maximizing the Log-Likelihood Function"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+#bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+   html: default
+---
+
+<!-- rm(list=ls()) -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+
+```
+
+# Goals
+
+The goal here is to walk through the process of writing a likelihood function based on the data we observe, then programming that likelihood function and optimizing it with respect to the data. 
+
+## Motivating Likelihood
+
+Let's recall the motivation for turning to ML. The data we have are not suitable for OLS because our observation of the data is limited. For instance, we observe a binary variable $[0,1]$ rather than the underlying continuous probability beneath it. If we could observe and measure that probability, we'd do so and perhaps use OLS to estimate a model. But since we only observe $[0,1]$, our observation is limited. 
+
+OLS is poorly suited to model this variable especially if one of our goals is to generate predictions of that underlying probability. That is, one of our goals might be to estimate a measure of the $y$ variable we wish we could measure directly.
+
+MLE is better suited to this task - it asks us what the data generating process is that produced the observed data, and to build a model appropriate to the limited observation of that $y$ variable.
+
+To do so, we need to:
+
+- describe the observed distribution of $y$
+- consider what we wish we could measure - this points to the key quantities of interest we want to derive from the model. 
+- describe $y$ according to a probability distribution; write that distribution
+- write a log-likelihood function appropriate to that probability distribution. 
+- parameterize the log-likelihood function such that we have a link distribution to map the linear prediction, $x\beta$, onto the probability space of $y$. 
+
+
+
+
+## Binary $y$ variable
+
+Let's start with a $y$ variable as follows: 
+
+```{r echo=FALSE}
+
+#binary y variable
+set.seed(8675309)
+n <- 1000
+X <- matrix(rnorm(n * 2), ncol = 2)
+true_beta <- c(-1, 0.5, -0.5)
+z <- cbind(1, X) %*% true_beta
+prob <- 1 / (1 + exp(-z))
+y <- rbinom(n, 1, prob)
+
+# library(kableExtra)
+# table(y)%>%
+#   as.data.frame() %>%
+#   rename( "count" = "Freq") %>%
+#   mutate(y = ifelse(y == 0, "0", "1")) %>%
+#   kable("html") %>%
+#   kable_styling("striped", full_width = F) %>%
+#   column_spec(1, border_right = T) %>%
+#   collapse_rows(columns = 1, valign = "top")
+
+library(tinytable)
+yb <- data.frame(table(y))
+tt(yb)
+
+
+```
+
+The variable, $y$, takes on values of zero and one - it appears binomial; let's write this in terms of the binomial distribution parameter $\pi$, so it takes on the value of one with probability $\pi$ and zero with probability $1-\pi$. 
+
+
+$$ y_i = \left\{ \begin{array}{ll}
+         1, & \mbox{} \pi_{i}\\
+         0, & \mbox{} 1-\pi_{i}
+         \end{array}
+     \right.$$
+     
+The likelihood of a single observation is:
+
+$$ \mathcal{L}(\pi_i|y) = \pi_{i}^{y_i} (1-\pi_{i})^{1-y_i} $$  
+
+This is a statement of the likelihood that any particular value of $\pi$ generated an observation. We want the likelihood any value of $\pi$ generated the entire dataset - that is, we want the joint likelihood of all the observations.
+
+$$ \mathcal{L}(\pi|y) = \prod_{i=1}^{n} \pi_{i}^{y_i} (1-\pi_{i})^{1-y_i} $$
+recalling that a joint probability is the product of individual probabilities.
+
+Let's take the log of this likelihood function - the natural log makes computation easier. Even for computers, this reduces the computational intensity especially with respect to extremely small decimals.  
+
+
+$$ \ln \mathcal{L}(\pi|y) = \sum_{i=1}^{n} y_i \ln(\pi_i) + (1-y_i) \ln(1-\pi_i) $$
+
+We can take this a step further and *parameterize* $\pi$ as a function of $X\beta$ where $X$ is the matrix of predictors and $\beta$ is the vector of coefficients such that 
+
+$$ \pi_i = F({X_i\beta}) $$
+
+So our estimate of the binomial probability is a function of the linear predictor $X\beta$. We map $X\beta$ onto the probability space $\pi$ using a link function, $F$. The most common link functions are the logistic (logit model), and the standard normal (probit model). Let's write the logit link: 
+
+$$ \pi_i = \frac{1}{1 + e^{-(X_i\beta)}} $$
+
+and now let's write this all in the log-likelihood function: 
+
+$$ \ln \mathcal{L}(\beta|y) = \sum_{i=1}^{n} y_i \ln(\frac{1}{1 + e^{-(X_i\beta)}}) + (1-y_i) \ln(1-\frac{1}{1 + e^{-(X_i\beta)}}) $$
+
+This is the logit log-likelihood function for a binary $y$ variable. 
+
+
+
+## Maximizing the Likelihood - Grid Search
+
+How do we solve this function for the data $y$? Put differently, what is the value of $\pi$ that most likely generated the data, $y$? There are a few ways to do this - one instructive method is to use a grid search, where we calculate the log-likelihood for a range of values of $\pi$ and find the value that maximizes the log-likelihood. We can repeat this to the desired level of specificity, progressively narrowing the grid. In this example, we'll just do one search out to 3 decimal places. The steps are these:
+
+ - generate the range of candidate values of our parameter $\pi$ to plug into the log-likelihood function.
+ - plug each value into the log-likelihood function to compute the log-likelihood for that value.
+ - identify which value of $\pi$ maximizes the log-likelihood.
+
+Here's code to do this:  
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# generate a vector of values of pi 
+
+pi_trials <- seq(0, 1, by = 0.001)
+
+# write the log-likelihood function
+
+log_likelihood <- function(pi_trials, y) {
+  sum(y * log(pi_trials) + (1 - y) * log(1 - pi_trials))
+}
+
+# Calculate log-likelihood for each pi value
+
+ll_values <- sapply(pi_trials, log_likelihood, y = y)
+
+# Find the pi value that maximizes the log-likelihood
+
+pi_hat <- pi_trials[which.max(ll_values)]
+print(pi_hat)
+
+```
+
+You'll note we recover the sample mean of $y$. Let's plot the log-likelihood against the values of $\pi$ to visualize the maximum.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Plot log-likelihood against pi
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+highcharter::highchart() %>%
+  hc_add_series(data.frame(pi = pi_trials, ll = ll_values), "line", hcaes(x = pi, y = ll)) %>%
+  hc_title(text = "Grid search - maximizing the log-likelihood") %>%
+  hc_xAxis(title = list(text = "Pi"), 
+           plotLines = list(
+    list(color ="red", value = pi_hat ))) %>%
+  hc_yAxis(title = list(text = "Log-Likelihood")) %>%
+  hc_legend(enabled = FALSE) %>%
+  hc_colors(bucolors)
+
+```
+
+
+
+## Optimization
+
+Grid searches are not sufficient for multivariate models, especially where we also need measures of uncertainty. Here, we turn to numerical optimization.
+
+Numerical optimization is a field aimed at finding "best" outcomes or answers depending on some set of criteria - often, the "best" is the maximum or minimum of some function - that's the case in maximum likelihood. 
+
+### Newton-Raphson
+
+There are lots of ways to optimize a function - in statistical software, most of them derive from Newton's iterative method. A very common application of this is the Newton-Raphson method.  Newton-Raphson is an iterative process that starts with an initial guess for the parameter $\pi$ (or the vector of unknowns, $\beta$) and updates it in the direction of the maximum until it converges to the maximum. At each step, it computes the first and second derivatives of the likelihood function, then uses these to update the parameter estimate(s). The update rule is:
+
+$$ \pi_{new} = \pi_{old} - H(\pi)^{-1}*g(\pi) $$
+
+So the new estimate of the parameter is the old estimate minus the first derivative (gradient) of the log-likelihood function pre-multiplied by the Hessian (second derivative) of the log-likelihood function. Here, $g(\pi)$ is the gradient of the log-likelihood function and $H(\pi)$ is the Hessian of the log-likelihood function. The algorithm iterates this process until the change in $\pi$ is sufficiently small, below a specified threshold. Since $g$ and $H$ are matrices, you should see how this straightforwardly applied to a multivariate regression.
+
+
+Let's write the Newton-Raphson algorithm ourselves - take a look at the code chunk below. You'll see it produces the same result as the grid search; the sample frequency of $y$.
+
+### Programming Newton-Raphson 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# use same data generated above; same LLF as above, aiming to recover pi
+
+#write the gradient - matrix of partial first derivatives of the log-likelihood function.
+
+gradient <- function(pi, y) {
+  sum(y / pi - (1 - y) / (1 - pi))
+}
+
+#write the Hessian - matrix of partial second derivatives of the log-likelihood function.
+
+hessian <- function(pi, y) {
+  sum(-y / pi^2 - (1 - y) / (1 - pi)^2)
+}
+
+#declare a starting value for pi
+
+pi <- 0.5
+
+#set convergence criteria - when new pi is within 1e-6 of old pi, stop iterating
+
+tol <- 1e-6
+
+#initialize iteration counter, set maximum iterations; how many times will we do this before we stop if we don't converge prior? 
+
+iter <- 0
+max_iter <- 100
+
+#iterate the Newton-Raphson algorithm
+
+for (iter in 1:max_iter) {
+  # Compute gradient  
+  grad <- gradient(pi, y)
+  
+  # Compute Hessian
+  hess <- hessian(pi, y)
+  
+  # Update pi
+  pi_new <- pi - (grad / hess)
+  
+  pi <- pi_new
+  
+  # Check for convergence
+  if (abs(pi_new - pi) < tol) {
+    break
+  }
+  
+  iter <- iter + 1
+}
+
+#after convergence, print the result
+
+print(pi)
+
+```
+
+
+So what's gone on here? We have 1000 observations of a binary variable; maximum likelihood is answering the question "what is the value of the parameter $\pi$ that makes the observed data most likely?" To get that answer, we have tried candidate values of $\pi$ to see which one maximizes the log-likelihood function.
+
+We've maximized the function two ways - using a grid search process, and using the Newton-Raphson algorithm. The latter is more efficient and is the basis for most optimization algorithms in statistical software, and easy to adapt to estimate multiple parameters.
+
+
+Here's one more approach also using the Newton-Raphson method. It calls the `maxLik` package to do the optimization instead of our having to write the algorithm ourselves.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+library(maxLik)
+# Write the binomial log-likelihood function
+log_likelihood <- function(pi, y) {
+  sum(y * log(pi) + (1 - y) * log(1 - pi))
+}
+
+#maximize the function using maxLik
+
+m1m <- maxLik(y=y, log_likelihood, start = c(0.5), method = "NR") #Newton-Raphson method, starting value of 0.5
+
+summary(m1m)
+
+```
+
+Again, the value of $\pi$ that maximizes the log-likelihood is the same as the sample frequency of $y$, which is 0.293.  
+
+
+
+
+### Multiple Predictors
+
+Let's make this more realistic in terms of resembling the models we want to run by adding an intercept term and multiple predictors to the model - the likelihood now has to account for those $X$ variables and maximize with respect to them. 
+
+- generate some data on $y$, and $X$
+- write the likelihood 
+- write the Newton-Raphson algorithm
+- apply to the data
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#| label: tbl-multiple
+
+# Generate binary y, and two X variables for regression; coefficients are -1, 0.5, -0.5
+
+set.seed(8675309)
+n <- 10000
+X <- matrix(rnorm(n * 2), ncol = 2)
+true_beta <- c(-1, 0.5, -0.5)
+z <- cbind(1, X) %*% true_beta
+prob <- 1 / (1 + exp(-z))
+y <- rbinom(n, 1, prob)
+
+
+# Define the log-likelihood function
+log_likelihood <- function(beta, X, y) {
+  z <- X %*% beta
+  probs <- plogis(z)
+  sum(y * log(probs) + (1 - y) * log(1 - probs))
+}
+
+# maximize using newton-raphson iterative algorithm
+
+logistic_regression <- function(X, y, max_iter = 100, tol = 1e-6) {
+  # Add intercept term to X if not already present
+  if (!all(X[,1] == 1)) {
+    X <- cbind(1, X)
+  }
+  
+#write the gradient function - matrix of partial first derivatives of the log-likelihood function.
+
+gradient <- function(beta, X, y) {
+p <- plogis(X %*% beta)
+  t(X) %*% (y - p)
+}
+
+  n <- nrow(X)
+  k <- ncol(X)
+  
+# set starting values for k columns of data (betas)
+  beta <- rep(0, k) 
+  
+# Store gradients and log-likelihoods for analysis
+  gradient_history <- list()
+  ll_history <- numeric()
+  
+# iterate NR 
+  for (iter in 1:max_iter) {
+    # compute gradient
+    grad <- gradient(beta, X, y)
+    gradient_history[[iter]] <- grad
+    
+    # compute log-likelihood
+    ll <- log_likelihood(beta, X, y)
+    ll_history[iter] <- ll
+    
+    # compute Hessian
+    z <- X %*% beta
+    probs <- plogis(z)
+    W <- diag(as.vector(probs * (1 - probs)))
+    hessian <- -t(X) %*% W %*% X
+    
+    # update beta
+    delta <- solve(hessian, grad)
+    beta_new <- beta - delta
+    
+    # check for convergence
+    if (max(abs(beta_new - beta)) < tol) {
+      break
+    }
+    
+    beta <- beta_new
+    
+    # compute standard errors for this model by taking the square root of the main diagonal elements of the inverse negative Hessian
+  se <- sqrt(diag(solve(-hessian)))
+
+  
+  }
+  
+  return(list(
+    coefficients = beta,
+    st.errors = se,
+    log_likelihood = ll,
+    iterations = iter,
+    gradient_history = gradient_history,
+    ll_history = ll_history
+  ))
+}
+
+#estimate the model
+logit <- logistic_regression(X, y)
+
+#compare to glm estimates 
+glm_fit <- glm(y ~ X, family = binomial)
+
+
+# compare the results 
+glmcoefs <- coef(glm_fit)
+glmse <- sqrt(diag(vcov(glm_fit)))
+
+#html table comparing glmcoefs to logit$coefficients
+
+library(kableExtra)
+data.frame(glmcoefs, logit$coefficients, glmse, logit$st.errors) %>% 
+  kable("html", caption="Comparing GLM and Dave Estimates") %>% 
+  kable_styling("striped", full_width = F) %>% 
+  column_spec(1, border_right = T) %>% 
+  column_spec(2, border_right = T) %>% 
+  column_spec(3, border_right = T) %>%
+  column_spec(4, border_right = T) %>%
+  collapse_rows(columns = 1:3, valign = "top") 
+
+
+
+
+```
+
+@tbl-multiple compares the coefficients and standard errors from the Newton-Raphson algorithm to the coefficients and standard errors from the `glm` function. The estimates are the same, the standard errors very close.
+
+
+Alright, lots of fun here. Now, let's use the program above to estimate a logit model using the democratic peace data.
+
+
+### Logit using Democratic Peace data
+
+@tbl-dp compares the coefficients and standard errors from the program we wrote to those produced by the `glm` function. The regression here is a logit model predicting the onset of a militarized dispute as a function of the logged capabilities ratio, an indicator of whether the pair of states share a border, and the lowest democracy (polity) score in the pair.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#| label: tbl-dp
+
+dp <- read.csv("/users/dave/documents/teaching/606J-mle/2022/exercises/ex1/dp.csv", header=TRUE)
+
+# for the log_likelihood function below, define y as the variable "dispute" in the dp data frame, and x1, x2, and x3 as the variables "lncaprat", "border", and "deml" in the dp data frame, respectively.
+dp$lncaprat <- log(dp$caprat)
+X <- as.matrix(dp[, c("lncaprat", "border", "deml")])
+y <- as.vector(dp$dispute)
+
+# Define the log-likelihood function
+log_likelihood <- function(beta, X, y) {
+  z <- X %*% beta
+  probs <- plogis(z)
+  sum(y * log(probs) + (1 - y) * log(1 - probs))
+}
+
+# maximize using newton-raphson 
+
+logistic_regression <- function(X, y, max_iter = 100, tol = 1e-6) {
+  # check for constant; add one if necessary
+  if (!all(X[,1] == 1)) {
+    X <- cbind(1, X)
+  }
+  
+#write the gradient function -  partial first derivatives of the log-likelihood function.
+
+gradient <- function(beta, X, y) {
+p <- 1 / (1 + exp(-X %*% beta))
+  t(X) %*% (y - p)
+}
+
+  n <- nrow(X)
+  p <- ncol(X)
+  
+  # set starting values for beta
+  beta <- rep(0, p)
+  
+  # Store gradients and log-likelihoods
+  gradient_history <- list()
+  ll_history <- numeric()
+  
+  for (iter in 1:max_iter) {
+    # Compute gradient
+    grad <- gradient(beta, X, y)
+    gradient_history[[iter]] <- grad
+    
+    # Compute log-likelihood
+    ll <- log_likelihood(beta, X, y)
+    ll_history[iter] <- ll
+    
+    # Compute Hessian - 2nd partial derivatives 
+    z <- X %*% beta
+    probs <- plogis(z)
+    W <- diag(as.vector(probs * (1 - probs)))
+    hessian <- -t(X) %*% W %*% X
+    
+    # Update beta
+    delta <- solve(hessian, grad)
+    beta_new <- beta - delta
+    
+    # Check for convergence - end if change in beta is less than tolerance value 
+    if (max(abs(beta_new - beta)) < tol) {
+      break
+    }
+    
+    beta <- beta_new
+  }
+
+#compute standard errors for this model; take the square root of the main diagonal elements of the inverse negative Hessian
+  se <- sqrt(diag(solve(-hessian)))
+
+  
+  return(list(
+    coefficients = beta,
+    st.errors = se,
+    log_likelihood = ll,
+    iterations = iter,
+    gradient_history = gradient_history,
+    ll_history = ll_history
+  ))
+}
+
+#estimate the model
+logit <- logistic_regression(X, y)
+# logit$coefficients
+# logit$st.errors
+
+#compare to glm estimates 
+glm_fit <- glm(y ~ X, family = binomial)
+
+# compare the results 
+glmcoefs <- coef(glm_fit)
+glmse <- sqrt(diag(vcov(glm_fit)))
+
+#compare glmcoefs to logit$coefficients
+
+library(kableExtra)
+data.frame(glmcoefs, logit$coefficients, glmse, logit$st.errors) %>% 
+  kable("html", caption="Comparing GLM and Dave Estimates, Democratic Peace Model") %>% 
+  kable_styling("striped", full_width = F) %>% 
+  column_spec(1, border_right = T) %>% 
+  column_spec(2, border_right = T) %>% 
+  collapse_rows(columns = 1:3, valign = "top")
+
+
+
+
+```
+
+Recapping what we've done:
+
+1. We wrote a log-likelihood function for a logistic regression model with multiple predictors.
+2. To maximize the log-likelihood, we implemented a Newton-Raphson algorithm in the following steps:
+   - Defined the gradient and Hessian functions. The gradient is the vector of first partial derivatives of the log-likelihood, and the Hessian is the matrix of second partial derivatives.
+   - Initialized the beta coefficients and stored gradients and log-likelihoods.
+   - Iterated the algorithm to update beta values.
+   - Checked for convergence based on the change in beta.
+3. Once the model converged, we computed standard errors for the estimated coefficients by taking the square root of the main diagonal elements of the inverse negative Hessian. 
+
+### Plot Gradient over iterations
+
+Here, you can see how the gradients change over each iteration.
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+#plot gradient convergence
+gradients <- do.call(cbind, logit$gradient_history)
+gradients <- as.data.frame(gradients) %>%
+  mutate(coef=c("Intercept", "lncaprat", "border", "deml")) 
+
+gradients <- gradients %>% 
+  pivot_longer(-coef, names_to = "iteration", values_to = "value")
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+
+highcharter::highchart() %>%
+  hc_add_series(gradients, "line", hcaes(x=iteration, y=value, group=coef, color=coef)) %>%
+  hc_title(text = "Gradient Convergence") %>%
+  hc_xAxis(title = list(text = "Iteration")) %>%
+  hc_yAxis(title = list(text = "Gradient")) %>%
+  hc_colors(bucolors) 
+
+
+
+
+```
+
+### Plot Log-Likelihood over iterations
+
+And here, we can see how the log-likelihood changes over iterations:
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#plot ll convergence
+
+lls <- as.data.frame(logit$ll_history) %>%
+  mutate(iteration=1:nrow(.))
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+
+highcharter::highchart() %>%
+  hc_add_series(lls, "line", hcaes(x=iteration, y=`logit$ll_history`)) %>%
+  hc_title(text = "Log-Likelihood Convergence") %>%
+  hc_xAxis(title = list(text = "Iteration")) %>%
+  hc_yAxis(title = list(text = "Log-Likelihood")) %>%
+  hc_colors(bucolors) 
+
+
+```
+
+### Recover the log-likelihood from the glm model
+
+Here are two ways to recover the final log-likelihood from the glm model. The first uses the `logLik` function from the `stats` package. The second calculates the log-likelihood by hand - generating the predictions and plugging those into the log-likelihood function, then summing. 
+
+$$ LL = \sum_{i=1}^{n} y_i \ln(p) + (1-y_i) \ln(1-p) $$
+
+
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# use the logLik function from the stats package  
+
+llest <- logLik(glm_fit)
+
+# or calculate it by hand - generate the predictions and plug those into the log-likelihood function, then sum.
+
+pred <- predict(glm_fit, type = "response")
+llestbyhand <- sum(dp$dispute * log(pred) + (1 - dp$dispute) * log(1 - pred))
+
+
+data.frame(llest, llestbyhand) %>% 
+  kable("html", caption="Recovering the Log-Likelihood" ) %>% 
+  kable_styling("striped", full_width = F) %>% 
+  column_spec(1, border_right = T) %>% 
+  column_spec(2, border_right = T) %>% 
+  collapse_rows(columns = 1:2, valign = "top")
+
+
+```
+
+

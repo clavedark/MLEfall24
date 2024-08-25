@@ -5,3 +5,7 @@ title: "Slides"
 [Binomial Models](binarymodels24.qmd) - [video](https://youtu.be/ku9L2f2aa7g)
 
 [Prediction Methods](prediction24.qmd) - [spring 2024 prediction video](https://youtu.be/1KUWg6bATRk)
+
+[Likelihood Theory and Applications](likelihood24.qmd) 
+
+[Maximization Methods](llfmax24.qmd) 
