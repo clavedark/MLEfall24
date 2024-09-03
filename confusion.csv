@@ -1,0 +1,5 @@
+﻿ Observed         ,"""""",    Predicted     ,""" "" "
+,,,
+                  ,Positive (1),Negative (0),              
+Positive (1), True Positive    ,  False Negative  ,  TPR =TP / P 
+Negative (0) , False Positive   ,  True Negative   , FPR = FP / N 

@@ -1,0 +1,636 @@
+---
+title: "Symmetry, Classification, and Model Fit"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+   html: default
+filters:
+  - parse-latex
+---
+
+<!-- rm(list=ls()) -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+
+```
+
+# Goals
+
+  -   symmetry - what are the implications of using symmetric links, especially given data on $y$?
+  -   classification
+  -   model evaluation and fit 
+  -   rareness - what happens when there are few events?  
+
+We're going to start with symmetry, then thinking about prediction and classification and fit.
+
+# Symmetry
+
+The logit and probit models use link functions with symmetric CDFs - so half the probability mass is on either side of $Pr(y=1) =.5$ , and the steepest rate of change in the curve is at $Pr(y=1) = .5$.
+
+Nagler argues that we should worry about symmetry in some cases; where a binary dependent variable is skewed, perhaps. We already know that the "transition point" of .5 is not very meaningful with such data.
+
+## Symmetry and Asymmetry
+
+Compare three CDFs: the logistic, the clog-log, and a skewed logit function. The logistic is symmetric, the clog-log and skewed logit are not. You should notice the probability associated with x=0 for each function - the logistic is .5, the clog-log is about .64, and the skewed logit is about than .71.
+
+For skewed binary $y$ variables, it could be that one of these CDFs is a more appropriate link function than the symmetric logistic or normal. Implementing these merely requires substituting the appropriate CDF into the log-likelihood function.
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Load required libraries
+library(highcharter)
+library(dplyr)
+
+# Binghamton University colors
+binghamton_green <- "#005A43"
+binghamton_gray <- "#707070"
+binghamton_yellow <- "#FFC726"
+
+# Generate data
+x <- seq(-5, 5, length.out = 1000)
+logistic_cdf <- plogis(x)
+cloglog_cdf <- 1 - exp(-exp(x))
+
+# Skewed logit function (shape parameter = 0.5)
+
+skewed_logit_cdf <- 1 / (1 + exp(-x)) ^ 0.5 
+
+# Create data frame
+df <- data.frame(x = x, logistic = logistic_cdf, cloglog = cloglog_cdf, skewed_logit = skewed_logit_cdf)
+
+# Create the highchart
+hc <- highchart() %>%
+  hc_chart(type = "line") %>%
+  hc_title(text = "Comparison of CDFs: Logistic, Clog-log, and Skewed Logit") %>%
+  hc_xAxis(
+    title = list(text = "x"),
+    plotLines = list(
+      list(
+        color = "#999",
+        width = 2,
+        value = 0,
+        zIndex = 3,
+        label = list(text = "x = 0")
+      )
+    )
+  ) %>%
+  hc_yAxis(
+    title = list(text = "Cumulative Probability"),
+    plotLines = list(
+      list(
+        color = "#999",
+        width = 2,
+        value = 0.5,
+        zIndex = 3,
+        label = list(text = "y = 0.5")
+      )
+    )
+  ) %>%
+  hc_tooltip(
+    shared = TRUE,
+    formatter = JS("function() {
+      return 'x: ' + this.x.toFixed(4) + '<br>' +
+             'Logistic: ' + this.points[0].y.toFixed(4) + '<br>' +
+             'Clog-log: ' + this.points[1].y.toFixed(4) + '<br>' +
+             'Skewed Logit: ' + this.points[2].y.toFixed(4);
+    }")
+  ) %>%
+  hc_plotOptions(series = list(marker = list(enabled = FALSE))) %>%
+  
+  # Add logistic CDF
+  hc_add_series(
+    data = df,
+    type = "line",
+    name = "Logistic",
+    color = binghamton_green,
+    hcaes(x = x, y = logistic)
+  ) %>%
+  
+  # Add clog-log CDF
+  hc_add_series(
+    data = df,
+    type = "line",
+    name = "Clog-log",
+    color = binghamton_gray,
+    hcaes(x = x, y = cloglog)
+  ) %>%
+  
+  # Add skewed logit CDF
+  hc_add_series(
+    data = df,
+    type = "line",
+    name = "Skewed Logit",
+    color = binghamton_yellow,
+    hcaes(x = x, y = skewed_logit)
+  )
+
+# Display the chart
+hc
+
+```
+
+## Skewed Logit
+
+@Nagler94 proposes the skewed logit (scobit) model - it's a binary response model, the usual LLF, with a different link (the Burr-10):
+
+$$ Pr(y=1) = \frac{1}{(1+e^{-x\beta})^\alpha}$$
+
+Note that if $\alpha=1$ this is the logistic CDF. If it is less than 1, the fastest rate of change is at $Pr(y =1 < .5)$; when greater than 1, the fastest rate of change, is at $Pr(y=1 > .5)$
+
+Nagler's logic is that symmetric links require the assumption that individuals in the model are most sensitive to the effects of the $X$ variables at or around $Pr(y=1) = .5$. Looking at the (symmetric) logit curve above, you can see that's where the derivative with respect to changes in $x$ is greatest. If $y$ is about half ones, half zeros, this may make sense - but often, we have $y$ variables that are not symmetrically distributed like this. It makes sense in such cases *not* to assume the fastest rate of change, and the transition point from zero to one, is at $Pr(y=1) = .5$.  
+
+The scobit model allows us to estimate the $\alpha$ parameter, which tells us where the fastest rate of change is in the CDF - that is, the transition point is an empirical question, not an assumption.
+
+
+The model appears rarely in the political science literature; a Google Scholar search indicates most of its use is transportation analysis. A cursory survey also indicates the scobit estimates are often not that different from logit estimates. Estimation sometimes is funky insofar as we cannot always  tell if changes in the likelihood are due to changes in $\beta$ or in $\alpha$. 
+
+
+## Symmetry
+
+The big point here is not that we should or should not use the scobit, but that we need to be very aware that the assumption in models with symmetric links is that the biggest effect of an $x$ variable is at $Pr(y=1) = 0.5$ which is where $x\beta=0$.
+
+## Why does symmetry matter?
+
+-   symmetry determines where the greatest effect of $x$ is.
+-   symmetry ensures rates of change above and below $x=0$ are the same as they approach the limits.
+-   symmetry implies the theoretical threshold, $\tau$, separating observed zeros and ones is $\tau=0.5$.
+-   if we want to use the model to generate predicted values of $y$ (rather than $y^*$), we need some threshold for classification.
+
+Some (very few) questions naturally link to a clear threshold like 0.5 \ldots election outcomes? But \ldots are we measuring the correct outcome variable?
+
+# Classification
+
+How do we know how well or poorly the model is predicting? Binary variable models are often referred to as *classification* models - they classify or sort observations into two categories. So the natural question is "how well is this sorting or classifying?"
+
+To know that, we need to sort our predictions into zeros and ones - we need some threshold - which is related to the assumption of symmetry?
+
+One common way to answer the "how well" question is classify predictions into zero and one categories, and generate a 2x2 table of predicted and observed values of $y$. To determine whether a predicted value of $y$ is zero or one, we need some value of $\tau$ on which to sort, then examine the intersection of:
+
+-   observed values of $y$.
+-   predicted values of $y$.
+
+given the threshold, $\tau$.
+
+## Confusion Matrix
+
+The "confusion matrix" (I didn't make this up) illustrates that intersection and identifies where our classification is "confused."
+
+
+::: {.r-stack}
+:::{.fragment .absolute left=0}
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(kableExtra)
+# opts <- options(knitr.kable.NA = "")
+df <- data.frame("Predicted Positive" = c("True Positive", "False Positive"), "Predicted Negative" = c("False Positive", "True Negative"), "Rate" = c("TPR=TP/P", "FPR=FP/N"))
+row.names(df) <- c("Observed Positive", "Observed Negative")
+
+tbl <- kbl(df, align = rep('c', 4)) |> 
+  column_spec(2:4, border_left = T) |> 
+  column_spec(1,  bold=T) |>
+  column_spec(1:4, width = "2cm", color = 'white', background = '#005A43', include_thead = TRUE) |>
+  column_spec(2:4, background = "inherit", color="inherit") |>
+  row_spec(1, extra_css = "border-bottom: 1px solid") |>
+  kable_paper("hover", bootstrap_options = c("condensed", "responsive"), full_width = F, font_size = 20)
+tbl
+
+```
+:::
+:::
+
+------------------------------------------------------------------------
+
+  - True Positive Rate: correctly classify positive outcomes. This is often called "sensitivity."
+  
+  - False Positive Rate: we incorrectly classify negative outcomes ($y=0$) as positive ($y=1$). This is often called "1-specificity." Specificity is the True Negative Rate, or the probability of correctly classifying a negative outcome ($y=0$).
+
+
+## Using the Confusion Matrix to Measure Model Fit
+
+So here's the deal:
+
+-   estimate the model.
+-   generate the predicted probability $y=1$ for each observation.
+-   assume a threshold separating zeros and ones; usually $\tau=0.5$.
+-   if $Pr(y=1 \geq 0.5)$, predict a positive outcome (predict $y=1$).
+-   if $Pr(y=0 < 0.5)$, predict a negative outcome (predict $y=0$).
+-   using the observed and predicted outcomes, generate a confusion table, and compute measures of fit like "percent correctly predicted" (PCP) and "proportional reduction of error" (PRE).
+
+### Percent Correctly Predicted (PCP)
+
+One thing we can do is sum the main diagonal and divide by the estimation sample: $(TP+TN)/N$. This gives us the Percent Correctly Predicted (PCP).
+
+### Proportional Reduction of Error (PRE)}
+
+A second thing is to compute the Proportional Reduction of Error (PRE) - the difference between the correct predictions of the model versus a null model usually the unconditional frequency of $y$ - in other words, we use the Percent in the Modal Category (PCM) of the $y$ variable.
+
+$$\frac{correct_{\text{informed}} - correct_{\text{null}}}{N - correct_{\text{null}}} $$
+
+or
+
+$$\frac{PCP- PMC}{1-PMC} $$
+
+### Example: NAFTA vote, 1993
+
+So here's a model predicting members of the US House votes for or against the NAFTA treaty in 1993: 1 is a "yes" vote; the $x$ variables are party (Democrat) and an ideology score.
+
+```{r, warning=FALSE, message=FALSE, results='asis' }
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+nafta <- read.csv("NAFTA.csv")
+
+naftamodel <- glm(vote ~ democrat + cope93, data=nafta, family=binomial(link="logit"))
+
+stargazer(naftamodel, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: NAFTA vote", dep.var.labels.include=FALSE,  covariate.labels=c("Party (Democrat=1)", "Ideology (COPE score)"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+
+
+```
+
+------------------------------------------------------------------------
+
+And here's the confusion matrix from that model assuming a threshold of $\tau=.5$ - it compares the observed vote frequency against how we classify our predictions based on a predicted probability greater than or less than 0.5. This is generated using the `caret` package in R.
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Load required libraries
+library(caret)
+
+# Assuming you have a fitted GLM object called 'glm_model'
+# and test data 'test_data' with actual outcomes in 'test_data$actual'
+
+test_data <- nafta %>% dplyr::select(vote, democrat, cope93) %>% mutate(actual = vote)
+# Make predictions on the test data
+predictions <- predict(naftamodel, newdata = test_data, type = "response")
+
+# Create confusion matrix
+# You may need to adjust the threshold (default is 0.5)
+predicted_classes <- ifelse(predictions > 0.5, 1, 0)
+conf_matrix <- confusionMatrix(factor(predicted_classes), factor(test_data$actual))
+
+# Print confusion matrix
+print(conf_matrix)
+
+
+```
+
+You should see the main diagonal presents the number of correct predictions - the off-diagonal elements are the incorrect predictions. If we sum the main diagonal and divide by $N$, we get the Percent Correctly Predicted (PCP). In this case, the PCP is 0.735 - 73.5% of the votes are correctly predicted.
+
+This all depends on the threshold (.5) - in the case of a Congressional vote, especially a relatively close vote like this one, the threshold might not be crazy. But it might be in other cases, and arbitrarily choosing a value for $\tau$ is problematic. So another approach is to compute the ROC curve. 
+
+
+What makes this work relatively well in the NAFTA context? As you'll see below, it works less well in the democratic peace models.
+
+### Example: Democratic Peace
+
+Here's a basic democratic peace model:
+
+
+```{r, warning=FALSE, message=FALSE, results='asis' }
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
+
+dpm1 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="logit"), data=dp )
+
+stargazer(dpm1, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: Dispute", dep.var.labels.include=FALSE,  covariate.labels=c("Shared Border", "Democracy", "Capabilities Ratio", "Allies"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+
+
+```
+
+Let's generate the confusion matrix for the democratic peace model, threshold set at $\tau =0.5$:
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(kableExtra)
+# opts <- options(knitr.kable.NA = "")
+df <- data.frame("Predicted Positive" = c("0", "0"), "Predicted Negative" = c("897", "19,245"), "Rate" = c("TPR=0/897=0", "FPR=0/19,245=0"))
+row.names(df) <- c("Observed Positive", "Observed Negative")
+
+tbl <- kbl(df, align = rep('c', 4)) |> 
+  column_spec(2:4, border_left = T) |> 
+  column_spec(1,  bold=T) |>
+  column_spec(1:4, width = "2cm", color = 'white', background = '#005A43', include_thead = TRUE) |>
+  column_spec(2:4, background = "inherit", color="inherit") |>
+  row_spec(1, extra_css = "border-bottom: 1px solid") |>
+  kable_paper("hover", bootstrap_options = c("condensed", "responsive"), full_width = F, font_size = 20)
+tbl
+
+```
+
+The problem is $\tau$; at $\tau=.5$ we get none of the ones correct. Here's the democratic peace at $\tau = 0.1$:
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(kableExtra)
+# opts <- options(knitr.kable.NA = "")
+df <- data.frame("Predicted Positive" = c("303", "1,764"), "Predicted Negative" = c("594", "17,481"), "Rate" = c("TPR=303/897=.34", "FPR=1,764/19,245=0.092"))
+row.names(df) <- c("Observed Positive", "Observed Negative")
+
+tbl <- kbl(df, align = rep('c', 4)) |> 
+  column_spec(2:4, border_left = T) |> 
+  column_spec(1,  bold=T) |>
+  column_spec(1:4, width = "2cm", color = 'white', background = '#005A43', include_thead = TRUE) |>
+  column_spec(2:4, background = "inherit", color="inherit") |>
+  row_spec(1, extra_css = "border-bottom: 1px solid") |>
+  kable_paper("hover", bootstrap_options = c("condensed", "responsive"), full_width = F, font_size = 20)
+tbl
+
+```
+At $\tau = 0.1$, we get a TPR = 0.34 and FPR = 0.092. The PCP = (303+17481)/20142 = 0.88 \ldots which is lower, but we get about 1/3 of the ones correct. 
+
+
+## Receiver-Operator Characteristic (ROC) Curves
+
+The problem is choosing the threshold - imagine that we compute a confusion matrix for all possible thresholds, $\tau=.01, .02, .03 \ldots 1$, then compute TPR and FPR, and plot them against one another. This is an ROC curve.
+
+ROCs originate in efforts to distinguish signal from noise in radar returns - the British built a radar system before WWII to detect German air attacks; they had the problem of distinguishing planes (signal) from flocks of geese (noise). As the turned up the sensitivity of the radar, they more often correctly detected planes, but they also lacked specificity and detected more geese too. So there was a tradeoff between sensitivity (correctly identifying positive signals as positive) and specificity (incorrectly identify negative signals as positive).
+
+ROCs measure these two dimensions and graph them against one another:
+
+-   sensitivity - true positive rate at every possible latent threshold between zero and one.
+-   1- specificity - false positive rate at every possible latent threshold between zero and one. This is 1 minus the True Negative Rate
+
+Here's the ROC for the NAFTA model - we'll use the `pROC` package in R to compute the ROC and plot it:  
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(pROC)
+
+# NAFTA
+
+naftaroc <- roc(test_data$actual, predictions, plot=TRUE, grid=TRUE, partial.auc.correct=TRUE,
+         print.auc=TRUE)
+
+
+```
+
+
+## ROC Intepretation
+
+  -   the diagonal is a model guessing randomly zero or one - no better than a coin toss.
+
+  -   above that line, the model is improving our classification over random guesses.
+
+  -   the top left corner would indicate a model that classifies perfectly - 100% sensitivity (TPR), and 0% FPR.
+
+  -   below the diagonal line, the model is classifying worse than a coin toss would.
+
+  -   we can compute the Area Under the Curve (AUC) as a percentage - AUC is often reported to indicate model fit. In the NAFTA model, the AUC is .843. AUC closer to one indicates better fit; closer to .5 indicates worse fit, similar to random guessing.
+
+  -   we can plot ROCs from different models on the same space and compare their fits.
+
+  -   The x-axis is 1-specificity, or the False Positive Rate.
+
+
+
+## ROC Democratic Peace
+
+Here's we compare fit for two models, one including "borders," the other excluding it. Here are the two models :
+
+```{r, warning=FALSE, message=FALSE, results='asis' }
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
+
+dpm1 <-glm(dispute ~ border+deml+caprat+ally+border, family=binomial(link="logit"), data=dp )
+dpm2 <-glm(dispute ~ deml+caprat+ally, family=binomial(link="logit"), data=dp )
+  
+stargazer(list(dpm1,dpm2), type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: Dispute", dep.var.labels.include=FALSE,  covariate.labels=c("Shared Border", "Democracy", "Capabilities Ratio", "Allies"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
+
+
+```
+
+
+------------------------------------------------------------------------
+
+And compute the ROC for each model - here's Claude.ai and I have written a function to compute the ROC and AUC for each model, and then plot them on the same space.
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+# part written by Claude.ai
+# compute ROC curve
+compute_roc <- function(actual, predictions) {
+  # Sort actual and predictions in descending order of predicted probabilities
+  sorted_data <- data.frame(actual, predictions)
+  sorted_data <- sorted_data[order(sorted_data$predictions, decreasing = TRUE), ]
+
+  # Initialize variables
+  n_positive <- sum(actual)
+  n_negative <- length(actual) - n_positive
+  tp <- 0
+  fp <- 0
+  tpr <- c()
+  fpr <- c()
+
+  # Iterate over sorted data
+  for (i in 1:nrow(sorted_data)) {
+    if (sorted_data$actual[i] == 1) {
+      tp <- tp + 1
+    } else {
+      fp <- fp + 1
+    }
+
+    # Calculate true positive rate (TPR) and false positive rate (FPR)
+    tpr <- c(tpr, tp / n_positive)
+    fpr <- c(fpr, fp / n_negative)
+  }
+
+  # Create ROC curve
+  roc_curve <- data.frame(fpr, tpr)
+  return(roc_curve)
+}
+
+# Function to compute AUC
+compute_auc <- function(fpr, tpr) {
+  # Sort FPR and TPR
+  ord <- order(fpr)
+  fpr <- fpr[ord]
+  tpr <- tpr[ord]
+  
+  # Compute AUC using trapezoidal rule
+  auc <- sum((fpr[-1] - fpr[-length(fpr)]) * (tpr[-1] + tpr[-length(tpr)]) / 2)
+  return(auc)
+}
+
+# Democratic Peace models
+
+test_dataB <- dp %>% dplyr::select(border,deml,caprat,ally) %>% 
+  mutate(actual = dp$dispute)
+
+test_dataNB <- dp %>% dplyr::select(deml,caprat,ally) %>% 
+  mutate(actual = dp$dispute)
+
+# Make predictions on the test data
+predictionsB <- predict(dpm1, newdata = test_dataB, type = "response")
+predictionsNB <- predict(dpm2, newdata = test_dataNB, type = "response")
+
+
+roc_curveB <- compute_roc(test_dataB$actual, predictionsB)
+#AUC
+auc_border <- compute_auc(roc_curveB$fpr, roc_curveB$tpr)
+roc_curveNB <- compute_roc(test_dataNB$actual, predictionsNB)
+auc_noborder <- compute_auc(roc_curveNB$fpr, roc_curveNB$tpr)
+
+# ROC Plot, pasting auc_border and auc_noborder on plot
+
+ggplot() +
+  geom_line(data = roc_curveB, aes(x = fpr, y = tpr, color = "Borders")) +
+  geom_line(data = roc_curveNB, aes(x = fpr, y = tpr, color = "No Borders")) +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "red") +
+  labs(title = "ROC Curve: Democratic Peace", x = "False Positive Rate", y = "True Positive Rate") +
+  theme_minimal() +
+  scale_color_manual(values = c("Borders" = "#005A43", "No Borders" = "#6CC24A"))+
+  annotate("text", x = 0.75, y = 0.5, label = paste("AUC Model 1: ", round(auc_border, 2)), color = "#005A43") +
+  annotate("text", x = 0.75, y = 0.4, label = paste("AUC Model 2: ", round(auc_noborder, 2)), color = "#6CC24A")
+
+#bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+```
+
+Also, note the measure Area Under the Curve (AUC) for each model - the AUC is often reported to indicate model fit. The AUC for the model including borders is 0.75, while the AUC for the model excluding borders is 0.72. A model with an AUC of 0.5 is no better than a coin toss, while a model with an AUC of 1 is perfect.
+
+
+# Model fit in ML models
+
+Measures of model fit in ML models are relatively simple - the topic is very important insofar as our goal is to evaluate how well models fit the data, and to compare how different models fit.
+
+Comparing model fit in the linear model we mostly accomplished using F-tests - the methods here are analogous. The *information criterion* methods covered below have exact analogs in the linear model, using the explained sum of squares rather than the log-likelihood.
+
+## Single Coefficient Estimates
+
+One property of MLEs is they are asymptotically multivariate normal; inference is straightforward because the variances are also normal so the ratio of $\beta /se$ is a z-score.
+
+## Model Evaluation
+
+Most commonly, we evaluate model fit using one of the "trinity" of tests:
+
+-   log-likelihood ratio tests (LLR)
+-   Wald tests
+-   Lagrange Multiplier tests (LM)
+
+The first two are the most common, and it's not clear one is better than the other.
+
+### Log-Likelihood Ratio Test
+
+The LLR test requires estimating two models - a null or constrained model, ($M_0$), and informed (unconstrained) model ($M_1$) - it compares the heights of the log-likelihood functions of the two models:
+
+$$ \chi^2 = -2 (ln\mathcal{L}(M_0) - ln\mathcal{L}(M_1))  $$
+
+The log-likelihoods here are literally the values of the $ln\mathcal{L}$ at the estimated maxima of the functions. Their difference is distributed $\chi^2$ with $k_1-k_0$ degrees of freedom.
+
+The LLR is simple to compute (you can do it in your head), but requires estimating two **nested** models. Recall, two models are nested iff the regressors in the constrained model are a strict subset of those in the unconstrained model, and the samples are identical.
+
+### Wald $\chi^2$
+
+The Wald test is similar, but only requires the unconstrained or informed model. During maximization, it examines the distance between $M_0$ and $M_1$, and weights that distance by the rate of change between the two (second derivative). If the distance is large and the rate of change is fast, the informed model improves a good bit on the uninformed one. You can imagine other combinations of distance and curvature. Long (p. 88) has a great illustration of this.
+
+### In Practice
+
+These two tests are asymptotically equivalent. In practice, it makes little difference in most cases which you choose, provided the models are nested.
+
+Stata reports LLR for most models, but reports Wald if you request robust standard errors.
+
+### Limits
+
+The limits of these tests is they apply only to nested models - models where the regressors in the constrained model are a strict subset of those in the unconstrained model and where the samples are identical.
+
+### Information Criterion Tests
+
+Alternatively, we can use information criterion tests - the two most common are the Akaike and Bayesian Information Criteria tests (AIC, BIC). These are both formulated to penalize likelihoods for the number of parameters estimated; this in effect rewards better specification (good variables, but few) and penalizes "garbage can" approaches (including lots of poor predictors).
+
+IC tests are useful for either nested or nonnested models. This is a significant though under-appreciated virtue of such tests.
+
+### Akaike and Bayesian Information Criterion tests
+
+$$AIC =  -2 ln(\mathcal{L}) + 2k $$
+
+$$BIC =  -2 ln(\mathcal{L}) + ln(N) k $$
+
+where $k$ is the number of parameters.
+
+#### Process
+
+*AIC:* Estimate model 1; generate the AIC. Estimate model 2; generate the AIC. The model with the smaller AIC is the preferred model (see Long 1997: 110).  
+
+*BIC:* Estimate model 1; generate the BIC. Estimate model 2; generate the BIC. Compute $BIC_1 - BIC_2$ - the smaller BIC value is the preferable model. The strength of the test statistic is given by Rafferty (1996): absolute value of this difference 0-2 = weak; 2-6= Positive; 6-10= Strong; greater than 10 = Very Strong (see Long 1997: 112).
+
+# Rare Events
+
+Rare events are common^[see what I did there?] in some areas of inquiry in political science - think of coups, wars, etc.  @kingzengexplain argue the such data present a couple of problems and aim to fix those - the paper is aimed at generating case-control-like conditions in large N data analyses. Their motives are:
+
+-   The problem is not just that the events in question are rare, but that their relative rarity makes generating new data difficult.
+-   Another, perhaps more important problem is that ML estimates in binary models of rare events are biased to the extent that the latent probability of a one is different from 0.5.
+-   That bias appears in the constant - as the probability of an event falls toward zero, the bias in $\widehat{\beta_0}$ is negative.
+-   This is ameliorated as the sample gets larger and larger.
+-   Not surprisingly, binary models with symmetric link functions (i.e. probit and logit) do best when the latent probability of an event is at 0.5.
+
+## Rare Events Logit
+
+What they propose is:
+
+-   Select all the cases with events (failures).
+-   Randomly choose a sample of the non-event (censored) cases (they say 2-5 times the size of the failure group).
+-   This smaller sample makes data collection possible (compared to the gigantic number of zeros in some event data).
+-   Estimate a logit on the new, smaller sample, and adjust the estimates for the sample.
+
+The Rare Events Logit doesn't appear in the literature much, though it's not uncommon for reviewers to ask for it. In my experience inferences from this model don't vary much from the usual logit. The model does present a major opportunity for data collection efforts. 
+
+
+

@@ -9,3 +9,5 @@ title: "Slides"
 [Likelihood Theory and Applications](likelihood24.qmd) 
 
 [Maximization Methods](llfmax24.qmd) - [video](https://youtu.be/I0KEvpVcDJw)
+
+[Binary Model Extensions I](binaryextensions124.qmd) 
