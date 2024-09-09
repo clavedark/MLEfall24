@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dave Clark">
+<meta name="dcterms.date" content="2024-09-09">
+
+<title>Discrete Time Hazard Models – MLE - Fall 2024</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/htmltools-fill/fill.css" rel="stylesheet">
+<script src="site_libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="site_libs/jquery/jquery.min.js"></script>
+<script src="site_libs/proj4js/proj4.js"></script>
+<link href="site_libs/highcharts/css/motion.css" rel="stylesheet">
+<script src="site_libs/highcharts/highcharts.js"></script>
+<script src="site_libs/highcharts/highcharts-3d.js"></script>
+<script src="site_libs/highcharts/highcharts-more.js"></script>
+<script src="site_libs/highcharts/modules/stock.js"></script>
+<script src="site_libs/highcharts/modules/map.js"></script>
+<script src="site_libs/highcharts/modules/data.js"></script>
+<script src="site_libs/highcharts/modules/exporting.js"></script>
+<script src="site_libs/highcharts/modules/offline-exporting.js"></script>
+<script src="site_libs/highcharts/modules/drilldown.js"></script>
+<script src="site_libs/highcharts/modules/item-series.js"></script>
+<script src="site_libs/highcharts/modules/overlapping-datalabels.js"></script>
+<script src="site_libs/highcharts/modules/annotations.js"></script>
+<script src="site_libs/highcharts/modules/export-data.js"></script>
+<script src="site_libs/highcharts/modules/funnel.js"></script>
+<script src="site_libs/highcharts/modules/heatmap.js"></script>
+<script src="site_libs/highcharts/modules/treemap.js"></script>
+<script src="site_libs/highcharts/modules/sankey.js"></script>
+<script src="site_libs/highcharts/modules/dependency-wheel.js"></script>
+<script src="site_libs/highcharts/modules/organization.js"></script>
+<script src="site_libs/highcharts/modules/solid-gauge.js"></script>
+<script src="site_libs/highcharts/modules/streamgraph.js"></script>
+<script src="site_libs/highcharts/modules/sunburst.js"></script>
+<script src="site_libs/highcharts/modules/vector.js"></script>
+<script src="site_libs/highcharts/modules/wordcloud.js"></script>
+<script src="site_libs/highcharts/modules/xrange.js"></script>
+<script src="site_libs/highcharts/modules/tilemap.js"></script>
+<script src="site_libs/highcharts/modules/venn.js"></script>
+<script src="site_libs/highcharts/modules/gantt.js"></script>
+<script src="site_libs/highcharts/modules/timeline.js"></script>
+<script src="site_libs/highcharts/modules/parallel-coordinates.js"></script>
+<script src="site_libs/highcharts/modules/bullet.js"></script>
+<script src="site_libs/highcharts/modules/coloraxis.js"></script>
+<script src="site_libs/highcharts/modules/dumbbell.js"></script>
+<script src="site_libs/highcharts/modules/lollipop.js"></script>
+<script src="site_libs/highcharts/modules/series-label.js"></script>
+<script src="site_libs/highcharts/plugins/motion.js"></script>
+<script src="site_libs/highcharts/custom/reset.js"></script>
+<script src="site_libs/highcharts/modules/boost.js"></script>
+<script src="site_libs/highchart-binding/highchart.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">MLE - Fall 2024</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./slides.html"> 
+<span class="menu-text">Slides</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./mlesyllabus24.html"> 
+<span class="menu-text">MLE Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./code.html"> 
+<span class="menu-text">Code</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label=""><i class="bi bi-github"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://github.com/clavedark/MLEfall24">
+            repo
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Discrete Time Hazard Models</h1>
+                      </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author">Dave Clark </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              Binghamton University
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 9, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#goals" id="toc-goals" class="nav-link active" data-scroll-target="#goals">Goals</a></li>
+  <li><a href="#temporal-dependence" id="toc-temporal-dependence" class="nav-link" data-scroll-target="#temporal-dependence">Temporal Dependence</a></li>
+  <li><a href="#memory-in-models" id="toc-memory-in-models" class="nav-link" data-scroll-target="#memory-in-models">Memory in models</a></li>
+  <li><a href="#binary-models-so-far" id="toc-binary-models-so-far" class="nav-link" data-scroll-target="#binary-models-so-far">Binary models so far …</a>
+  <ul class="collapse">
+  <li><a href="#memoryless" id="toc-memoryless" class="nav-link" data-scroll-target="#memoryless">Memoryless</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
+  </ul></li>
+  <li><a href="#hazards" id="toc-hazards" class="nav-link" data-scroll-target="#hazards">Hazards</a>
+  <ul class="collapse">
+  <li><a href="#time" id="toc-time" class="nav-link" data-scroll-target="#time">Time</a></li>
+  <li><a href="#hazard-models" id="toc-hazard-models" class="nav-link" data-scroll-target="#hazard-models">Hazard models</a></li>
+  <li><a href="#discrete-time---binary-time-series-cross-section-data" id="toc-discrete-time---binary-time-series-cross-section-data" class="nav-link" data-scroll-target="#discrete-time---binary-time-series-cross-section-data">Discrete Time - Binary Time Series Cross Section data</a></li>
+  <li><a href="#terminology" id="toc-terminology" class="nav-link" data-scroll-target="#terminology">Terminology</a></li>
+  <li><a href="#illustration" id="toc-illustration" class="nav-link" data-scroll-target="#illustration">Illustration</a></li>
+  <li><a href="#survival-spells" id="toc-survival-spells" class="nav-link" data-scroll-target="#survival-spells">Survival Spells</a></li>
+  </ul></li>
+  <li><a href="#quantities-in-hazard-models" id="toc-quantities-in-hazard-models" class="nav-link" data-scroll-target="#quantities-in-hazard-models">Quantities in Hazard Models</a>
+  <ul class="collapse">
+  <li><a href="#survival-time" id="toc-survival-time" class="nav-link" data-scroll-target="#survival-time">Survival time</a></li>
+  <li><a href="#failure" id="toc-failure" class="nav-link" data-scroll-target="#failure">Failure</a></li>
+  <li><a href="#cumulative-function" id="toc-cumulative-function" class="nav-link" data-scroll-target="#cumulative-function">Cumulative Function</a></li>
+  <li><a href="#hazard-rate" id="toc-hazard-rate" class="nav-link" data-scroll-target="#hazard-rate">Hazard Rate</a></li>
+  <li><a href="#discrete-time-ht" id="toc-discrete-time-ht" class="nav-link" data-scroll-target="#discrete-time-ht">Discrete time h(t)</a></li>
+  <li><a href="#density" id="toc-density" class="nav-link" data-scroll-target="#density">Density</a></li>
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation">Estimation</a></li>
+  </ul></li>
+  <li><a href="#discrete-time-hazards" id="toc-discrete-time-hazards" class="nav-link" data-scroll-target="#discrete-time-hazards">Discrete Time Hazards</a>
+  <ul class="collapse">
+  <li><a href="#the-problem" id="toc-the-problem" class="nav-link" data-scroll-target="#the-problem">The problem</a></li>
+  <li><a href="#the-solution" id="toc-the-solution" class="nav-link" data-scroll-target="#the-solution">The solution</a></li>
+  <li><a href="#the-result" id="toc-the-result" class="nav-link" data-scroll-target="#the-result">The result</a>
+  <ul class="collapse">
+  <li><a href="#constant-ht---no-memory" id="toc-constant-ht---no-memory" class="nav-link" data-scroll-target="#constant-ht---no-memory">Constant <span class="math inline">\(h(t)\)</span> - no memory</a></li>
+  <li><a href="#measuring-survival-time" id="toc-measuring-survival-time" class="nav-link" data-scroll-target="#measuring-survival-time">Measuring survival time</a></li>
+  <li><a href="#monotonic-hazard" id="toc-monotonic-hazard" class="nav-link" data-scroll-target="#monotonic-hazard">Monotonic hazard</a></li>
+  <li><a href="#non-monotonic-hazard" id="toc-non-monotonic-hazard" class="nav-link" data-scroll-target="#non-monotonic-hazard">Non-monotonic hazard</a></li>
+  <li><a href="#understanding-substantive-variables-in-the-hazard-context" id="toc-understanding-substantive-variables-in-the-hazard-context" class="nav-link" data-scroll-target="#understanding-substantive-variables-in-the-hazard-context">Understanding substantive variables in the hazard context</a></li>
+  </ul></li>
+  <li><a href="#an-alternative---transitions" id="toc-an-alternative---transitions" class="nav-link" data-scroll-target="#an-alternative---transitions">An alternative - transitions</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<!-- rm(list=ls()) -->
+<section id="goals" class="level1">
+<h1>Goals</h1>
+<ul>
+<li>consider what “memory” might look like in a binary time series setting.</li>
+<li>introduce concepts underlying hazard models.</li>
+<li>understand the discrete time hazard model.</li>
+</ul>
+</section>
+<section id="temporal-dependence" class="level1">
+<h1>Temporal Dependence</h1>
+<p>So far, we have explored binary response models in terms of the structure of the LLF, estimation, and interpretation. Today, we’ll focus on the assumption the errors are independent over time - what we’ll call temporal independence.</p>
+<p><strong>Temporal independence</strong> requires that <span class="math inline">\(cov(\varepsilon_t, \varepsilon_t-k)=0\)</span> - that the errors are not correlated across time. It implies that observations on <span class="math inline">\(y\)</span> are independent of one another.</p>
+<p>Put differently, the process that generates <span class="math inline">\(y\)</span> is memory-less.</p>
+</section>
+<section id="memory-in-models" class="level1">
+<h1>Memory in models</h1>
+<p>In the linear model, we considered several ways present-day values of <span class="math inline">\(y\)</span> might arise as a function of things that happened in the past (either at lagged values of <span class="math inline">\(y\)</span>, or past values of <span class="math inline">\(x\)</span> variables).</p>
+<p>In the binary model, we need to consider the same sort of dynamics, but lagging the <span class="math inline">\(y\)</span> variable does not exactly measure persistence - it would only measure whether the presence/absence of <span class="math inline">\(y\)</span> in the last period affects present day values of <span class="math inline">\(y\)</span>. What we’d really like to measure is how the latent probability <span class="math inline">\(y=1\)</span> in the past affects the probability <span class="math inline">\(y=1\)</span> today.</p>
+</section>
+<section id="binary-models-so-far" class="level1">
+<h1>Binary models so far …</h1>
+<p>The binary models we’ve examined so far have not accounted for the past. Consider the <span class="citation" data-cites="onealrussett97">Oneal and Russett (<a href="#ref-onealrussett97" role="doc-biblioref">1997</a>)</span> democratic peace data, and a model like this ::</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dp <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dpm1 <span class="ot">&lt;-</span><span class="fu">glm</span>(dispute <span class="sc">~</span> border<span class="sc">+</span>deml<span class="sc">+</span>caprat<span class="sc">+</span>ally, <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data=</span>dp )</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stargazer</span>(dpm1, <span class="at">type=</span><span class="st">"html"</span>,  <span class="at">single.row=</span><span class="cn">TRUE</span>, <span class="at">header=</span><span class="cn">FALSE</span>, <span class="at">digits=</span><span class="dv">3</span>,  <span class="at">omit.stat=</span><span class="fu">c</span>(<span class="st">"LL"</span>,<span class="st">"ser"</span>),  <span class="at">star.cutoffs=</span><span class="fu">c</span>(<span class="fl">0.05</span>,<span class="fl">0.01</span>,<span class="fl">0.001</span>),    <span class="at">dep.var.caption=</span><span class="st">"Dependent Variable: Dispute"</span>, <span class="at">dep.var.labels.include=</span><span class="cn">FALSE</span>,  <span class="at">covariate.labels=</span><span class="fu">c</span>(<span class="st">"Shared Border"</span>, <span class="st">"Democracy"</span>, <span class="st">"Capabilities Ratio"</span>, <span class="st">"Allies"</span>),  <span class="at">notes=</span><span class="fu">c</span>(<span class="st">"Standard errors in parentheses"</span>, <span class="st">"Significance levels:  *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05"</span>), <span class="at">notes.append =</span> <span class="cn">FALSE</span>,  <span class="at">align=</span><span class="cn">TRUE</span>,  <span class="at">font.size=</span><span class="st">"small"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Dependent Variable: Dispute
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Shared Border
+</td>
+<td>
+1.221<sup>***</sup> (0.078)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Democracy
+</td>
+<td>
+-0.071<sup>***</sup> (0.007)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Capabilities Ratio
+</td>
+<td>
+-0.003<sup>***</sup> (0.0004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Allies
+</td>
+<td>
+-0.806<sup>***</sup> (0.080)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-3.492<sup>***</sup> (0.075)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+20,990
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+7,011.947
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+Standard errors in parentheses
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td style="text-align:right">
+Significance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05
+</td>
+</tr>
+</tbody></table>
+</div>
+<p>What is the effect of democracy if the dyad has been at peace for 2 years?</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># at mean data over 30 observations</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>atmean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">stime=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>), <span class="at">deml=</span><span class="fu">median</span>(dp<span class="sc">$</span>deml), <span class="at">border=</span><span class="dv">0</span>, <span class="at">caprat=</span><span class="fu">median</span>(dp<span class="sc">$</span>caprat), <span class="at">ally=</span><span class="dv">0</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(atmean, <span class="fu">predict</span>(dpm1, <span class="at">newdata=</span>atmean, <span class="at">type=</span><span class="st">"response"</span>, <span class="at">se=</span><span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">fit=</span><span class="fu">round</span>(fit, <span class="dv">2</span>) )</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predictions, <span class="fu">aes</span>(<span class="at">x=</span>stime, <span class="at">y=</span>fit)) <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color=</span><span class="st">"#005A43"</span>, <span class="at">size=</span><span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Time since last dispute"</span>, <span class="at">y=</span><span class="st">"Pr(Dispute)"</span>) <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>fit<span class="fl">-1.96</span><span class="sc">*</span>se.fit, <span class="at">ymax=</span>fit<span class="fl">+1.96</span><span class="sc">*</span>se.fit), <span class="at">fill=</span><span class="st">"grey90"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">15</span>, <span class="at">y =</span> <span class="fl">0.041</span>, <span class="at">label =</span> <span class="st">"Effect of Democracy"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.15</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>))  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="discretehazards24_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>What is the effect of democracy if the dyad has been at peace for 22 years? Obviously, there is no difference in this model because we didn’t account for time. In effect, we assumed each period is independent of any other, so there is no memory across observations. The effects of the <span class="math inline">\(x\)</span> variables like democracy are assumed constant over time.</p>
+<section id="memoryless" class="level2">
+<h2 class="anchored" data-anchor-id="memoryless">Memoryless</h2>
+<p>By construction, this model lacks any memory. <span class="math inline">\(Pr(Y_{i,t}=1)\)</span> is a function of <span class="math inline">\(X_{i,t}\)</span>, but is independent of anything that happened prior to <span class="math inline">\(t\)</span>.</p>
+<p>This means dyads that have been at peace for 2 years and for 22 years are treated as the same, varying only on the <span class="math inline">\(X\)</span> variables.</p>
+<p>Note this is by choice - we’re assuming <span class="math inline">\(y_t\)</span> has no bearing on <span class="math inline">\(y_{t+1}\)</span>, so there is no persistence or memory from period to period. We’ll encounter a range of models that are explicitly aimed at understanding this question: <strong>How does having survived up until now affect the chances of failing now?</strong></p>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>The democratic peace data is panel data - composed of cross sections observed over time. The <span class="math inline">\(y\)</span> variable is binary, and measures a rare event - conflict. So the <span class="math inline">\(y\)</span> variable for any particular panel is usually a string of zeros, occasionally punctuated by a one.</p>
+<p>What we’d really like to know is if/how strings of zeros affect the chances of a one at any given point in time. This is a question of <strong>hazards</strong>.</p>
+</section>
+</section>
+<section id="hazards" class="level1">
+<h1>Hazards</h1>
+<p>The hazard is the probability of failure at a particular point in time, conditional on having survived up until that point. Asking about the chances something comes to an end without also asking how long it’s lasted so far often doesn’t make much sense.</p>
+<p>Consider human mortality as an example:</p>
+<ul>
+<li>What is the probability of death for a 2 year old white male in the US, all else equal?</li>
+<li>What is the probability of death for a 22 year old white male in the US, all else equal?</li>
+<li>What is the probability of death for a 92 year old white male in the US, all else equal?</li>
+</ul>
+<p>It’s possible (likely?) these probabilities are all similar if not the same because we’re asking the wrong question. We’re considering all these probabilities unconditionally though a potentially important condition is that</p>
+<ul>
+<li>The 2 year old has survived up until 2.</li>
+<li>The 22 year old has survived up until 22.</li>
+<li>The 92 year old has survived up until 92.</li>
+</ul>
+<p>When we think about whether a unit fails at a particular point in time, it’s essential to consider how long they’ve survived up to that point. This quantity,</p>
+<p><span class="math display">\[Pr(Fail_t | Survival_{t-1}) \]</span></p>
+<p>is a conditional probability called the <strong>hazard rate</strong>. This is a really interesting quantity.</p>
+<section id="time" class="level2">
+<h2 class="anchored" data-anchor-id="time">Time</h2>
+<p>What would data for mortality (or any sort of <em>spells</em>) look like? There are two basic types:</p>
+<p>Survival:</p>
+<p><span class="math display">\[Age = 1, 2, 3, 4, 5, \ldots 87, 88, 89\]</span></p>
+<p>or</p>
+<p>Failure:</p>
+<p><span class="math display">\[Death = 0, 0, 0, 0, 0, \ldots 0, 0, 1\]</span></p>
+<p>Note that these convey the two parts of the hazard - how many periods the individual survives, and at what period the individual fails.</p>
+<p>These also represent two ways to think about time: continuously:</p>
+<p><span class="math display">\[Age = 1, 2, 3, 4, 5, \ldots 87, 88, 89\]</span></p>
+<p>or discretely:</p>
+<p><span class="math display">\[Death = 0, 0, 0, 0, 0, \ldots 0, 0, 1\]</span></p>
+<p>In truth, we almost always measure time discretely in the sense that failure can only happen in certain intervals (days, weeks, years, etc.), even though time is continuous and failure can happen in much smaller increments than these (e.g.&nbsp;minutes, seconds). Still, most treatments consider two types of hazard models:</p>
+<ul>
+<li><p>Continuous time models using data like <span class="math inline">\(Age = 1, 2, 3, 4, 5, \ldots 87, 88, 89\)</span> as the <span class="math inline">\(y\)</span> variable.</p></li>
+<li><p>Discrete time models using data like <span class="math inline">\(Death = 0, 0, 0, 0, 0, \ldots 0, 0, 1\)</span> as the <span class="math inline">\(y\)</span> variable. These are usually estimated using a binomial LLF (e.g.&nbsp;the logit model).</p></li>
+</ul>
+</section>
+<section id="hazard-models" class="level2">
+<h2 class="anchored" data-anchor-id="hazard-models">Hazard models</h2>
+<p>A key feature of any hazard model is that the model accounts for both time until failure, <em>and</em> the realization of failure. In continuous or discrete time models, <em>both</em> of these are part of the estimation.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An aside on naming - models like these are interchangeably called “hazard models,” “survival models,” “duration models,” or “event history models.” They all refer to the same basic idea - modeling the time until an event occurs. They can sometimes indicate whether the quantity of interest is the hazard or survival - note that these are opposites in the sense that the hazard is the probability of failure at a particular point in time, while survival is the probability of surviving up to that point in time. “Event history” often refers to discrete time models.</p>
+</div>
+</div>
+</section>
+<section id="discrete-time---binary-time-series-cross-section-data" class="level2">
+<h2 class="anchored" data-anchor-id="discrete-time---binary-time-series-cross-section-data">Discrete Time - Binary Time Series Cross Section data</h2>
+<p>Time is continuous insofar as time units are infinitely divisible, but in practice, we measure time in discrete units like days, months, years, etc. In the democratic peace data above, we will have two dyads “fail” (have disputes) at year 3; but it’s nearly certain one of those dyads started its dispute before the other one. We group the data by these time intervals (years, in this case). So we are measuring time discretely (i.e, in years), but the underlying process is continuous. Moreover, the fact these can be grouped by failure time makes them <strong>grouped duration data</strong>.</p>
+<p>It’s common to have binary <span class="math inline">\(y\)</span> variables observed for cross sections over time - these are <strong>Binary Time Series Cross Section (BTSCS)</strong> data. This is the form the democratic peace data takes, and is a common form of data in the social sciences. BTSCS data are grouped duration data, and failure is measured in discrete time.</p>
+<p>Here’s an example of BTSCS data thinking of disputes in dyads over time.</p>
+<div class="tiny">
+<div class="center">
+<div id="tab:btscs">
+<table class="caption-top table">
+<caption>BTSCS data</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span><strong>State</strong></span></td>
+<td style="text-align: right;"><span><strong>Year</strong></span></td>
+<td style="text-align: right;"><span><strong>Dispute</strong></span></td>
+<td style="text-align: right;">Censored</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1960</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1961</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1962</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1963</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1964</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1965</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1966</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1967</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1968</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1969</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1960</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1961</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1962</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1963</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1964</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1965</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1966</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1967</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="terminology" class="level2">
+<h2 class="anchored" data-anchor-id="terminology">Terminology</h2>
+<p>Let’s begin thinking about terminology:</p>
+<ul>
+<li>we observe at each point <span class="math inline">\(t\)</span> whether a unit <span style="color:red;"><strong>fails</strong></span> or not. <span style="color:red;"><strong>Failure</strong></span> means experiencing the event of interest. In mortality studies, this is is death; in the democratic peace data, the event is a militarized dispute.</li>
+<li>each unit is <span style="color:red;"><strong>at risk</strong></span> until it exits the data either because the period of observation ends, or because it fails and can only fail once. In mortality studies, an individual can only fail once; in the democratic peace data, a dyad can fail multiple times.</li>
+<li>a unit <span style="color:red;"><strong>survives</strong></span> some spell up to the point at which it fails. We can count these time periods to measure <span style="color:red;"><strong>survival time</strong></span>.</li>
+<li>the period a unit survives is called a <span style="color:red;"><strong>spell</strong></span>; spells end at failure.</li>
+<li>we have no idea what happened to these units prior to 1960; the units are left-censored.</li>
+<li>we have no idea what happens to these units after 1970; the units are <span style="color:red;"><strong>right censored</strong></span>. Any unit that does not experience the failure event during the period of study is right-censored.</li>
+</ul>
+</section>
+<section id="illustration" class="level2">
+<h2 class="anchored" data-anchor-id="illustration">Illustration</h2>
+<p>Here are different spells:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(highcharter)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Binghamton University colors</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>binghamton_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#005A43"</span>, <span class="st">"#8C2132"</span>, <span class="st">"#FFD100"</span>, <span class="st">"#000000"</span>, <span class="st">"#636466"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframes for each case with updated labels</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>cases <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">name =</span> <span class="st">"uncensored"</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">2.5</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), <span class="at">name =</span> <span class="st">"left censored"</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="fl">2.8</span>, <span class="dv">8</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">3</span>), <span class="at">name =</span> <span class="st">"fails at last period"</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="fl">3.5</span>, <span class="dv">10</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>), <span class="at">name =</span> <span class="st">"right censored"</span>),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="dv">7</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>), <span class="at">name =</span> <span class="st">"uncensored"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>hc <span class="ot">&lt;-</span> <span class="fu">highchart</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hc_chart</span>(<span class="at">type =</span> <span class="st">"line"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hc_xAxis</span>(</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">list</span>(<span class="at">text =</span> <span class="st">"time"</span>),</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">plotLines =</span> <span class="fu">list</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">value =</span> <span class="dv">2</span>, <span class="at">width =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"black"</span>),</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">value =</span> <span class="dv">8</span>, <span class="at">width =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"black"</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="dv">0</span>,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">max =</span> <span class="dv">10</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hc_yAxis</span>(</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">list</span>(<span class="at">text =</span> <span class="st">"case"</span>),</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="dv">0</span>,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">max =</span> <span class="dv">5</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">tickInterval =</span> <span class="dv">1</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hc_plotOptions</span>(</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">series =</span> <span class="fu">list</span>(</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">lineWidth =</span> <span class="dv">3</span>,</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">marker =</span> <span class="fu">list</span>(<span class="at">enabled =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hc_legend</span>(<span class="at">enabled =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Add each case as a separate series with Binghamton colors</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(cases)) {</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  hc <span class="ot">&lt;-</span> hc <span class="sc">%&gt;%</span> <span class="fu">hc_add_series</span>(</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">list_parse2</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> cases[[i]]<span class="sc">$</span>x, <span class="at">y =</span> cases[[i]]<span class="sc">$</span>y)),</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> cases[[i]]<span class="sc">$</span>name,</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> binghamton_colors[i]</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the plot</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>hc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="highchart html-widget html-fill-item" id="htmlwidget-0858eb19bdd25801a887" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-0858eb19bdd25801a887">{"x":{"hc_opts":{"chart":{"reflow":true,"type":"line"},"title":{"text":null},"yAxis":{"title":{"text":"case"},"min":0,"max":5,"tickInterval":1},"credits":{"enabled":false},"exporting":{"enabled":false},"boost":{"enabled":false},"plotOptions":{"series":{"label":{"enabled":false},"turboThreshold":0,"lineWidth":3,"marker":{"enabled":false}},"treemap":{"layoutAlgorithm":"squarified"}},"xAxis":{"title":{"text":"time"},"plotLines":[{"value":2,"width":2,"color":"black"},{"value":8,"width":2,"color":"black"}],"min":0,"max":10},"legend":{"enabled":false},"series":[{"data":[[3,1],[6,1]],"name":"uncensored","color":"#005A43"},{"data":[[-0.5,2],[2.5,2]],"name":"left censored","color":"#8C2132"},{"data":[[2.8,3],[8,3]],"name":"fails at last period","color":"#FFD100"},{"data":[[3.5,4],[10,4]],"name":"right censored","color":"#000000"},{"data":[[5.5,5],[7,5]],"name":"uncensored","color":"#636466"}]},"theme":{"chart":{"backgroundColor":"transparent"},"colors":["#7cb5ec","#434348","#90ed7d","#f7a35c","#8085e9","#f15c80","#e4d354","#2b908f","#f45b5b","#91e8e1"]},"conf_opts":{"global":{"Date":null,"VMLRadialGradientURL":"http =//code.highcharts.com/list(version)/gfx/vml-radial-gradient.png","canvasToolsURL":"http =//code.highcharts.com/list(version)/modules/canvas-tools.js","getTimezoneOffset":null,"timezoneOffset":0,"useUTC":true},"lang":{"contextButtonTitle":"Chart context menu","decimalPoint":".","downloadCSV":"Download CSV","downloadJPEG":"Download JPEG image","downloadPDF":"Download PDF document","downloadPNG":"Download PNG image","downloadSVG":"Download SVG vector image","downloadXLS":"Download XLS","drillUpText":"◁ Back to {series.name}","exitFullscreen":"Exit from full screen","exportData":{"annotationHeader":"Annotations","categoryDatetimeHeader":"DateTime","categoryHeader":"Category"},"hideData":"Hide data table","invalidDate":null,"loading":"Loading...","months":["January","February","March","April","May","June","July","August","September","October","November","December"],"noData":"No data to display","numericSymbolMagnitude":1000,"numericSymbols":["k","M","G","T","P","E"],"printChart":"Print chart","resetZoom":"Reset zoom","resetZoomTitle":"Reset zoom level 1:1","shortMonths":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"shortWeekdays":["Sat","Sun","Mon","Tue","Wed","Thu","Fri"],"thousandsSep":" ","viewData":"View data table","viewFullscreen":"View in full screen","weekdays":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]}},"type":"chart","fonts":[],"debug":false},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<ul>
+<li>some units survive through the end of the study; these units are <span style="color:red;"><strong>right censored</strong></span>. That is, they do not fail during the period of observation.</li>
+<li>failure is only observed per year; so failure is grouped by year; these are <span style="color:red;"><strong>grouped duration data</strong></span>. We could, for instance, graph the density of failures at each point in time, effectively grouping them by failure time.</li>
+<li>the probability of failing at <span class="math inline">\(t\)</span>, given survival til <span class="math inline">\(t\)</span> is the hazard of failure; at any point in time, this is called the <span style="color:red;"><strong>hazard rate</strong></span>, denoted <span class="math inline">\(h(t)\)</span>.</li>
+<li>in the democratic peace model above, <span class="math inline">\(h(t)\)</span> does not depend on what happened at <span class="math inline">\(t-1\)</span>, so <span class="math inline">\(h(t)\)</span> is constant over time or is time invariant, or is <span style="color:red;"><strong>duration independent</strong></span>.</li>
+</ul>
+</section>
+<section id="survival-spells" class="level2">
+<h2 class="anchored" data-anchor-id="survival-spells">Survival Spells</h2>
+<p>We can measure survival spells; time elapsed until failure or censoring. These are the same data as above, just re-formed so the units are different. Note the summed survival time is equal to the total time at risk. So for the US-Cuba dyad, the total time at risk is 11 years. Also, notice that the US-Cuba dyad is censored in 1970. It survives 3 years since its last dispute, but the end of that spell is our observation period, not another dispute.</p>
+<div class="tiny">
+<div class="center">
+<div id="tab:btscs">
+<table class="caption-top table">
+<caption>Spell data</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span><strong>State</strong></span></td>
+<td style="text-align: right;"><span><strong>Year</strong></span></td>
+<td style="text-align: right;"><span><strong>Dispute</strong></span></td>
+<td style="text-align: right;">fail</td>
+<td style="text-align: right;">censored</td>
+<td style="text-align: right;">survival</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1961</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1967</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">US-Cuba</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">US-UK</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">11</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="quantities-in-hazard-models" class="level1">
+<h1>Quantities in Hazard Models</h1>
+<section id="survival-time" class="level2">
+<h2 class="anchored" data-anchor-id="survival-time">Survival time</h2>
+<p>Survival time: the time up to failure, in the interval <span class="math inline">\(t_0, t_{\infty}\)</span> such that <span class="math inline">\(t \in \{1,2,3 \ldots t_{\infty} \}\)</span></p>
+</section>
+<section id="failure" class="level2">
+<h2 class="anchored" data-anchor-id="failure">Failure</h2>
+<p>The probability of the failure event:</p>
+<p><span class="math display">\[\begin{aligned}
+f(t) = Pr(t_i=t) \nonumber
+\end{aligned}\]</span></p>
+<p>This is the density.</p>
+</section>
+<section id="cumulative-function" class="level2">
+<h2 class="anchored" data-anchor-id="cumulative-function">Cumulative Function</h2>
+<p>Write the cumulative probability of failure up to <span class="math inline">\(t_i\)</span>.</p>
+<p><span class="math display">\[\begin{aligned}
+F(t) = \sum_{i=1}^{\infty} f(t_i) \nonumber
+\end{aligned}\]</span></p>
+<p>Now, consider the probability of surviving up until <span class="math inline">\(t\)</span> - this is equal to 1 minus the CDF, so</p>
+<p><span class="math display">\[S(t) = 1-F(t) = P(t_{i} \geq t)\]</span></p>
+<p>Most importantly, the conditional probability given by the probability of failing at <span class="math inline">\(t_i\)</span> given survival up until <span class="math inline">\(t_i\)</span>:</p>
+<p><span class="math display">\[\begin{aligned}
+h(t)=Pr(t=t_i | t \geq t_i) \nonumber \\
+= \frac{f(t)}{S(t)} \nonumber
+\end{aligned}\]</span></p>
+<p>This is the <strong>hazard rate</strong>.</p>
+</section>
+<section id="hazard-rate" class="level2">
+<h2 class="anchored" data-anchor-id="hazard-rate">Hazard Rate</h2>
+<p><span class="math display">\[\begin{aligned}
+h(t)=Pr(t=t_i | t \geq t_i) \nonumber \\
+= \frac{f(t)}{S(t)} \nonumber
+\end{aligned}\]</span></p>
+<p>The hazard rate is conceptually important because it explicitly relates the past to the present, thereby incorporating memory into the statistical model. The hazard is different from <span class="math inline">\(Pr(y_t=1)\)</span> because it conditions on what has happened prior to <span class="math inline">\(t\)</span>.</p>
+</section>
+<section id="discrete-time-ht" class="level2">
+<h2 class="anchored" data-anchor-id="discrete-time-ht">Discrete time h(t)</h2>
+<p>What we have derived is the discrete time hazard function - time is measured in discrete units (e.g.&nbsp;years, not parts of years like months or days); some processes only make sense in discrete terms - e.g.&nbsp;a member of the US House can only be turned out by voters every two years, not before.</p>
+</section>
+<section id="density" class="level2">
+<h2 class="anchored" data-anchor-id="density">Density</h2>
+<p>Since the probability of survival at some value of <span class="math inline">\(t\)</span> is the probability of survival at <span class="math inline">\(t\)</span> given survival up to <span class="math inline">\(t\)</span>, the conditional probability of survival is 1 minus the hazard rate:</p>
+<p><span class="math display">\[Pr(t_j&gt;t | t_j\geq t) = 1 - h(t)\]</span></p>
+<p>We can rewrite the survivor function as a product of the probabilities of surviving up to <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[S(t) = \prod_{j=0}^{t} \{1-h(t-j)\}\]</span></p>
+<p>We can rewrite the density <span class="math inline">\(f(t)\)</span>:</p>
+<p><span class="math display">\[f(t) = h(t)S(t)\]</span></p>
+</section>
+<section id="estimation" class="level2">
+<h2 class="anchored" data-anchor-id="estimation">Estimation</h2>
+<p>Let’s build a likelihood - as you might have guessed, it needs to involve <span class="math inline">\(f(t)\)</span> and <span class="math inline">\(S(t)\)</span> (failure and survival times) so we can estimate <span class="math inline">\(h(t)\)</span>.</p>
+<p><span class="math display">\[ \mathcal{L} = \prod_{t_i\leq t} f(t_i) \prod_{t_i\geq t} S(t_i) \]</span></p>
+<p>then, think of censoring where <span class="math inline">\(y_{i,t}\)</span> indicates when, and whether a subject ever fails; if zero, censored, if one, uncensored (fails during our period of observation).</p>
+<p><span class="math display">\[ \mathcal{L} = \prod_{t_i\leq t} f(t_i)^{y_{i,t}} \prod_{t_i\geq t} S(t_i)^{1- y_{i,t}} \]</span></p>
+<p>This should be looking familiar.</p>
+<p>Now, substituting:</p>
+<p><span class="math display">\[ \mathcal{L} = \prod_{i=1}^{N} \Bigg\{ h(t) \prod_{j=1}^{t-1}   [1-h(t-i)] \Bigg\} ^{y_{i,t}} \Bigg\{ \prod_{j=1}^{t}   [1-h(t-i)] \Bigg\}^{1- y_{i,t}}\]</span></p>
+<p>And substitute an appropriate link density for <span class="math inline">\(f(t)\)</span> and <span class="math inline">\(S(t)\)</span>, e.g., exponential,</p>
+<p><span class="math display">\[f(t) = \lambda(t) exp^{\lambda(t)}\]</span> <span class="math display">\[S(t) = exp^{-\lambda(t)}\]</span> <span class="math display">\[h(t) = \lambda\]</span></p>
+<p>Weibull: <span class="math display">\[f(t) = \lambda p (\lambda(t))^{p-1} exp^{-(\lambda t)^p}\]</span> <span class="math display">\[S(t) = exp^{-(\lambda t)^p}\]</span> <span class="math display">\[h(t) = \lambda p (\lambda t)^{p-1}\]</span></p>
+<p>etc …</p>
+</section>
+</section>
+<section id="discrete-time-hazards" class="level1">
+<h1>Discrete Time Hazards</h1>
+<p>Until the late 1990s, studies using BTSCS data ignored memory. Put differently, the conventional way to model these data was using a binomial model like the logit estimated above. Beck, Katz, and Tucker’s <span class="citation" data-cites="becktuck">(<a href="#ref-becktuck" role="doc-biblioref">1998</a>)</span> paper pointed out the problems with doing this, and suggested an easy fix.</p>
+<section id="the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-problem">The problem</h2>
+<p>The standard logit/probit model in these data assumes the errors are i.i.d. - that the disturbances are uncorrelated. A somewhat more interesting observation is that the model assumes no relationship between the outcome at <span class="math inline">\(t\)</span> and the outcome at <span class="math inline">\(t-1, t-2 \ldots t-k\)</span>. So the observations on <span class="math inline">\(y\)</span> arise independently of one another …almost as if each observation is an independent Bernoulli trial. If this isn’t true, the model is misspecified, and likely the parameter estimates are biased.</p>
+<p>In the context of the democratic peace data, this means the probability of a dispute at any point in time is unrelated to how long that particular dyad has been at peace. Whether it’s been at peace for 1 year or 10 years has no bearing on the chances of conflict now. On its face, this is a heroic assumption.</p>
+</section>
+<section id="the-solution" class="level2">
+<h2 class="anchored" data-anchor-id="the-solution">The solution</h2>
+<p>At its root, this is a model specification issue - we think time since last dispute is probably related to the chances of a dispute today, but no such measure is in the model. BKT suggest including “survival time” as a right hand side variable. Doing so explicitly models the effect of surviving up til <span class="math inline">\(t\)</span> on the probability of failing at <span class="math inline">\(t\)</span>.</p>
+<p>BKT suggest including nonlinear functions of survival time so the effect of time isn’t constrained to be monotonic. They suggested using cubic splines of survival time; <span class="citation" data-cites="carter2010back">Carter and Signorino (<a href="#ref-carter2010back" role="doc-biblioref">2010</a>)</span> later show polynomials for survival time are just as good and easier to compute/understand.</p>
+</section>
+<section id="the-result" class="level2">
+<h2 class="anchored" data-anchor-id="the-result">The result</h2>
+<p>This fundamentally changed models on BTSCS data - the state of the art since then is to include survival time, thereby measuring “memory” in the <span class="math inline">\(y\)</span> series. While most BTSCS models since <span class="citation" data-cites="becktuck">Beck, Katz, and Tucker (<a href="#ref-becktuck" role="doc-biblioref">1998</a>)</span> include survival time, relatively few interpret it; that’s okay insofar as the effect of survival might not be of theoretical interest. Most incorrectly interpret the predictions as probabilities - they are now conditional probabilities, $pr(fail | survival), so hazards.</p>
+<section id="constant-ht---no-memory" class="level3">
+<h3 class="anchored" data-anchor-id="constant-ht---no-memory">Constant <span class="math inline">\(h(t)\)</span> - no memory</h3>
+<p>Revisiting …in this model, <span class="math inline">\(Pr(y_i=1) = F(x_i\beta + \beta_0)\)</span>, <span class="math inline">\(x_i \beta\)</span> induces deviation from the constant or baseline level; but there is no temporal variation, temporal persistence, or memory. What happened last year has no bearing on what we observe this year. Repeating, it is as if these are Bernoulli trials.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dp <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dpm1 <span class="ot">&lt;-</span><span class="fu">glm</span>(dispute <span class="sc">~</span> border<span class="sc">+</span>deml<span class="sc">+</span>caprat<span class="sc">+</span>ally, <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data=</span>dp )</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stargazer</span>(dpm1, <span class="at">type=</span><span class="st">"html"</span>,  <span class="at">single.row=</span><span class="cn">TRUE</span>, <span class="at">header=</span><span class="cn">FALSE</span>, <span class="at">digits=</span><span class="dv">3</span>,  <span class="at">omit.stat=</span><span class="fu">c</span>(<span class="st">"LL"</span>,<span class="st">"ser"</span>),  <span class="at">star.cutoffs=</span><span class="fu">c</span>(<span class="fl">0.05</span>,<span class="fl">0.01</span>,<span class="fl">0.001</span>),    <span class="at">dep.var.caption=</span><span class="st">"Dependent Variable: Dispute"</span>, <span class="at">dep.var.labels.include=</span><span class="cn">FALSE</span>,  <span class="at">covariate.labels=</span><span class="fu">c</span>(<span class="st">"Shared Border"</span>, <span class="st">"Democracy"</span>, <span class="st">"Capabilities Ratio"</span>, <span class="st">"Allies"</span>),  <span class="at">notes=</span><span class="fu">c</span>(<span class="st">"Standard errors in parentheses"</span>, <span class="st">"Significance levels:  *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05"</span>), <span class="at">notes.append =</span> <span class="cn">FALSE</span>,  <span class="at">align=</span><span class="cn">TRUE</span>,  <span class="at">font.size=</span><span class="st">"small"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Dependent Variable: Dispute
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Shared Border
+</td>
+<td>
+1.221<sup>***</sup> (0.078)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Democracy
+</td>
+<td>
+-0.071<sup>***</sup> (0.007)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Capabilities Ratio
+</td>
+<td>
+-0.003<sup>***</sup> (0.0004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Allies
+</td>
+<td>
+-0.806<sup>***</sup> (0.080)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-3.492<sup>***</sup> (0.075)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+20,990
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+7,011.947
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+Standard errors in parentheses
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td style="text-align:right">
+Significance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># at mean data over 30 observations</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>atmean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">stime=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>), <span class="at">deml=</span><span class="fu">median</span>(dp<span class="sc">$</span>deml), <span class="at">border=</span><span class="dv">0</span>, <span class="at">caprat=</span><span class="fu">median</span>(dp<span class="sc">$</span>caprat), <span class="at">ally=</span><span class="dv">0</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(atmean, <span class="fu">predict</span>(dpm1, <span class="at">newdata=</span>atmean, <span class="at">type=</span><span class="st">"response"</span>, <span class="at">se=</span><span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">fit=</span><span class="fu">round</span>(fit, <span class="dv">2</span>) )</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predictions, <span class="fu">aes</span>(<span class="at">x=</span>stime, <span class="at">y=</span>fit)) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color=</span><span class="st">"#005A43"</span>, <span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Time since last dispute"</span>, <span class="at">y=</span><span class="st">"Pr(Dispute)"</span>) <span class="sc">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>fit<span class="fl">-1.96</span><span class="sc">*</span>se.fit, <span class="at">ymax=</span>fit<span class="fl">+1.96</span><span class="sc">*</span>se.fit), <span class="at">fill=</span><span class="st">"grey90"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">15</span>, <span class="at">y =</span> <span class="fl">0.041</span>, <span class="at">label =</span> <span class="st">"Effect of Democracy"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.15</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="discretehazards24_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is the case where</p>
+<p><span class="math display">\[h_0(t) = \frac{1}{1+ exp(\beta_0)}\]</span></p>
+<p>the baseline hazard is the constant. Even with <span class="math inline">\(x\)</span> variables, there is still no accounting for time - the <span class="math inline">\(x\)</span> effects are only shifts around this baseline hazard.</p>
+<p><span class="math display">\[h_0(t) = \frac{1}{1+ exp(\beta_0+ x'\beta)}\]</span></p>
+<p>this is still a constant baseline hazard with the effects of <span class="math inline">\(x\)</span> deviating around it.</p>
+</section>
+<section id="measuring-survival-time" class="level3">
+<h3 class="anchored" data-anchor-id="measuring-survival-time">Measuring survival time</h3>
+<ul>
+<li>count periods of survival up to failure. This is a counter of survival time. generate a binary variable for each survival period.</li>
+<li>Either include those survival dummies in the logit, or include the survival counter itself with polynomials, e.g.&nbsp;<span class="math inline">\(t^2, t^3, \ldots\)</span>.</li>
+<li>interpret those coefficients as baseline hazards for groups that survive to <span class="math inline">\(t_i\)</span>.</li>
+<li>with all <span class="math inline">\(x\)</span> variables set to zero, the probability of failure is now given by the constant and the appropriate dummy or counter coefficient.</li>
+<li>Note the quantity of interest is not constant across time: it’s a conditional probability; the probability of failing at <span class="math inline">\(t\)</span> given the estimated probability of survival through <span class="math inline">\(t-1\)</span> - <span class="math inline">\(h(t)|S(t)\)</span>.</li>
+</ul>
+</section>
+<section id="monotonic-hazard" class="level3">
+<h3 class="anchored" data-anchor-id="monotonic-hazard">Monotonic hazard</h3>
+<p>So how to deal with this, incorporating memory: thinking in terms of hazards rather than probabilities (i.e., conditional rather than unconditional probabilities), what if we measure survival time?</p>
+<ul>
+<li>The binary <span class="math inline">\(y\)</span> variable is an indicator of failure at <span class="math inline">\(t\)</span>; the model estimates <span class="math inline">\(f(t)\)</span>, which we’ve said is not especially informative since subjects might fail before <span class="math inline">\(t\)</span>.</li>
+<li>Think of the number of periods up to failure as the cumulative survival time, <span class="math inline">\(S(t)\)</span>.</li>
+</ul>
+<p>See how we’re starting to construct the hazard rate by its parts.</p>
+<p>Here’s an example in the democratic peace data:</p>
+<p><span class="math inline">\(dispute = \beta_0+ \beta_1(survival)\)</span></p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dp <span class="ot">&lt;-</span> <span class="fu">read_dta</span>(<span class="st">"/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>process_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(dyad, year) <span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(dyad) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">dispute_lag =</span> <span class="fu">lag</span>(dispute, <span class="at">default =</span> <span class="dv">1</span>),  <span class="co"># Treat first year as following a dispute</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">reset_group =</span> <span class="fu">cumsum</span>(dispute_lag <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(dyad, reset_group) <span class="sc">%&gt;%</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">stime =</span> <span class="fu">row_number</span>() <span class="sc">-</span> <span class="dv">1</span>  <span class="co"># Start counting from 0</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>dispute_lag, <span class="sc">-</span>reset_group)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>survivaldp <span class="ot">&lt;-</span> <span class="fu">process_data</span>(dp)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>dpm2 <span class="ot">&lt;-</span><span class="fu">glm</span>(dispute <span class="sc">~</span> stime, <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data=</span>survivaldp )</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="fu">stargazer</span>(dpm2, <span class="at">type=</span><span class="st">"html"</span>,  <span class="at">single.row=</span><span class="cn">TRUE</span>, <span class="at">header=</span><span class="cn">FALSE</span>, <span class="at">digits=</span><span class="dv">3</span>,  <span class="at">omit.stat=</span><span class="fu">c</span>(<span class="st">"LL"</span>,<span class="st">"ser"</span>),  <span class="at">star.cutoffs=</span><span class="fu">c</span>(<span class="fl">0.05</span>,<span class="fl">0.01</span>,<span class="fl">0.001</span>),    <span class="at">dep.var.caption=</span><span class="st">"Dependent Variable: Dispute"</span>, <span class="at">dep.var.labels.include=</span><span class="cn">FALSE</span>,  <span class="at">covariate.labels=</span><span class="fu">c</span>(<span class="st">"Survival Time"</span>),  <span class="at">notes=</span><span class="fu">c</span>(<span class="st">"Standard errors in parentheses"</span>, <span class="st">"Significance levels:  *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05"</span>), <span class="at">notes.append =</span> <span class="cn">FALSE</span>,  <span class="at">align=</span><span class="cn">TRUE</span>,  <span class="at">font.size=</span><span class="st">"small"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Dependent Variable: Dispute
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time
+</td>
+<td>
+-0.265<sup>***</sup> (0.010)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-1.513<sup>***</sup> (0.045)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+20,990
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+6,208.082
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+Standard errors in parentheses
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td style="text-align:right">
+Significance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05
+</td>
+</tr>
+</tbody></table>
+</div>
+<p>And here are predicted probabilities from the model.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>atmean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">stime=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(atmean, <span class="fu">predict</span>(dpm2, <span class="at">newdata=</span>atmean, <span class="at">type=</span><span class="st">"response"</span>, <span class="at">se=</span><span class="cn">TRUE</span>)) </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predictions, <span class="fu">aes</span>(<span class="at">x=</span>stime, <span class="at">y=</span>fit)) <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Time since last dispute"</span>, <span class="at">y=</span><span class="st">"Pr(Dispute)"</span>) <span class="sc">+</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>fit<span class="fl">-1.96</span><span class="sc">*</span>se.fit, <span class="at">ymax=</span>fit<span class="fl">+1.96</span><span class="sc">*</span>se.fit), <span class="at">fill=</span><span class="st">"#005A43"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.15</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="discretehazards24_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Where the baseline hazard is no longer constant - it can increase or decrease monotonically:</p>
+<p><span class="math display">\[h_0(t) = \frac{1}{1+ exp(\beta_0 + \gamma_0(t))}\]</span></p>
+<p>the baseline hazard is the constant plus the effect of survival time - the <span class="math inline">\(x\)</span> effects are shifts around this baseline hazard.</p>
+<p><span class="math display">\[h_0(t) = \frac{1}{1+ exp(\beta_0 + \gamma_0(t)) + x'\beta)}\]</span></p>
+<p>The baseline hazard is no longer constrained to be constant, though it can be if <span class="math inline">\(\gamma_0=0\)</span>.</p>
+<ul>
+<li><p>This model accounts for “memory” - the QI is now the hazard.</p></li>
+<li><p>The hazard is not constrained to be constant, but is constrained to be monotonic.</p></li>
+<li><p>To relax this, we can</p>
+<ul>
+<li>include dummy variables - these are discrete time indicators based on the counter.</li>
+<li>include cubic splines or lowess estimates - these are smoothed time functions based on the counter.</li>
+<li>include polynomials of the time counter.</li>
+</ul></li>
+</ul>
+</section>
+<section id="non-monotonic-hazard" class="level3">
+<h3 class="anchored" data-anchor-id="non-monotonic-hazard">Non-monotonic hazard</h3>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>survivaldp <span class="ot">&lt;-</span> survivaldp <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">stime2=</span>stime<span class="sc">^</span><span class="dv">2</span>, <span class="at">stime3=</span>stime<span class="sc">^</span><span class="dv">3</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>dpm3 <span class="ot">&lt;-</span><span class="fu">glm</span>(dispute <span class="sc">~</span> stime<span class="sc">+</span>stime2<span class="sc">+</span>stime3, <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data=</span>survivaldp )</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stargazer</span>(dpm3, <span class="at">type=</span><span class="st">"html"</span>,  <span class="at">single.row=</span><span class="cn">TRUE</span>, <span class="at">header=</span><span class="cn">FALSE</span>, <span class="at">digits=</span><span class="dv">3</span>,  <span class="at">omit.stat=</span><span class="fu">c</span>(<span class="st">"LL"</span>,<span class="st">"ser"</span>),  <span class="at">star.cutoffs=</span><span class="fu">c</span>(<span class="fl">0.05</span>,<span class="fl">0.01</span>,<span class="fl">0.001</span>),    <span class="at">dep.var.caption=</span><span class="st">"Dependent Variable: Dispute"</span>, <span class="at">dep.var.labels.include=</span><span class="cn">FALSE</span>,  <span class="at">covariate.labels=</span><span class="fu">c</span>(<span class="st">"Survival Time"</span>, <span class="st">"Survival Time2"</span>, <span class="st">"Survival Time3"</span>),  <span class="at">notes=</span><span class="fu">c</span>(<span class="st">"Standard errors in parentheses"</span>, <span class="st">"Significance levels:  *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05"</span>), <span class="at">notes.append =</span> <span class="cn">FALSE</span>,  <span class="at">align=</span><span class="cn">TRUE</span>,  <span class="at">font.size=</span><span class="st">"small"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Dependent Variable: Dispute
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time
+</td>
+<td>
+-0.830<sup>***</sup> (0.035)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time2
+</td>
+<td>
+0.052<sup>***</sup> (0.004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time3
+</td>
+<td>
+-0.001<sup>***</sup> (0.0001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-0.950<sup>***</sup> (0.048)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+20,990
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+5,742.615
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+Standard errors in parentheses
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td style="text-align:right">
+Significance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>atmean <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">stime=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>), <span class="at">stime2=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>)<span class="sc">^</span><span class="dv">2</span>, <span class="at">stime3=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>)<span class="sc">^</span><span class="dv">3</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(atmean, <span class="fu">predict</span>(dpm3, <span class="at">newdata=</span>atmean, <span class="at">type=</span><span class="st">"response"</span>, <span class="at">se=</span><span class="cn">TRUE</span>)) </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(predictions, <span class="fu">aes</span>(<span class="at">x=</span>stime, <span class="at">y=</span>fit)) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Time since last dispute"</span>, <span class="at">y=</span><span class="st">"Pr(Dispute)"</span>) <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>fit<span class="fl">-1.96</span><span class="sc">*</span>se.fit, <span class="at">ymax=</span>fit<span class="fl">+1.96</span><span class="sc">*</span>se.fit), <span class="at">fill=</span><span class="st">"#005A43"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.15</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="discretehazards24_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This last is a close approximation of a Cox proportional hazards model. The hazard is non monotonic; it nests the exponential (constant hazard), and the monotonic (Weibull) hazard, and is very general. Besides, it’s very easy to estimate and interpret.</p>
+</section>
+<section id="understanding-substantive-variables-in-the-hazard-context" class="level3">
+<h3 class="anchored" data-anchor-id="understanding-substantive-variables-in-the-hazard-context">Understanding substantive variables in the hazard context</h3>
+<p>The survival variables now permit the baseline hazard to vary. The effects of <span class="math inline">\(x\)</span> variables can be thought of as deviations from those baseline hazards. For example, think about the models presented above, but with democracy. The estimates on democracy will shift the baseline hazard up or down.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>survivaldp <span class="ot">&lt;-</span> survivaldp <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">stime2=</span>stime<span class="sc">^</span><span class="dv">2</span>, <span class="at">stime3=</span>stime<span class="sc">^</span><span class="dv">3</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>dpm4 <span class="ot">&lt;-</span><span class="fu">glm</span>(dispute <span class="sc">~</span> stime<span class="sc">+</span>stime2<span class="sc">+</span>stime3<span class="sc">+</span>deml, <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data=</span>survivaldp )</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">stargazer</span>(dpm4, <span class="at">type=</span><span class="st">"html"</span>,  <span class="at">single.row=</span><span class="cn">TRUE</span>, <span class="at">header=</span><span class="cn">FALSE</span>, <span class="at">digits=</span><span class="dv">3</span>,  <span class="at">omit.stat=</span><span class="fu">c</span>(<span class="st">"LL"</span>,<span class="st">"ser"</span>),  <span class="at">star.cutoffs=</span><span class="fu">c</span>(<span class="fl">0.05</span>,<span class="fl">0.01</span>,<span class="fl">0.001</span>),    <span class="at">dep.var.caption=</span><span class="st">"Dependent Variable: Dispute"</span>, <span class="at">dep.var.labels.include=</span><span class="cn">FALSE</span>,  <span class="at">covariate.labels=</span><span class="fu">c</span>(<span class="st">"Survival Time"</span>, <span class="st">"Survival Time2"</span>, <span class="st">"Survival Time3"</span>, <span class="st">"Democracy"</span>),  <span class="at">notes=</span><span class="fu">c</span>(<span class="st">"Standard errors in parentheses"</span>, <span class="st">"Significance levels:  *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05"</span>), <span class="at">notes.append =</span> <span class="cn">FALSE</span>,  <span class="at">align=</span><span class="cn">TRUE</span>,  <span class="at">font.size=</span><span class="st">"small"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Dependent Variable: Dispute
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time
+</td>
+<td>
+-0.823<sup>***</sup> (0.035)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time2
+</td>
+<td>
+0.051<sup>***</sup> (0.004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Survival Time3
+</td>
+<td>
+-0.001<sup>***</sup> (0.0001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Democracy
+</td>
+<td>
+-0.065<sup>***</sup> (0.007)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-1.298<sup>***</sup> (0.065)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+20,990
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+5,650.709
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+Standard errors in parentheses
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td style="text-align:right">
+Significance levels: *** p&lt;0.001, ** p&lt;0.01, * p&lt;0.05
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dpm4 <span class="ot">&lt;-</span><span class="fu">glm</span>(dispute <span class="sc">~</span> stime<span class="sc">+</span>stime2<span class="sc">+</span>stime3<span class="sc">+</span>deml<span class="sc">+</span>caprat, <span class="at">family=</span><span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data=</span>survivaldp )</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># copy estimation data for avg effects</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>dppred <span class="ot">&lt;-</span> survivaldp</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># df for output</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">time=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (d <span class="cf">in</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="dv">10</span>)) {</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    df[<span class="fu">paste0</span>(<span class="st">"p"</span>, d<span class="sc">+</span><span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  df[<span class="fu">paste0</span>(<span class="st">"Se"</span>, d<span class="sc">+</span><span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># predictions</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (d <span class="cf">in</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="dv">10</span>)) {</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  dppred<span class="sc">$</span>deml <span class="ot">&lt;-</span> d</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">34</span>,<span class="dv">1</span>)) {  </span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  dppred<span class="sc">$</span>stime <span class="ot">&lt;-</span> t</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  dppred<span class="sc">$</span>stime2 <span class="ot">&lt;-</span> t<span class="sc">^</span><span class="dv">2</span> </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  dppred<span class="sc">$</span>stime3 <span class="ot">&lt;-</span> t<span class="sc">^</span><span class="dv">3</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(dpm4, <span class="at">newdata=</span>dppred, <span class="at">type=</span><span class="st">"response"</span>, <span class="at">se=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  df[t, <span class="fu">paste0</span>(<span class="st">"p"</span>, d<span class="sc">+</span><span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred<span class="sc">$</span>fit, <span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  df[t, <span class="fu">paste0</span>(<span class="st">"Se"</span>, d<span class="sc">+</span><span class="dv">10</span>)] <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred<span class="sc">$</span>se.fit, <span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  df<span class="sc">$</span>time[t] <span class="ot">&lt;-</span> t</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>time, <span class="at">y=</span>p0)) <span class="sc">+</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color=</span><span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>p0<span class="fl">-1.96</span><span class="sc">*</span>Se0, <span class="at">ymax=</span>p0<span class="fl">+1.96</span><span class="sc">*</span>Se0), <span class="at">fill=</span><span class="st">"#6CC24A"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>p10), <span class="at">color=</span><span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>p10<span class="fl">-1.96</span><span class="sc">*</span>Se10, <span class="at">ymax=</span>p10<span class="fl">+1.96</span><span class="sc">*</span>Se10), <span class="at">fill=</span><span class="st">"#A7DA92"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>p20), <span class="at">color=</span><span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>p20<span class="fl">-1.96</span><span class="sc">*</span>Se20, <span class="at">ymax=</span>p20<span class="fl">+1.96</span><span class="sc">*</span>Se20), <span class="at">fill=</span><span class="st">"#005A43"</span>, <span class="at">alpha=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Time since last dispute"</span>, <span class="at">y=</span><span class="st">"Pr(Dispute)"</span>) <span class="sc">+</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">size =</span> <span class="fl">0.15</span>,</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">linetype =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="discretehazards24_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="an-alternative---transitions" class="level2">
+<h2 class="anchored" data-anchor-id="an-alternative---transitions">An alternative - transitions</h2>
+<p>What happens if we lag <span class="math inline">\(y\)</span> as we might with a continuous variable (say, in OLS), such that the estimation model is</p>
+<p><span class="math display">\[y_t = \beta_0 + \beta_1(x_1) + \ldots + \gamma(y_{t-1}) + \varepsilon\]</span></p>
+<p>With binary time series data, lagging <span class="math inline">\(y\)</span> would measure changes of state - these are a class known as transition models (there are a variety of these).</p>
+<p>In general, these are interactive models where</p>
+<p><span class="math display">\[Pr(y_i=1) = F(x_{i,t}\beta + y_{i,t-1}*x_{i,t} \gamma)\]</span></p>
+<p>and <span class="math inline">\(\gamma\)</span> measures the difference in effect when <span class="math inline">\(y_{i,t-1} = 0\)</span> (this is just <span class="math inline">\(\beta\)</span>), and when <span class="math inline">\(y_{i,t-1}  = 1\)</span>; denote this <span class="math inline">\(\alpha\)</span>. So <span class="math inline">\(\gamma = \beta - \alpha\)</span>. That difference indicates the conditional probability of state transitions from the state where <span class="math inline">\(y\)</span> takes on one value, to the state where it takes on the other value.</p>
+<p>Transition models are useful, but measure something fundamentally different from the latent hazard rate, or the chances of failure given a history of survival. Put differently, lagging <span class="math inline">\(y\)</span> in a binary variable model does not measure memory or persistence; it does not measure the extent to which the observed value today depends on the value yesterday; it does not measure how the latent probability of failure today depends on surviving through yesterday.</p>
+</section>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<ul>
+<li>We relaxed the assumption of temporal independence.</li>
+<li>Did so by conceiving of the QI as a hazard rather than a probability.</li>
+<li>Built a model that estimates <span class="math inline">\(h(t)\)</span> such that we don’t have to assume <span class="math inline">\(h(t)\)</span> is constant.</li>
+<li>Have permitted memory in the model such that the past can shape the present.</li>
+</ul>
+<p><img src="software.jpeg" class="img-fluid"></p>
+
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-becktuck" class="csl-entry" role="listitem">
+Beck, Nathaniel, Jonathan M. Katz, and Richard Tucker. 1998. <span>“Beyond Ordinary Logit: Taking Time Seriously in Binary Time-Series Cross-Section Models.”</span> <em>American Journal of Political Science</em> 42 (4): 1260–88.
+</div>
+<div id="ref-carter2010back" class="csl-entry" role="listitem">
+Carter, David B, and Curtis S Signorino. 2010. <span>“Back to the Future: Modeling Time Dependence in Binary Data.”</span> <em>Political Analysis</em> 18 (3): 271–92.
+</div>
+<div id="ref-onealrussett97" class="csl-entry" role="listitem">
+Oneal, John R., and Bruce M. Russett. 1997. <span>“The Classic Liberals Were Right: Democracy, Interdependence, and Conflict, 1950-1985.”</span> <em>International Studies Quarterly</em> 4 (2): 267–94.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

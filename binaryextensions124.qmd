@@ -458,7 +458,7 @@ stargazer(list(dpm1,dpm2), type="html",  single.row=TRUE, header=FALSE, digits=3
 
 ------------------------------------------------------------------------
 
-And compute the ROC for each model - here's Claude.ai and I have written a function to compute the ROC and AUC for each model, and then plot them on the same space.
+And compute the ROC for each model - here Claude.ai and I have written a function to compute the ROC and AUC for each model, and then plot them on the same space.
 
 
 ```{r, warning=FALSE, message=FALSE}
