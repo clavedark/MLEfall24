@@ -11,3 +11,5 @@ title: "Slides"
 [Maximization Methods](llfmax24.qmd) - [video](https://youtu.be/I0KEvpVcDJw)
 
 [Binary Model Extensions I](binaryextensions124.qmd) 
+
+[Discrete Hazards](discretehazards24.qmd)
