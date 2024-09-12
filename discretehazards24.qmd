@@ -546,26 +546,11 @@ this is still a constant baseline hazard with the effects of $x$ deviating aroun
   - with all $x$ variables set to zero, the probability of failure is now given by the constant and the appropriate dummy or counter coefficient. 
   - Note the quantity of interest is not constant across time: it's a conditional probability; the probability of failing at $t$ given the estimated probability of  survival through $t-1$ - $h(t)|S(t)$.
 
+------------------------------------------------------------------------
 
+Here's what the survival time counter looks like in the democratic peace data:
 
-
-### Monotonic hazard
-
-So how to deal with this, incorporating memory: thinking in terms of hazards rather than probabilities (i.e., conditional rather than unconditional probabilities), what if we measure survival time?
-
-  - The binary $y$ variable is an indicator of failure at $t$; the model estimates $f(t)$, which we've said is not especially informative since subjects might fail before $t$. 
-  - Think of the number of periods up to failure as the cumulative survival time, $S(t)$. 
- 
- See how we're starting to construct the hazard rate by its parts.
-
-Here's an example in the democratic peace data: 
-
-$dispute = \beta_0+ \beta_1(survival)$
-
-```{r, results='asis'}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
+```{r, results='asis', echo=FALSE}
 
 dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
 
@@ -586,6 +571,45 @@ process_data <- function(data) {
 }
 
 survivaldp <- process_data(dp)
+
+```
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+sdpshort <- survivaldp %>% head(160) %>% dplyr::select(dyad, year, dispute, stime)
+
+library(kableExtra)
+tibble(sdpshort)%>% 
+    kable("html", caption="Survival Time, Democratic Peace Data") %>% 
+  kable_styling("striped", full_width = F) %>% 
+  column_spec(1, border_right = T) %>% 
+  column_spec(2, border_right = T) 
+
+```
+
+
+### Monotonic hazard
+
+So how to deal with this, incorporating memory: thinking in terms of hazards rather than probabilities (i.e., conditional rather than unconditional probabilities), what if we measure survival time?
+
+  - The binary $y$ variable is an indicator of failure at $t$; the model estimates $f(t)$, which we've said is not especially informative since subjects might fail before $t$. 
+  - Think of the number of periods up to failure as the cumulative survival time, $S(t)$. 
+ 
+ See how we're starting to construct the hazard rate by its parts.
+
+Here's an example in the democratic peace data: 
+
+$dispute = \beta_0+ \beta_1(survival)$
+
+```{r, results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
 
 dpm2 <-glm(dispute ~ stime, family=binomial(link="logit"), data=survivaldp )
 
@@ -636,6 +660,8 @@ The baseline hazard is no longer constrained to be constant, though it can be if
     - include dummy variables - these are discrete time indicators based on the counter.
     - include cubic splines or lowess estimates - these are smoothed time functions based on the counter.
     - include polynomials of the time counter.
+
+
 
 ### Non-monotonic hazard
  
