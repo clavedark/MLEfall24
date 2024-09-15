@@ -1,0 +1,288 @@
+---
+title: "Exercise #2 Answers"
+subtitle: "PLSC 606J, Fall 2024"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+format: 
+  html
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+
+# knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+
+ library(knitr)
+# library(datasets)
+library(tidyverse)
+library(ggplot2)
+# library(haven) #read stata w/labels
+# library(countrycode)
+library(patchwork)
+# library(mvtnorm)
+# library(modelsummary)
+# library("GGally")
+library(stargazer)
+library(maxLik)
+
+```
+
+
+Please answer the following questions. All answers should be coded in **R** and submitted in PDF format, created either in LaTeX or in R Markdown (Quarto). Please turn in both **R** scripts and PDFs on Brightspace. 
+
+For this assignment, the only **R** libraries you need (should use) are 
+
+  - `maxLik` for optimizing the log-likelihood function,
+  - `modelsummary` for summary tables of data, regression results or,
+  - `stargazer` for nice tables of regression results.
+
+
+This is the hardest assignment of the semester. I want you to know that, and to know that I know it's hard. Work hard to get this stuff - it'll pay off.
+
+The assignment asks you to write a program to estimate binomial regression models with different link functions. The aim here is to emphasize the parts of the log-likelihood function, and how straightforwardly we can change the link function. The assignment also is designed to push on the programming skill of writing functions. 
+
+Should you pull parts of my code from the maximization slides? Yes, of course. Should you consult AI bots? As a secondary source, sure, but please don't start there. Please do not rely on bots to write this because I'll ask you to explain your work, and things will devolve accordingly. 
+
+
+{{< pagebreak >}}
+
+
+1. Please write a program in R to estimate a binomial regression model with a logit link function. The program should allow you to estimate a model using the CES data (so should allow $X$ variables), and you should write it to maximize the function using the `maxLik` library. Please write a couple of paragraphs explaining how your program works, why it's built the way it is, and what you learned from writing it.
+
+
+2. Please use the program you wrote to estimate the CES model from last week's assignment, and report the results in a professional table. Compare them to the GLM model from last week - are they the same? [no need to report the GLM, just comment on the comparison.]
+
+
+## Logit 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+ces <- read.csv("/users/dave/documents/teaching/606J-mle/2024/exercises/ex1/ces.csv", header=TRUE)
+
+cesanalysis <- ces %>% mutate(pro = ifelse(prochoice == "Support", 1, 0), concealw = ifelse(conceal == "Support", 1, 0), buildwall = ifelse(wall == "Support", 1, 0), repealaca=ifelse(aca == "Support", 1, 0), white=ifelse(race == "White", 1, 0), vote=ifelse(votechoice == "Joe Biden (Democrat)", 1, ifelse(votechoice == "Donald J. Trump (Republican)", 0, NA))) 
+
+# remove all na values
+
+cesanalysis <- na.omit(cesanalysis)
+
+# llf
+llf <- function(beta, y, X) {
+  probs <- plogis(X %*% beta)
+  loglik <- sum(y * log(probs) + (1 - y) * log(1 - probs))
+  return(loglik)
+}
+
+# logit set up - enter data
+logit<- function(data, y_var, x_vars) {
+  
+  # Prepare the data, add constant
+  y <- data[[y_var]]
+  X <- as.matrix(cbind(1, data[, x_vars]))
+
+  # starting values
+  start_b <- rep(0, ncol(X))
+
+#Maximize the log-likelihood
+  result <- maxLik(logLik = llf,
+                   start = start_b,
+                   method = "BFGS",
+                   y = y,
+                   X = X)
+
+  # Return the results
+  return(result)
+}
+
+
+m1 <- logit(cesanalysis, y_var = "vote", x_vars = c("age", "white", "pro"))
+summary(m1)
+
+mglm <- glm(vote ~ age + white + pro, data = cesanalysis, family = binomial(link = "logit"))
+summary(mglm)
+
+
+```
+
+
+3. Using the same program structure, alter the program to estimate a probit model. 
+
+4. Estimate the CES model using your probit program, and report the results in a professional table. Compare them to the GLM model from last week - are they the same? [no need to report the GLM, just comment on the comparison.]
+
+
+
+
+## Probit
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+ces <- read.csv("/users/dave/documents/teaching/606J-mle/2024/exercises/ex1/ces.csv", header=TRUE)
+
+cesanalysis <- ces %>% mutate(pro = ifelse(prochoice == "Support", 1, 0), concealw = ifelse(conceal == "Support", 1, 0), buildwall = ifelse(wall == "Support", 1, 0), repealaca=ifelse(aca == "Support", 1, 0), white=ifelse(race == "White", 1, 0), vote=ifelse(votechoice == "Joe Biden (Democrat)", 1, ifelse(votechoice == "Donald J. Trump (Republican)", 0, NA))) 
+
+# remove all na values
+
+cesanalysis <- na.omit(cesanalysis)
+
+# llf
+llf <- function(beta, y, X) {
+  probs <- pnorm(X %*% beta)
+  loglik <- sum(y * log(probs) + (1 - y) * log(1 - probs))
+  return(loglik)
+}
+
+# logit set up - enter data
+probit<- function(data, y_var, x_vars) {
+  
+  # Prepare the data, add constant
+  y <- data[[y_var]]
+  X <- as.matrix(cbind(1, data[, x_vars]))
+
+  # starting values
+  start_b <- rep(0, ncol(X))
+
+#Maximize the log-likelihood
+  result <- maxLik(logLik = llf,
+                   start = start_b,
+                   method = "BFGS",
+                   y = y,
+                   X = X)
+
+  # Return the results
+  return(result)
+}
+
+
+m1 <- probit(cesanalysis, y_var = "vote", x_vars = c("age", "white", "pro"))
+summary(m1)
+
+mglm <- glm(vote ~ age + white + pro, data = cesanalysis, family = binomial(link = "probit"))
+summary(mglm)
+
+
+```
+
+
+
+5. Using the same program structure, please write a program to estimate a cloglog regression (so the link function is the cloglog). 
+
+6. Estimate the CES model using your cloglog program, and report the results in a professional table.
+
+
+## Cloglog
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+ces <- read.csv("/users/dave/documents/teaching/606J-mle/2024/exercises/ex1/ces.csv", header=TRUE)
+
+cesanalysis <- ces %>% mutate(pro = ifelse(prochoice == "Support", 1, 0), concealw = ifelse(conceal == "Support", 1, 0), buildwall = ifelse(wall == "Support", 1, 0), repealaca=ifelse(aca == "Support", 1, 0), white=ifelse(race == "White", 1, 0), vote=ifelse(votechoice == "Joe Biden (Democrat)", 1, ifelse(votechoice == "Donald J. Trump (Republican)", 0, NA))) 
+
+# remove all na values
+
+cesanalysis <- na.omit(cesanalysis)
+
+# llf
+llf <- function(beta, y, X) {
+  probs <- 1-exp(-exp(X %*% beta))
+  loglik <- sum(y * log(probs) + (1 - y) * log(1 - probs))
+  return(loglik)
+}
+
+# logit set up - enter data
+cloglog<- function(data, y_var, x_vars) {
+  
+  # Prepare the data, add constant
+  y <- data[[y_var]]
+  X <- as.matrix(cbind(1, data[, x_vars]))
+
+  # starting values
+  start_b <- rep(0, ncol(X))
+
+#Maximize the log-likelihood
+  result <- maxLik(logLik = llf,
+                   start = start_b,
+                   method = "BFGS",
+                   y = y,
+                   X = X)
+
+  # Return the results
+  return(result)
+}
+
+
+m1 <- cloglog(cesanalysis, y_var = "vote", x_vars = c("age", "white", "pro"))
+summary(m1)
+
+mglm <- glm(vote ~ age + white + pro, data = cesanalysis, family = binomial(link = "cloglog"))
+summary(mglm)
+
+
+```
+
+
+7. Using the cloglog estimates, please produce average effects and present them in a professional plot. 
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+mcloglog <- glm(vote ~ age + white + pro, data = cesanalysis, family = binomial(link = "cloglog"))
+
+# Average effects
+
+
+# average effects
+#pro=0
+cesplotdata <- cesanalysis
+medianpred <-numeric(length(95))
+age <- 0
+medianse <- numeric(length(95))
+for (i in seq(18, 95, 1)) {
+  cesplotdata$pro <- 0
+  cesplotdata$age <- i-17
+  predictions <- data.frame(predict(mcloglog, type = "response", se=TRUE, newdata=cesplotdata))
+  medianpred[i-17]<- median(predictions$fit, na.rm=TRUE)
+  medianse[i-17] <- median(predictions$se.fit, na.rm=TRUE)
+  age[i-17] <- i
+  pro <-0
+}
+  p1<- data.frame(age= age, pro=pro, xb = medianpred, se=medianse)
+# pro = 1
+for (i in seq(18, 95, 1)) {
+  cesplotdata$pro <- 1
+  cesplotdata$age <- i-17
+  predictions <- data.frame(predict(mcloglog, type = "response", se=TRUE, newdata=cesplotdata))
+  medianpred[i-17]<- median(predictions$fit, na.rm=TRUE)
+  medianse[i-17] <- median(predictions$se.fit, na.rm=TRUE)
+  age[i-17] <- i
+  pro <- 1
+}
+  p2<- data.frame(age= age, pro= pro, xb = medianpred ,se=medianse)
+allpredictions <- rbind(p1, p2)  
+  
+## predictions by prochoice using color="#005A43" and "#6CC24A" for ribbon fills
+
+ggplot(data=allpredictions, aes(x=age, y=xb, color=factor(pro))) +
+  geom_line() +
+  geom_ribbon(aes(ymin=xb-se, ymax=xb+se, fill=factor(pro)), alpha=.2) +
+  labs(y="Predicted Probability", x="Age") +
+  ggtitle("Predicted Probabilities of Voting for Biden by Age and Pro-Choice Stance") +
+  scale_color_manual(values=c("#005A43", "#6CC24A")) +
+  scale_fill_manual(values=c("#005A43", "#6CC24A")) +
+  theme_minimal()
+
+```
+

@@ -1,0 +1,339 @@
+---
+title: "Exercise #1 Answers"
+subtitle: "PLSC 606J, Fall 2024"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: today
+date-format: long
+format: 
+  html
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+
+# knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+
+ library(knitr)
+# library(datasets)
+library(tidyverse)
+library(ggplot2)
+# library(haven) #read stata w/labels
+# library(countrycode)
+library(patchwork)
+# library(mvtnorm)
+# library(modelsummary)
+# library("GGally")
+ library(stargazer)
+
+```
+
+
+Please answer the following questions. All answers should be coded in **R** and submitted in PDF format, created either in LaTeX or in R Markdown (Quarto). Please turn in both **R** scripts and PDFs on Brightspace. 
+
+For this assignment, the only **R** libraries you need (should use) are 
+
+- tidyverse for data management
+- ggplot2 for plotting
+- patchwork for question #1 plots
+- modelsummary for summary tables of data, regression results or,
+- stargazer for nice tables of regression results 
+
+This assignment is aimed at developing coding skills/habits, an understanding of probability distributions, their relationship to data, and some basic data management.
+
+{{< pagebreak >}}
+For this section, please write out all PDF/CDF equations - that is, do not use built-in R functions (e.g. `plogis`, etc.).
+
+1. Please replicate this figure. What do the PDFs describe? What do the CDFs describe?
+
+```{r echo=FALSE, fig.align = "center"}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+xb <- runif(1000, min=-4, max=4)
+logitcdf <- 1/(1+exp(-xb))
+cauchycdf <- 1/2 + atan(xb)/pi
+logitpdf <- exp(xb)/(1+exp(xb))^2
+cauchypdf <- 1/(pi*(1+xb^2))
+
+df <- data.frame(xb, logitcdf, cauchycdf, logitpdf, cauchypdf)
+
+#cdf  
+cdf <- ggplot(data=df, aes(x=xb, y=logitcdf)) +
+  geom_line() +
+  geom_line(aes(y=cauchycdf),  linetype="dotted"  ) +
+  annotate("text", x = 0, y = .9, label = "Logistic") +
+  annotate("text", x = -3, y = .15, label = "Cauchy") +
+  labs(y="Pr(Y=1)",  x=expression(x*beta)) +
+  ggtitle("Cauchy and Logistic CDFs")
+            
+pdf <- ggplot(data=df, aes(x=xb, y=logitpdf)) +
+  geom_line() +
+  geom_line(aes(y=cauchypdf), linetype="dotted" ) +
+  annotate("text", x = 0, y = .35, label = "Cauchy") +
+  annotate("text", x = -2.8, y = .2, label = "Logistic") +
+  labs(y="Pr(Y=1)", x=expression(x*beta)) +
+  ggtitle("Cauchy and Logistic PDFs") +
+  theme_minimal()
+
+pdf-cdf
+```
+
+
+{{< pagebreak >}}
+
+2. Please replicate this figure - it overlays plots of:
+  - the logistic CDF
+  - the cloglog CDF
+  - the loglog CDF
+
+Comment on the differences among the three. 
+
+```{r echo=FALSE, fig.align = "center"}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# plot CDFs for logistic, cloglog, and loglog distributions
+
+xb <- seq(-4, 4, length.out=1000)
+logistic <- 1/(1+exp(-xb))
+cloglog <- 1-exp(-exp(xb))
+loglog <- exp(-exp(-xb)) 
+
+df <- data.frame(xb, logistic, cloglog, loglog)
+
+ggplot(data=df, aes(x=xb, y=logistic)) +
+  geom_line() +
+  geom_line(aes(y=cloglog), linetype="dotted") +
+  geom_line(aes(y=loglog), linetype="twodash") +
+  annotate("text", x = 1.25, y = .85, label = "Logistic") +
+  annotate("text", x = -.5, y = .8, label = "Cloglog") +
+  annotate("text", x = 0, y = .2, label = "Loglog") +
+  labs(y="Pr(Y=1)", x=expression(x*beta)) +
+  ggtitle("Logistic, Cloglog, and Loglog CDFs")
+
+
+```
+{{< pagebreak >}}
+
+3. Please replicate this figure - it overlays plots of:
+  - the logistic CDF with intercept of zero
+  - the logistic CDF with intercept of -1
+  - the logistic CDF with intercept of +1
+
+Please describe what you see happening at the intercept changes. Compare these intercept shifts to intercept shifts in the linear model.
+
+
+```{r echo=FALSE, fig.align = "center"}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+#logit cdf at -2, -1, 0, 1, 2
+
+xb <- seq(-4, 4, length.out=1000)
+
+logitcdfm1 <- 1/(1+exp(-xb-1))
+logitcdf0 <- 1/(1+exp(-xb))
+logitcdf1 <- 1/(1+exp(-xb+1))
+
+df <- data.frame(xb, logitcdfm1, logitcdf0, logitcdf1)
+
+ggplot(data=df, aes(x=xb, y=logitcdf0)) +
+  geom_line() +
+  geom_line(aes(y=logitcdfm1), linetype="longdash") +
+  geom_line(aes(y=logitcdf1), linetype="dashed") +
+  annotate("text", x = 1.5, y = .4, label = "Intercept=-1") +
+  annotate("text", x = 0, y = .5, label = "Intercept=0") +
+  annotate("text", x = -1.7, y = .6, label = "Intercept=+1") +
+  labs(y="Pr(Y=1)", x=expression(x*beta)) +
+  ggtitle("Logistic CDFs with Intercept Shifts")
+
+
+
+
+```
+{{< pagebreak >}}
+4. Please replicate this figure - it overlays plots of:
+
+  - the skewed logit CDF with shape parameter of 1
+  - the skewed logit CDF with shape parameter of 2
+  - the skewed logit CDF with shape parameter of .5
+
+Please describe what you see happening at the shape parameter changes. How are these similar/different from the logistic CDF?
+
+```{r echo=FALSE, fig.align = "center"}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+#overlay skewed logit cdfs
+
+xb <- seq(-4, 4, length.out=1000)
+
+scobit1 <- 1/((1+exp(-xb))^1)
+scobit0 <- 1/((1+exp(-xb))^2)
+scobitp5 <- 1/((1+exp(-xb))^.5)
+
+df <- data.frame(xb, scobit1, scobit0, scobitp5)
+
+ggplot(data=df, aes(x=xb, y=scobit1)) +
+  geom_line() +
+  geom_line(aes(y=scobit0), linetype="dotted") +
+  geom_line(aes(y=scobitp5), linetype="longdash") +
+  annotate("text", x = 1.5, y = .4, label = "shape=1") +
+  annotate("text", x = 0, y = .5, label = "shape=0") +
+  annotate("text", x = -1.7, y = .6, label = "shape=-1") +
+  labs(y="Pr(Y=1)", x=expression(x*beta)) +
+  ggtitle("Skewed Logit CDFs")
+
+
+
+
+```
+
+{{< pagebreak >}}
+
+5.  Please write code that simulates data for a binary $y$ variable, from the equation $y = \beta_0*-1  + \beta_1*.5 x + \beta_2*-.5$. The output should be a data frame of 1000 observations with a binary $y$ variable, a constant, and 2 $x$ variables. 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+set.seed(8675309)
+n <- 10000
+X <- matrix(rnorm(n * 2), ncol = 2)
+true_beta <- c(-1, 0.5, -0.5)
+z <- cbind(1, X) %*% true_beta
+prob <- 1 / (1 + exp(-z))
+y <- rbinom(n, 1, prob)
+
+```
+
+6. Please write (in proper math notation, not code) a likelihood and log-likelihood function for a binary $y$ variable using the cloglog as the link function. 
+
+cloglog link function:
+
+$$ g(p) = 1 - \exp(-\exp(x \beta)) $$
+cloglog likelihood function:
+
+$$ L(\beta | y) = \prod_{i=1}^n \left[ \left(1 - \exp(-\exp(x \beta)) \right)^{y_i} \left( 1 - 1 - \exp(-\exp(x \beta)) \right)^{1-y_i} \right] $$
+
+cloglog log-likelihood function:
+
+$$ \ln L(\beta | y) = \sum_{i=1}^n \left[ y_i \log \left(1 - \exp(-\exp(x \beta)) \right) + (1 - y_i) \log \left(1 - 1 - \exp(-\exp(x \beta)) \right) \right] $$
+
+
+
+7. Please write the log-likelihood function from above in R code as a `function`.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+clogloglik <- function(beta, y, X) {
+  xb <- cbind(1, X) %*% beta
+  prob <- 1 - exp(- exp(xb))
+  -sum(y * log(prob) + (1 - y) * log(1 - prob))
+}
+
+```
+
+{{< pagebreak >}}
+
+You'll find a dataset alongside this assignment called `ces.csv`. It contains data from the Cooperative Election Study for the 2020 election via the "American Voter Bot" on Twitter. Variable descriptions are in the data. More information is in the notes section below. 
+
+You'll need to look carefully at the variables, recode/clean as necessary prior to estimation - please include all code for this so it can be replicated.
+
+8. Please estimate  logit and probit models predicting vote choice as a function of whatever variables you think are relevant. Please present a professional table of the estimates in side-by-side columns and discuss. Explain your thinking about the models - why did you include these variables, and what do you expect? 
+
+9. Compute odds ratios for variables of interest in the logit model and discuss. 
+
+10. Please generate predicted probabilities and intervals from both models and present professional plots (separately, one plot for each model). For the logit, please use average effects; for the probit, please use at-mean effects. For both, the $x$ axis should be a continuous variable; for each, please plot two lines, one for each value of a binary variable of interest. Please write code for these (i.e. do not use built-in functions).
+
+```{r, results='asis', warning=FALSE, message=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+ces <- read_csv("ces.csv")
+
+cesanalysis <- ces %>% mutate(pro = ifelse(prochoice == "Support", 1, 0), concealw = ifelse(conceal == "Support", 1, 0), buildwall = ifelse(wall == "Support", 1, 0), repealaca=ifelse(aca == "Support", 1, 0), white=ifelse(race == "White", 1, 0), vote=ifelse(votechoice == "Joe Biden (Democrat)", 1, ifelse(votechoice == "Donald J. Trump (Republican)", 0, NA))) 
+
+
+m3 <- glm(vote ~ age + white + pro , data=cesanalysis, family=binomial(link="logit"))
+#summary(m3)
+
+stargazer(m3, type="html")
+
+```
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# average effects
+#pro=0
+cesplotdata <- cesanalysis
+medianpred <-numeric(length(95))
+age <- 0
+medianse <- numeric(length(95))
+for (i in seq(18, 95, 1)) {
+  cesplotdata$pro <- 0
+  cesplotdata$age <- i-17
+  predictions <- data.frame(predict(m3, type = "response", se=TRUE, newdata=cesplotdata))
+  medianpred[i-17]<- median(predictions$fit, na.rm=TRUE)
+  medianse[i-17] <- median(predictions$se.fit, na.rm=TRUE)
+  age[i-17] <- i
+  pro <-0
+}
+  p1<- data.frame(age= age, pro=pro, xb = medianpred, se=medianse)
+# pro = 1
+for (i in seq(18, 95, 1)) {
+  cesplotdata$pro <- 1
+  cesplotdata$age <- i-17
+  predictions <- data.frame(predict(m3, type = "response", se=TRUE, newdata=cesplotdata))
+  medianpred[i-17]<- median(predictions$fit, na.rm=TRUE)
+  medianse[i-17] <- median(predictions$se.fit, na.rm=TRUE)
+  age[i-17] <- i
+  pro <- 1
+}
+  p2<- data.frame(age= age, pro= pro, xb = medianpred ,se=medianse)
+allpredictions <- rbind(p1, p2)  
+  
+## predictions by prochoice using color="#005A43" and "#6CC24A" for ribbon fills
+
+ggplot(data=allpredictions, aes(x=age, y=xb, color=factor(pro))) +
+  geom_line() +
+  geom_ribbon(aes(ymin=xb-se, ymax=xb+se, fill=factor(pro)), alpha=.2) +
+  labs(y="Predicted Probability", x="Age") +
+  ggtitle("Predicted Probabilities of Voting for Biden by Age and Pro-Choice Stance") +
+  scale_color_manual(values=c("#005A43", "#6CC24A")) +
+  scale_fill_manual(values=c("#005A43", "#6CC24A")) +
+  theme_minimal()
+
+
+
+
+```
+
+
+
+
+
+
+{{< pagebreak >}}
+
+## Notes
+
+The CES project site is [https://cces.gov.harvard.edu](https://cces.gov.harvard.edu). Here's an article about the "American Voter Bot" project: [https://www.nytimes.com/2020/01/20/opinion/twitter-democratic-debate.html?smtyp=cur&smid=tw-nytopinion](https://www.nytimes.com/2020/01/20/opinion/twitter-democratic-debate.html?smtyp=cur&smid=tw-nytopinion)
+
+
+
+
+    

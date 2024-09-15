@@ -2,3 +2,8 @@
 title: "Code"
 ---
 
+[exercise #1](ex12024answers.qmd)
+
+[exercise #2](ex22024answers.qmd)
+
+
