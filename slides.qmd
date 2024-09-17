@@ -13,3 +13,5 @@ title: "Slides"
 [Binary Model Extensions I](binaryextensions124.qmd) 
 
 [Discrete Hazards](discretehazards24.qmd)
+
+[Binary Model Extensions II](binaryextensions224.qmd)

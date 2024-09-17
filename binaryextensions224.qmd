@@ -1,5 +1,5 @@
 ---
-title: "Symmetry, Classification, and Model Fit"
+title: "Binomial Topics: Ordered $y$, non-constant variance"
 author: "Dave Clark"
 institute: "Binghamton University"
 date: "`r Sys.Date()`"
@@ -39,598 +39,1276 @@ library(sjPlot)
 library(highcharter)
 
 ```
-
-# Goals
-
-  -   symmetry - what are the implications of using symmetric links, especially given data on $y$?
-  -   classification
-  -   model evaluation and fit 
-  -   rareness - what happens when there are few events?  
-
-We're going to start with symmetry, then thinking about prediction and classification and fit.
-
-# Symmetry
-
-The logit and probit models use link functions with symmetric CDFs - so half the probability mass is on either side of $Pr(y=1) =.5$ , and the steepest rate of change in the curve is at $Pr(y=1) = .5$.
-
-Nagler argues that we should worry about symmetry in some cases; where a binary dependent variable is skewed, perhaps. We already know that the "transition point" of .5 is not very meaningful with such data.
-
-## Symmetry and Asymmetry
-
-Compare three CDFs: the logistic, the clog-log, and a skewed logit function. The logistic is symmetric, the clog-log and skewed logit are not. You should notice the probability associated with x=0 for each function - the logistic is .5, the clog-log is about .64, and the skewed logit is about than .71.
-
-For skewed binary $y$ variables, it could be that one of these CDFs is a more appropriate link function than the symmetric logistic or normal. Implementing these merely requires substituting the appropriate CDF into the log-likelihood function.
+  
+ 
 
 
-```{r, warning=FALSE, message=FALSE}
+
+
+# Extensions of the Binary Model
+
+The binary model serves as the root, or really a special case, of many other models. More generally, the binomial distribution informs many models beyond the binary variable ones. 
+
+  -   instead of a binary choice, we can consider multiple choices simply by extending the utility model logic, and expanding the on/off switches in the LLF (weeks 8, 9).
+  - we can consider multiple ordered choices (we'll look at this today).
+  - we can relax the assumption observations are independent over time, that the DGP has no memory (discrete hazards - last time).
+  - we can relax the constant variance assumption (today).
+  - we can relax the symmetry assumption in the link function (2 weeks ago). 
+  - we can take binary events, binomially distributed, count them up over time, and treat them as discrete (Poisson) event counts (week 10).
+  
+Today, we'll discuss models for ordered $y$ variables, and how to address non-constant variance in the probit model.
+
+# Ordered $y$ Variables
+
+So far, we've considered the binary dependent variable. One straightforward extension of this model is the ordered regression - where $y$ takes on more than 2 values, and we assume those values are ordered. This is a significant assumption. But it's useful to show how easily these models simply extend the binary models.
+
+
+
+## Revisiting continuous v. discrete measures
+
+
+  - Continuous variables (interval, ratio level) have meaningful distances between discrete observations and can be infinitely divided.  
+  - We could, for instance, infinitely divide a measure of income into finer and finer units.  The distances between these units would be equal and meaningful in some fashion.  
+  - Discrete variables, on the other hand, only take on certain values.
+ - Those values may or may not indicate order, value or magnitude, and the intervals between values generally are not meaningful nor are they equal.  
+ - Discrete indicators cannot reasonably be subdivided in meaningful ways as a general rule.
+
+
+
+In spite of this distinction, it is not uncommon for scholars to use a continuous data model (e.g. OLS) to examine data that are by their nature discrete.  While the results of doing so are not always awful, they are suboptimal.  If we treat a discrete ordered variable as if it is continuous, we are explicitly assuming that the distances between categories are equal.  If this assumption is met, our estimates of $\beta$ might be unbiased (though the errors will be heteroskedastic and nonnormal); if this assumption is not met, then even the $\beta$s are biased. 
+
+
+## Discrete Ordered Variables
+
+When we are interested in predicting an ordered (discrete) variable, we can turn to the ordered logit and probit models - these are natural extensions of the binary models we've already discussed and are not that much more complicated.  I will focus on the ordered probit because it is more common in the literature, and because it can be easily extended to accommodate non constant errors.
+
+
+
+What sorts of measures are ordinal? Likert scales, ranks, survey responses, eg. how much do you trust government to protect you from terrorists?
+
+   - not at all.
+   - somewhat.
+   - substantially.
+   - completely.
+ 
+
+We can receive 4 meaningful responses (the fifth less meaningful response would be "no opinion, don't know") - we'd need this category for exhaustiveness. 
+
+
+
+These observed responses represent some latent variable, *trust in government*.  We cannot directly observe this variable but can measure and observe these discrete manifestations of the unobserved variable. 
+
+
+When we estimate and interpret the discrete variable model, we are interested in the effect of $x_i$ on the underlying latent variable $y^{*}$, though we only measure $y_{i}$.  We are really interested in the probability of any given level of trust in government, not in whether the mean of $y$ is 2.3 or 2.6; in fact, is this mean even meaningful?  Given the latent variable motivation, no. This is part of the problem with linear regression on such variables.
+
+
+## Latent Variable Motivation
+
+Begin with the binary case - assume a latent quantity we're interested, denoted $y^*$, but our observations of $y$ are limited to successes ($y_i=1$) and failures ($y_i=0$).
+
+\begin{eqnarray}
+y^{*}=\mathbf{x_i \beta}+\epsilon_i \nonumber
+\end{eqnarray}
+
+
+for $y^{*}$, the latent variable,
+
+
+$$ y_{i} = \left\{ \begin{array}{ll}
+         0, & \mbox{if $-\infty < y^{*}_{i} \leq \tau_1 $} \\
+         1, & \mbox{if $\tau_1 < y^{*}_{i} \leq \infty$}
+         \end{array}
+     \right. $$
+
+
+where $\tau_1$ is an unobserved threshold. 
+
+
+Make probabilities statements, and let $\tau_1=0$, 
+
+\begin{eqnarray}
+Pr(y_i=1) = Pr(y^{*}_{1}>0) \nonumber \\ \nonumber \\
+=Pr(\mathbf{x_i \beta}+\epsilon_i>0) \nonumber \\ \nonumber \\
+=Pr(\epsilon_i>-\mathbf{x_i \beta}) \nonumber 
+\end{eqnarray}
+
+If $F(\cdot)$ is symmetric, then
+
+\begin{eqnarray}
+Pr(y_i=1)= Pr(\epsilon_i<\mathbf{x_i \beta}) \nonumber 
+\end{eqnarray}
+
+
+
+
+\begin{eqnarray}
+Pr(y_i=1)=Pr(\epsilon_i<\mathbf{x_i \beta}) \nonumber \\ \nonumber \\
+=F(\mathbf{x_i \beta}) \nonumber 
+\end{eqnarray}
+
+Relate to the binomial: 
+
+\begin{eqnarray}
+\pi_i= Pr(y_i=1)=  F(\mathbf{x_i \beta})    \nonumber \\
+1-\pi_i=Pr(y_i=0)= 1-F(\mathbf{x_i \beta}) \nonumber
+\end{eqnarray}
+
+
+
+Let $\tau_1=0$ (as above); let $-\infty = \tau_0$; let $\infty=\tau_2$. We now have $j$ categories of $y$ ($j=2$ in the binary case above), and we have $j+1=3$ unobserved thresholds, $\tau_0, \tau_1, \tau_2$:
+
+$$ y_{i} = \left\{ \begin{array}{ll}
+         0, & \mbox{if $\tau_0 < y^{*}_{i} \leq \tau_1 $} \\
+         1, & \mbox{if $\tau_1 < y^{*}_{i} \leq \tau_2$}
+         \end{array}
+     \right. $$
+
+and extending, 
+
+$$ y_{i} = \left\{ \begin{array}{ll}
+         0, & \mbox{if $\tau_0 < y^{*}_{i} \leq \tau_1 $} \\
+         1, & \mbox{if $\tau_1 < y^{*}_{i} \leq \tau_2$} \\
+         2, & \mbox{if $\tau_2 < y^{*}_{i} \leq \tau_3$} \\
+         3, & \mbox{if $\tau_3 < y^{*}_{i} \leq \tau_4 $} \\
+          &$\ldots$ \\
+          j, & \mbox{if $\tau_{j-1} < y^{*}_{i} \leq \tau_j $} \\
+         \end{array}
+     \right. $$
+
+As before, let $\tau_0= -\infty$, $\tau_j=\infty$, and $\tau_1=0$; so we need to estimate $j-3$ thresholds or values of $\tau$.
+
+
+Let's relate the formal statement of what we observe ($y_i=  j, \mbox{if }  \tau_{j-1} \leq y^{*}$ etc.) to the survey example.   
+
+What are the $\tau$s?  These are the cutpoints or dividing thresholds between categories of our observed variable, $y$. Thus, $\tau_{1}$ is the threshold between respondents that fall in the zero category and those that fall in the one category; $\tau_{2}$ is the threshold between one and two, etc. 
+
+These thresholds represent an important link between our underlying latent variable and the observed variable insofar as the thresholds measure the probability on the normal curve where we make the transition from one category to the other.  
+
+
+Recall where we started with the latent variable as a linear function of systematic and random components:
+
+\begin{eqnarray}
+y^{*}=\mathbf{x_i \beta}+\epsilon_i \nonumber
+\end{eqnarray}
+
+Substitute:
+
+$$y_{i} = \left\{ \begin{array}{ll}
+         0, & \mbox{if $\tau_0 < x_i \beta+\epsilon_i \leq \tau_1 $} \\
+         1, & \mbox{if $\tau_1 < x_i \beta+\epsilon_i \leq \tau_2$} \\
+         2, & \mbox{if $\tau_2 < x_i \beta+\epsilon_i \leq \tau_3$} \\
+         3, & \mbox{if $\tau_3 < x_i \beta+\epsilon_i \leq \tau_4 $} \\
+          &$\ldots$ \\
+          j, & \mbox{if $\tau_{j-1} < x_i \beta+\epsilon_i\leq \tau_j $} \\
+         \end{array}
+     \right. $$
+
+
+
+
+
+If we had a survey question asking "How secure do you feel personally given the Department of Homeland Security's handling of terrorist threats?" with the following results,
+
+
+   - not secure at all, I hide under the bed most days - 32\%
+   - somewhat secure, i've got lots of duct tape - 12\%
+   - very secure, i like the color charts a lot - 22\%
+   - more secure than I've ever felt, bring it on big daddy - 30\%
+
+
+then these percentages represent the probability at which we shift from one category to the next. So these probabilities divide the normal (in the probit model) into 4 regions each containing the correct mass. 
+
+
+\begin{eqnarray}
+\tau_1 = \Phi^{-1} (.32) = z(.32) = -.47  \nonumber
+\end{eqnarray}
+
+\noindent so the cutpoint or threshold is at -.47. The second threshold ($\tau_2$) would be at
+
+\begin{eqnarray}
+\tau_2 = \Phi^{-1} (.32 + .12) =  -.15 \nonumber \\
+\tau_3 = \Phi^{-1} (.32 + .12 + .22) =  .52  \nonumber
+\end{eqnarray}
+
+
+
+
+
+## Cut points
+
+```{r}
 #| echo: true
 #| code-fold: true
 #| code-summary: "code"
 
+# normal pdf with vertical lines at -0.47, -.15, .52
+
+z <- runif(100, -3, 3 )
+pz <- dnorm(z)
+
+ggplot() + 
+  geom_line(aes(x=z, y=pz), color="blue") +
+  geom_vline(xintercept = -0.47, color="red") +
+  geom_vline(xintercept = -0.15, color="red") +
+  geom_vline(xintercept = 0.52, color="red") +
+  labs(title="Normal Distribution with Cutpoints") +
+  theme_minimal()
+
+```
+
+
+
+
+As a general rule, the probability $y_i=j$ is given by:
+
+\begin{eqnarray}
+Pr(y_i=j)= F(\tau_{j} -x_i\beta) - F(\tau_{j-1} - x_i\beta) \nonumber 
+\end{eqnarray}
+
+so in the survey,  the probability $y_i=1$ is the area between the two thresholds that delineate $y_i=1$; so the area beneath $\tau_1$ and $\tau_0=-\infty=0$
+
+\begin{eqnarray}
+Pr(y_i=1)= F(\tau_{1} - x_i\beta) - 0 \nonumber \\
+\mbox{or in the probit model} \nonumber \\
+Pr(y_i=1)= \Phi(\tau_{1} - x_i\beta)  \nonumber
+\end{eqnarray}
+
+This formulation gives us the probability any observation falls in the area between thresholds, and thus provides us estimates of the probability of observing any particular value of the dependent variable.
+
+
+
+\begin{eqnarray}
+Pr(y_i=1)= \Phi(\tau_{1} - x_i\beta)  \nonumber \\
+Pr(y_i=2)= \Phi(\tau_{2} - x_i\beta) - \Phi(\tau_{1} - x_i\beta)  \nonumber \\
+Pr(y_i=3)= \Phi(\tau_{3} - x_i\beta) -\Phi(\tau_{2} - x_i\beta)  \nonumber \\
+Pr(y_i=4)= 1- \Phi(\tau_{4} - x_i\beta) \nonumber
+\end{eqnarray}
+
+because $\tau_4 = \infty = 1$.
+
+
+
+
+### Aside on Link Functions
+
+I've only written this with a Normal (probit) link but the logit is just as easy:
+
+\begin{eqnarray}
+Pr(y_i=1)= F(\tau_{1} - x_i\beta) - 0 \nonumber \\
+Pr(y_i=1)= \Lambda(\tau_{1} - x_i\beta) \\ \nonumber
+Pr(y_i=1)= 1/(1+exp(-(\tau_{1} - x_i\beta)))  \nonumber
+\end{eqnarray}
+
+
+
+## Example
+
+Recall our survey questions:
+
+
+  - not secure at all.
+  - somewhat secure.
+  - very secure.
+  - more secure than I've ever felt, bring it on big daddy.
+
+
+And imagine we also have data on respondents' 
+
+
+  - years of education (0-16)
+  - gender (0 = female; 1 = male)
+  - party id (0 = democrat; 1 = republican)
+
+
+
+Suppose we use an ordered probit to regress survey response (increasing in security), on education, gender, and party: 
+
+```{=latex}
+\begin{table}[!ht]
+\begin{center}  \caption{Fake Estimates: Perceptions of Security} \label{tab:security}
+\begin{tabular}{lccccccccc} 
+\hline \hline \\
+X  & $\widehat{\beta}$ & s.e.\\ \hline \\
+gender  & -1.0 & (.22) \\
+party id  &  +2.0 & (.034)  \\
+education  &  +0.6 & (.11)  \\
+constant & -4.0 & (1.2) \\ 
+$\tau_2$  &  +1.5 & (.51)  \\
+$\tau_3$  &  +3 & (.42) \\
+
+\hline \hline 
+\end{tabular}
+\end{center}
+\end{table}
+
+```
+
+
+Recall that  $\tau_0=-\infty$;  $\tau_1=0$;  and $\tau_4=+\infty =1$; the constant shifts $\tau_1$.
+
+
+Shifting $x\beta$ shifts the curve left and right \ldots
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
 
 # Load required libraries
-library(highcharter)
-library(dplyr)
+library(ggplot2)
+library(gridExtra)
 
-# Binghamton University colors
-binghamton_green <- "#005A43"
-binghamton_gray <- "#707070"
-binghamton_yellow <- "#FFC726"
+# Set seed for reproducibility
+set.seed(123)
 
-# Generate data
-x <- seq(-5, 5, length.out = 1000)
-logistic_cdf <- plogis(x)
-cloglog_cdf <- 1 - exp(-exp(x))
+# Create data
+n <- 1000
+z <- seq(-5, 10, length.out = n)
 
-# Skewed logit function (shape parameter = 0.5)
+# Calculate normal densities
+a <- dnorm(z, mean = 4.2, sd = sqrt(12))
+b <- dnorm(z, mean = 5.2, sd = sqrt(12))
 
-skewed_logit_cdf <- 1 / (1 + exp(-x)) ^ 0.5 
+
+# Define thresholds
+t1 <- 0
+t2 <- 1.5
+t3 <- 4
 
 # Create data frame
-df <- data.frame(x = x, logistic = logistic_cdf, cloglog = cloglog_cdf, skewed_logit = skewed_logit_cdf)
+df <- data.frame(z = z, a = a, b = b)
 
-# Create the highchart
-hc <- highchart() %>%
-  hc_chart(type = "line") %>%
-  hc_title(text = "Comparison of CDFs: Logistic, Clog-log, and Skewed Logit") %>%
-  hc_xAxis(
-    title = list(text = "x"),
-    plotLines = list(
-      list(
-        color = "#999",
-        width = 2,
-        value = 0,
-        zIndex = 3,
-        label = list(text = "x = 0")
-      )
-    )
-  ) %>%
-  hc_yAxis(
-    title = list(text = "Cumulative Probability"),
-    plotLines = list(
-      list(
-        color = "#999",
-        width = 2,
-        value = 0.5,
-        zIndex = 3,
-        label = list(text = "y = 0.5")
-      )
-    )
-  ) %>%
-  hc_tooltip(
-    shared = TRUE,
-    formatter = JS("function() {
-      return 'x: ' + this.x.toFixed(4) + '<br>' +
-             'Logistic: ' + this.points[0].y.toFixed(4) + '<br>' +
-             'Clog-log: ' + this.points[1].y.toFixed(4) + '<br>' +
-             'Skewed Logit: ' + this.points[2].y.toFixed(4);
-    }")
-  ) %>%
-  hc_plotOptions(series = list(marker = list(enabled = FALSE))) %>%
-  
-  # Add logistic CDF
-  hc_add_series(
-    data = df,
-    type = "line",
-    name = "Logistic",
-    color = binghamton_green,
-    hcaes(x = x, y = logistic)
-  ) %>%
-  
-  # Add clog-log CDF
-  hc_add_series(
-    data = df,
-    type = "line",
-    name = "Clog-log",
-    color = binghamton_gray,
-    hcaes(x = x, y = cloglog)
-  ) %>%
-  
-  # Add skewed logit CDF
-  hc_add_series(
-    data = df,
-    type = "line",
-    name = "Skewed Logit",
-    color = binghamton_yellow,
-    hcaes(x = x, y = skewed_logit)
-  )
+# Function to create plots
+create_plot <- function(data, y_var, title, x_beta) {
+  ggplot(data, aes(x = z)) +
+    geom_line(aes_string(y = y_var)) +
+    geom_vline(xintercept = c(t1, t2, t3), linetype = "dotted") +
+    geom_text(aes(x = 0, y = 0.014, label = "τ[1]"), parse = TRUE, hjust = 0) +
+    geom_text(aes(x = 1.5, y = 0.014, label = "τ[2]"), parse = TRUE, hjust = 0) +
+    geom_text(aes(x = 4, y = 0.014, label = "τ[3]"), parse = TRUE, hjust = 0) +
+    geom_text(aes(x = -3, y = 0.057, label = paste0("xβ=", x_beta)), hjust = 0) +
+    geom_text(aes(x = -4, y = 0.072, label = title), hjust = 0) +
+    #theme_minimal() +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+          axis.title = element_blank(), legend.position = "none")  
+}
 
-# Display the chart
-hc
+# Create plots
+p1 <- create_plot(df, "a", "Male, Republican, HS grad", 4.2)
+p2 <- create_plot(df, "b", "Female, Republican, HS grad", 5.2)
 
+# Combined plot
+p3 <- ggplot(df, aes(x = z)) +
+  geom_line(aes(y = a), color = "blue") +
+  geom_line(aes(y = b), color = "red") +
+  geom_vline(xintercept = c(t1, t2, t3), linetype = "dotted") +
+  geom_text(aes(x = 0, y = 0.014, label = "τ[1]"), parse = TRUE, hjust = 0) +
+  geom_text(aes(x = 1.5, y = 0.014, label = "τ[2]"), parse = TRUE, hjust = 0) +
+  geom_text(aes(x = 4, y = 0.014, label = "τ[3]"), parse = TRUE, hjust = 0) +
+  geom_text(aes(x = -3, y = 0.05, label = "xβ=4.2"), hjust = 0) +
+  geom_text(aes(x = 6.0, y = 0.099, label = "Female, Republican, HS grad"), hjust = 0) +
+  geom_text(aes(x = 6.5, y = 0.08, label = "xβ=5.2"), hjust = 0) +
+  geom_text(aes(x = -4, y = 0.067, label = "Male, Republican, HS grad"), hjust = 0) +
+  #geom_text(aes(x = -4, y = 0.072, label = "Shift in latent variable given change in xβ. Difference is estimate on Gender (β=-1)"), hjust = 0) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title = element_blank(), legend.position = "none") +
+   labs(caption="Shift in latent variable given change in xβ. Difference is estimate on Gender (β=-1)")
+ 
+
+
+p1/p2/p3
+ 
 ```
 
-## Skewed Logit
-
-@Nagler94 proposes the skewed logit (scobit) model - it's a binary response model, the usual LLF, with a different link (the Burr-10):
-
-$$ Pr(y=1) = \frac{1}{(1+e^{-x\beta})^\alpha}$$
-
-Note that if $\alpha=1$ this is the logistic CDF. If it is less than 1, the fastest rate of change is at $Pr(y =1 < .5)$; when greater than 1, the fastest rate of change, is at $Pr(y=1 > .5)$
-
-Nagler's logic is that symmetric links require the assumption that individuals in the model are most sensitive to the effects of the $X$ variables at or around $Pr(y=1) = .5$. Looking at the (symmetric) logit curve above, you can see that's where the derivative with respect to changes in $x$ is greatest. If $y$ is about half ones, half zeros, this may make sense - but often, we have $y$ variables that are not symmetrically distributed like this. It makes sense in such cases *not* to assume the fastest rate of change, and the transition point from zero to one, is at $Pr(y=1) = .5$.  
-
-The scobit model allows us to estimate the $\alpha$ parameter, which tells us where the fastest rate of change is in the CDF - that is, the transition point is an empirical question, not an assumption.
-
-
-The model appears rarely in the political science literature; a Google Scholar search indicates most of its use is transportation analysis. A cursory survey also indicates the scobit estimates are often not that different from logit estimates. Estimation sometimes is funky insofar as we cannot always  tell if changes in the likelihood are due to changes in $\beta$ or in $\alpha$. 
-
-
-## Symmetry
-
-The big point here is not that we should or should not use the scobit, but that we need to be very aware that the assumption in models with symmetric links is that the biggest effect of an $x$ variable is at $Pr(y=1) = 0.5$ which is where $x\beta=0$.
-
-## Why does symmetry matter?
-
--   symmetry determines where the greatest effect of $x$ is.
--   symmetry ensures rates of change above and below $x=0$ are the same as they approach the limits.
--   symmetry implies the theoretical threshold, $\tau$, separating observed zeros and ones is $\tau=0.5$.
--   if we want to use the model to generate predicted values of $y$ (rather than $y^*$), we need some threshold for classification.
-
-Some (very few) questions naturally link to a clear threshold like 0.5 \ldots election outcomes? But \ldots are we measuring the correct outcome variable?
-
-# Classification
-
-How do we know how well or poorly the model is predicting? Binary variable models are often referred to as *classification* models - they classify or sort observations into two categories. So the natural question is "how well is this sorting or classifying?"
-
-To know that, we need to sort our predictions into zeros and ones - we need some threshold - which is related to the assumption of symmetry?
-
-One common way to answer the "how well" question is classify predictions into zero and one categories, and generate a 2x2 table of predicted and observed values of $y$. To determine whether a predicted value of $y$ is zero or one, we need some value of $\tau$ on which to sort, then examine the intersection of:
-
--   observed values of $y$.
--   predicted values of $y$.
-
-given the threshold, $\tau$.
-
-## Confusion Matrix
-
-The "confusion matrix" (I didn't make this up) illustrates that intersection and identifies where our classification is "confused."
-
-
-::: {.r-stack}
-:::{.fragment .absolute left=0}
 ```{r}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-
-library(kableExtra)
-# opts <- options(knitr.kable.NA = "")
-df <- data.frame("Predicted Positive" = c("True Positive", "False Positive"), "Predicted Negative" = c("False Positive", "True Negative"), "Rate" = c("TPR=TP/P", "FPR=FP/N"))
-row.names(df) <- c("Observed Positive", "Observed Negative")
-
-tbl <- kbl(df, align = rep('c', 4)) |> 
-  column_spec(2:4, border_left = T) |> 
-  column_spec(1,  bold=T) |>
-  column_spec(1:4, width = "2cm", color = 'white', background = '#005A43', include_thead = TRUE) |>
-  column_spec(2:4, background = "inherit", color="inherit") |>
-  row_spec(1, extra_css = "border-bottom: 1px solid") |>
-  kable_paper("hover", bootstrap_options = c("condensed", "responsive"), full_width = F, font_size = 20)
-tbl
-
-```
-:::
-:::
-
-------------------------------------------------------------------------
-
-  - True Positive Rate: correctly classify positive outcomes. This is often called "sensitivity."
-  
-  - False Positive Rate: we incorrectly classify negative outcomes ($y=0$) as positive ($y=1$). This is often called "1-specificity." Specificity is the True Negative Rate, or the probability of correctly classifying a negative outcome ($y=0$).
-
-
-## Using the Confusion Matrix to Measure Model Fit
-
-So here's the deal:
-
--   estimate the model.
--   generate the predicted probability $y=1$ for each observation.
--   assume a threshold separating zeros and ones; usually $\tau=0.5$.
--   if $Pr(y=1 \geq 0.5)$, predict a positive outcome (predict $y=1$).
--   if $Pr(y=0 < 0.5)$, predict a negative outcome (predict $y=0$).
--   using the observed and predicted outcomes, generate a confusion table, and compute measures of fit like "percent correctly predicted" (PCP) and "proportional reduction of error" (PRE).
-
-### Percent Correctly Predicted (PCP)
-
-One thing we can do is sum the main diagonal and divide by the estimation sample: $(TP+TN)/N$. This gives us the Percent Correctly Predicted (PCP).
-
-### Proportional Reduction of Error (PRE)}
-
-A second thing is to compute the Proportional Reduction of Error (PRE) - the difference between the correct predictions of the model versus a null model usually the unconditional frequency of $y$ - in other words, we use the Percent in the Modal Category (PCM) of the $y$ variable.
-
-$$\frac{correct_{\text{informed}} - correct_{\text{null}}}{N - correct_{\text{null}}} $$
-
-or
-
-$$\frac{PCP- PMC}{1-PMC} $$
-
-### Example: NAFTA vote, 1993
-
-So here's a model predicting members of the US House votes for or against the NAFTA treaty in 1993: 1 is a "yes" vote; the $x$ variables are party (Democrat) and an ideology score.
-
-```{r, warning=FALSE, message=FALSE, results='asis' }
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-
-nafta <- read.csv("NAFTA.csv")
-
-naftamodel <- glm(vote ~ democrat + cope93, data=nafta, family=binomial(link="logit"))
-
-stargazer(naftamodel, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: NAFTA vote", dep.var.labels.include=FALSE,  covariate.labels=c("Party (Democrat=1)", "Ideology (COPE score)"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
-
-
-```
-
-------------------------------------------------------------------------
-
-And here's the confusion matrix from that model assuming a threshold of $\tau=.5$ - it compares the observed vote frequency against how we classify our predictions based on a predicted probability greater than or less than 0.5. This is generated using the `caret` package in R.
-
-
-```{r, warning=FALSE, message=FALSE}
 #| echo: true
 #| code-fold: true
 #| code-summary: "code"
 
 # Load required libraries
-library(caret)
+library(plotly)
 
-# Assuming you have a fitted GLM object called 'glm_model'
-# and test data 'test_data' with actual outcomes in 'test_data$actual'
+# Set seed for reproducibility
+set.seed(123)
 
-test_data <- nafta %>% dplyr::select(vote, democrat, cope93) %>% mutate(actual = vote)
-# Make predictions on the test data
-predictions <- predict(naftamodel, newdata = test_data, type = "response")
+# Create data
+n <- 1000
+z <- seq(-5, 10, length.out = n)
 
-# Create confusion matrix
-# You may need to adjust the threshold (default is 0.5)
-predicted_classes <- ifelse(predictions > 0.5, 1, 0)
-conf_matrix <- confusionMatrix(factor(predicted_classes), factor(test_data$actual))
+# Calculate normal densities
+a <- dnorm(z, mean = 4.2, sd = sqrt(12))
+b <- dnorm(z, mean = 5.2, sd = sqrt(12))
 
-# Print confusion matrix
-print(conf_matrix)
+# Define thresholds
+t1 <- 0
+t2 <- 1.5
+t3 <- 4
 
+# Create data frame
+df <- data.frame(z = z, a = a, b = b)
+
+# Create the interactive plot
+plot <- plot_ly() %>%
+  add_lines(x = ~z, y = ~a, data = df, name = "Male", line = list(color = "#005A43"), visible = TRUE) %>%
+  add_lines(x = ~z, y = ~b, data = df, name = "Female", line = list(color = "#6CC24A"), visible = FALSE) %>%
+  add_segments(x = t1, xend = t1, y = 0, yend = 0.045, line = list(dash = "solid",color = "#6CC24A"), showlegend = FALSE) %>%
+  add_segments(x = t2, xend = t2, y = 0, yend = 0.045, line = list(dash = "solid",color = "#6CC24A"), showlegend = FALSE) %>%
+  add_segments(x = t3, xend = t3, y = 0, yend = 0.045, line = list(dash = "solid", color = "#6CC24A"), showlegend = FALSE) %>%
+  add_annotations(x = c(0, 1.5, 4), y = 0.014, text = c("τ[1]", "τ[2]", "τ[3]"), showarrow = FALSE) %>%
+  layout(
+    showlegend = FALSE,
+    xaxis = list(title = "", range = c(-5, 10)),
+    yaxis = list(title = "", showticklabels = FALSE),
+    annotations = list(
+      list(x = -3, y = 0.05, text = "xβ=4.2", showarrow = FALSE, visible = TRUE),
+      list(x = -4, y = 0.059, text = "Male, Republican, HS grad", showarrow = FALSE, visible = TRUE),
+      list(x = -3, y = 0.01, text = "xβ=5.2", showarrow = FALSE, visible = FALSE),
+      list(x = -4, y = 0.059, text = "Female, Republican, HS grad", showarrow = FALSE, visible = FALSE),
+      list(x = -4, y = 0.028, text = "Shift in latent variable given change in xβ.<br>Difference is estimate on Gender (β=-1)", showarrow = FALSE, visible = FALSE)
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.1,
+        y = 1.2,
+        buttons = list(
+          list(method = "update",
+               args = list(
+                 list(visible = c(TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE)),
+                 list(title = "Male, Republican, HS grad",
+                      annotations = list(
+                        list(x = -3, y = 0.05, text = "xβ=4.2", showarrow = FALSE, visible = TRUE),
+                        list(x = -4, y = 0.059, text = "Male, Republican, HS grad", showarrow = FALSE, visible = TRUE)
+                      ))
+               ),
+               label = "Figure 1"),
+          list(method = "update",
+               args = list(
+                 list(visible = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)),
+                 list(title = "Female, Republican, HS grad",
+                      annotations = list(
+                        list(x = -3, y = 0.05, text = "xβ=5.2", showarrow = FALSE, visible = TRUE),
+                        list(x = -4, y = 0.059, text = "Female, Republican, HS grad", showarrow = FALSE, visible = TRUE)
+                      ))
+               ),
+               label = "Figure 2"),
+          list(method = "update",
+               args = list(
+                 list(visible = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)),
+                 list(title = "Combined Plot",
+                      annotations = list(
+                        list(x = -3, y = 0.05, text = "xβ=4.2", showarrow = FALSE, visible = TRUE),
+                        list(x = -4, y = 0.059, text = "Male, Republican, HS grad", showarrow = FALSE, visible = TRUE),
+                        list(x = 6.5, y = 0.059, text = "Female, Republican, HS grad", showarrow = FALSE, visible = TRUE),
+                        list(x = 6.5, y = 0.05, text = "xβ=5.2", showarrow = FALSE, visible = TRUE),
+                        list(x = -4, y = 0.028, text = "Shift in latent variable given change in xβ.<br>Difference is estimate on Gender (β=-1)", showarrow = FALSE, visible = TRUE)
+                      ))
+               ),
+               label = "Figure 3")
+        )
+      )
+    )
+  )
+
+# Save the plot as an HTML file
+htmlwidgets::saveWidget(plot, "interactive_ordered_probit_plot.html")
+
+
+plot
 
 ```
 
-You should see the main diagonal presents the number of correct predictions - the off-diagonal elements are the incorrect predictions. If we sum the main diagonal and divide by $N$, we get the Percent Correctly Predicted (PCP). In this case, the PCP is 0.735 - 73.5% of the votes are correctly predicted.
-
-This all depends on the threshold (.5) - in the case of a Congressional vote, especially a relatively close vote like this one, the threshold might not be crazy. But it might be in other cases, and arbitrarily choosing a value for $\tau$ is problematic. So another approach is to compute the ROC curve. 
-
-
-What makes this work relatively well in the NAFTA context? As you'll see below, it works less well in the democratic peace models.
-
-### Example: Democratic Peace
-
-Here's a basic democratic peace model:
-
-
-```{r, warning=FALSE, message=FALSE, results='asis' }
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-
-dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
-
-dpm1 <-glm(dispute ~ border+deml+caprat+ally, family=binomial(link="logit"), data=dp )
-
-stargazer(dpm1, type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: Dispute", dep.var.labels.include=FALSE,  covariate.labels=c("Shared Border", "Democracy", "Capabilities Ratio", "Allies"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
-
-
-```
-
-Let's generate the confusion matrix for the democratic peace model, threshold set at $\tau =0.5$:
-
+## Cumulative Probabilities
 
 ```{r}
 #| echo: true
 #| code-fold: true
 #| code-summary: "code"
 
-library(kableExtra)
-# opts <- options(knitr.kable.NA = "")
-df <- data.frame("Predicted Positive" = c("0", "0"), "Predicted Negative" = c("897", "19,245"), "Rate" = c("TPR=0/897=0", "FPR=0/19,245=0"))
-row.names(df) <- c("Observed Positive", "Observed Negative")
+t1 <- 0
+t2 <- 1.5
+t3 <- 4
 
-tbl <- kbl(df, align = rep('c', 4)) |> 
-  column_spec(2:4, border_left = T) |> 
-  column_spec(1,  bold=T) |>
-  column_spec(1:4, width = "2cm", color = 'white', background = '#005A43', include_thead = TRUE) |>
-  column_spec(2:4, background = "inherit", color="inherit") |>
-  row_spec(1, extra_css = "border-bottom: 1px solid") |>
-  kable_paper("hover", bootstrap_options = c("condensed", "responsive"), full_width = F, font_size = 20)
-tbl
+education <- 1:16
+xb_RM <- (2 - 1 - 4) + 0.4 * education
 
-```
+# probabilities
+c0 <- pnorm(t1 - xb_RM)
+c1 <- pnorm((t2 - xb_RM) + (t1 - xb_RM))
+c2 <- pnorm((t3 - xb_RM) + (t2 - xb_RM))
+c3 <- 1 - pnorm(t3 - xb_RM)
 
-The problem is $\tau$; at $\tau=.5$ we get none of the ones correct. Here's the democratic peace at $\tau = 0.1$:
+# Create data frame
+df <- data.frame(education = education, c0 = c0, c1 = c1, c2 = c2, c3 = c3)
 
-```{r}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
+binghamton_green <- "#005A43"
+binghamton_gray <- "#6CC24A"
+binghamton_black <- "#000000"
 
-library(kableExtra)
-# opts <- options(knitr.kable.NA = "")
-df <- data.frame("Predicted Positive" = c("303", "1,764"), "Predicted Negative" = c("594", "17,481"), "Rate" = c("TPR=303/897=.34", "FPR=1,764/19,245=0.092"))
-row.names(df) <- c("Observed Positive", "Observed Negative")
-
-tbl <- kbl(df, align = rep('c', 4)) |> 
-  column_spec(2:4, border_left = T) |> 
-  column_spec(1,  bold=T) |>
-  column_spec(1:4, width = "2cm", color = 'white', background = '#005A43', include_thead = TRUE) |>
-  column_spec(2:4, background = "inherit", color="inherit") |>
-  row_spec(1, extra_css = "border-bottom: 1px solid") |>
-  kable_paper("hover", bootstrap_options = c("condensed", "responsive"), full_width = F, font_size = 20)
-tbl
-
-```
-At $\tau = 0.1$, we get a TPR = 0.34 and FPR = 0.092. The PCP = (303+17481)/20142 = 0.88 \ldots which is lower, but we get about 1/3 of the ones correct. 
-
-
-## Receiver-Operator Characteristic (ROC) Curves
-
-The problem is choosing the threshold - imagine that we compute a confusion matrix for all possible thresholds, $\tau=.01, .02, .03 \ldots 1$, then compute TPR and FPR, and plot them against one another. This is an ROC curve.
-
-ROCs originate in efforts to distinguish signal from noise in radar returns - the British built a radar system before WWII to detect German air attacks; they had the problem of distinguishing planes (signal) from flocks of geese (noise). As the turned up the sensitivity of the radar, they more often correctly detected planes, but they also lacked specificity and detected more geese too. So there was a tradeoff between sensitivity (correctly identifying positive signals as positive) and specificity (incorrectly identify negative signals as positive).
-
-ROCs measure these two dimensions and graph them against one another:
-
--   sensitivity - true positive rate at every possible latent threshold between zero and one.
--   1- specificity - false positive rate at every possible latent threshold between zero and one. This is 1 minus the True Negative Rate
-
-Here's the ROC for the NAFTA model - we'll use the `pROC` package in R to compute the ROC and plot it:  
-
-
-```{r, warning=FALSE, message=FALSE}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-
-library(pROC)
-
-# NAFTA
-
-naftaroc <- roc(test_data$actual, predictions, plot=TRUE, grid=TRUE, partial.auc.correct=TRUE,
-         print.auc=TRUE)
-
-
-```
-
-
-## ROC Intepretation
-
-  -   the diagonal is a model guessing randomly zero or one - no better than a coin toss.
-
-  -   above that line, the model is improving our classification over random guesses.
-
-  -   the top left corner would indicate a model that classifies perfectly - 100% sensitivity (TPR), and 0% FPR.
-
-  -   below the diagonal line, the model is classifying worse than a coin toss would.
-
-  -   we can compute the Area Under the Curve (AUC) as a percentage - AUC is often reported to indicate model fit. In the NAFTA model, the AUC is .843. AUC closer to one indicates better fit; closer to .5 indicates worse fit, similar to random guessing.
-
-  -   we can plot ROCs from different models on the same space and compare their fits.
-
-  -   The x-axis is 1-specificity, or the False Positive Rate.
-
-
-
-## ROC Democratic Peace
-
-Here's we compare fit for two models, one including "borders," the other excluding it. Here are the two models :
-
-```{r, warning=FALSE, message=FALSE, results='asis' }
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-
-dp <- read_dta("/Users/dave/Documents/teaching/501/2023/slides/L7_limiteddv/code/dp.dta")
-
-dpm1 <-glm(dispute ~ border+deml+caprat+ally+border, family=binomial(link="logit"), data=dp )
-dpm2 <-glm(dispute ~ deml+caprat+ally, family=binomial(link="logit"), data=dp )
-  
-stargazer(list(dpm1,dpm2), type="html",  single.row=TRUE, header=FALSE, digits=3,  omit.stat=c("LL","ser"),  star.cutoffs=c(0.05,0.01,0.001),    dep.var.caption="Dependent Variable: Dispute", dep.var.labels.include=FALSE,  covariate.labels=c("Shared Border", "Democracy", "Capabilities Ratio", "Allies"),  notes=c("Standard errors in parentheses", "Significance levels:  *** p<0.001, ** p<0.01, * p<0.05"), notes.append = FALSE,  align=TRUE,  font.size="small")
-
-
-```
-
-
-------------------------------------------------------------------------
-
-And compute the ROC for each model - here Claude.ai and I have written a function to compute the ROC and AUC for each model, and then plot them on the same space.
-
-
-```{r, warning=FALSE, message=FALSE}
-#| echo: true
-#| code-fold: true
-#| code-summary: "code"
-# part written by Claude.ai
-# compute ROC curve
-compute_roc <- function(actual, predictions) {
-  # Sort actual and predictions in descending order of predicted probabilities
-  sorted_data <- data.frame(actual, predictions)
-  sorted_data <- sorted_data[order(sorted_data$predictions, decreasing = TRUE), ]
-
-  # Initialize variables
-  n_positive <- sum(actual)
-  n_negative <- length(actual) - n_positive
-  tp <- 0
-  fp <- 0
-  tpr <- c()
-  fpr <- c()
-
-  # Iterate over sorted data
-  for (i in 1:nrow(sorted_data)) {
-    if (sorted_data$actual[i] == 1) {
-      tp <- tp + 1
-    } else {
-      fp <- fp + 1
-    }
-
-    # Calculate true positive rate (TPR) and false positive rate (FPR)
-    tpr <- c(tpr, tp / n_positive)
-    fpr <- c(fpr, fp / n_negative)
-  }
-
-  # Create ROC curve
-  roc_curve <- data.frame(fpr, tpr)
-  return(roc_curve)
-}
-
-# Function to compute AUC
-compute_auc <- function(fpr, tpr) {
-  # Sort FPR and TPR
-  ord <- order(fpr)
-  fpr <- fpr[ord]
-  tpr <- tpr[ord]
-  
-  # Compute AUC using trapezoidal rule
-  auc <- sum((fpr[-1] - fpr[-length(fpr)]) * (tpr[-1] + tpr[-length(tpr)]) / 2)
-  return(auc)
-}
-
-# Democratic Peace models
-
-test_dataB <- dp %>% dplyr::select(border,deml,caprat,ally) %>% 
-  mutate(actual = dp$dispute)
-
-test_dataNB <- dp %>% dplyr::select(deml,caprat,ally) %>% 
-  mutate(actual = dp$dispute)
-
-# Make predictions on the test data
-predictionsB <- predict(dpm1, newdata = test_dataB, type = "response")
-predictionsNB <- predict(dpm2, newdata = test_dataNB, type = "response")
-
-
-roc_curveB <- compute_roc(test_dataB$actual, predictionsB)
-#AUC
-auc_border <- compute_auc(roc_curveB$fpr, roc_curveB$tpr)
-roc_curveNB <- compute_roc(test_dataNB$actual, predictionsNB)
-auc_noborder <- compute_auc(roc_curveNB$fpr, roc_curveNB$tpr)
-
-# ROC Plot, pasting auc_border and auc_noborder on plot
-
-ggplot() +
-  geom_line(data = roc_curveB, aes(x = fpr, y = tpr, color = "Borders")) +
-  geom_line(data = roc_curveNB, aes(x = fpr, y = tpr, color = "No Borders")) +
-  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "red") +
-  labs(title = "ROC Curve: Democratic Peace", x = "False Positive Rate", y = "True Positive Rate") +
+ggplot(df, aes(x = education)) +
+  geom_line(aes(y = c0, color = "Not Secure"), size = .5) +
+  geom_line(aes(y = c1, color = "Somewhat Secure"), size = .5) +
+  geom_line(aes(y = c2, color = "Very Secure"), size = .5) +
+  #geom_line(aes(y = c3, color = "Extremely Secure"), size = 1) +
+  scale_color_manual(values = c("Not Secure" = binghamton_green,
+                                "Somewhat Secure" = binghamton_gray,
+                                "Very Secure" = binghamton_black)) +
+  annotate("text", x = 1, y = 0.7, label = "Not Secure", hjust = 0, color = binghamton_green) +
+  annotate("text", x = 5, y = 0.9, label = "Somewhat Secure", hjust = 0, color = binghamton_gray) +
+  annotate("text", x = 10, y = 0.7, label = "Very Secure", hjust = 0, color = binghamton_black) +
+  labs(x = "Years of Education", y = "Pr(y=j)") +
   theme_minimal() +
-  scale_color_manual(values = c("Borders" = "#005A43", "No Borders" = "#6CC24A"))+
-  annotate("text", x = 0.75, y = 0.5, label = paste("AUC Model 1: ", round(auc_border, 2)), color = "#005A43") +
-  annotate("text", x = 0.75, y = 0.4, label = paste("AUC Model 2: ", round(auc_noborder, 2)), color = "#6CC24A")
+  theme(legend.position = "none")
 
-#bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+
 ```
 
-Also, note the measure Area Under the Curve (AUC) for each model - the AUC is often reported to indicate model fit. The AUC for the model including borders is 0.75, while the AUC for the model excluding borders is 0.72. A model with an AUC of 0.5 is no better than a coin toss, while a model with an AUC of 1 is perfect.
 
 
-# Model fit in ML models
+## Estimation
 
-Measures of model fit in ML models are relatively simple - the topic is very important insofar as our goal is to evaluate how well models fit the data, and to compare how different models fit.
+Because the ordered probit and logit models are straightforward extensions of the binary models, estimation is relatively simple.  Let's recall the probit likelihood function:
 
-Comparing model fit in the linear model we mostly accomplished using F-tests - the methods here are analogous. The *information criterion* methods covered below have exact analogs in the linear model, using the explained sum of squares rather than the log-likelihood.
+\begin{eqnarray}
+L(\beta|Y,X) = \prod\limits_{i=1}^{n} [\Phi(X \beta)]^{y_{i}} [1-\Phi(X \beta)]^{1-y_{i}}  \nonumber 
+\end{eqnarray}
+\noindent and the log likelihood as
+\begin{eqnarray}
+\ln L(\beta|Y,X) = \sum\limits_{i=1}^{n} y_{i} \ln(\Phi(X \beta)) + (1-y_{i}) \ln(1-\Phi(X \beta))  \nonumber 
+\end{eqnarray}
 
-## Single Coefficient Estimates
 
-One property of MLEs is they are asymptotically multivariate normal; inference is straightforward because the variances are also normal so the ratio of $\beta /se$ is a z-score.
 
-## Model Evaluation
+### Probit \ldots
 
-Most commonly, we evaluate model fit using one of the "trinity" of tests:
+\begin{eqnarray}
+L(\beta, \tau |Y,X) = \prod\limits_{i=1}^{n} \prod\limits_{j=1}^{m} \left[ \Phi(\tau_{j} - \beta'X)- \Phi(\tau_{j-1}- \beta'X) \right]^{y_{ij}}  \nonumber 
+\end{eqnarray}
+\noindent and the log likelihood is
+\begin{eqnarray}
+\ln L(\beta, \tau |Y,X) = \sum\limits_{i=1}^{n} \sum\limits_{j=1}^{m} y_{ij} \ln \left[ \Phi(\tau_{j}- \beta'X) - \Phi(\tau_{j-1} - \beta'X) \right]  \nonumber 
+\end{eqnarray}
 
--   log-likelihood ratio tests (LLR)
--   Wald tests
--   Lagrange Multiplier tests (LM)
+Note the LLF will turn on for $y=j$ and off for $y\neq j$ just as in the binary case. 
 
-The first two are the most common, and it's not clear one is better than the other.
 
-### Log-Likelihood Ratio Test
+and as is the case in the binary probit model, we assume $\sigma^{2}$ to be one (and in the ordered logit model to be $\frac{\pi^{2}}{3}$); put another way, we assume the model is homoskedastic.  Relaxing this assumption is just as easy in the ordered probit model as it is in the binary model since:
 
-The LLR test requires estimating two models - a null or constrained model, ($M_0$), and informed (unconstrained) model ($M_1$) - it compares the heights of the log-likelihood functions of the two models:
+\begin{eqnarray}
+\ln L(\beta, \tau |Y,X) = \sum\limits_{i=1}^{n} \sum\limits_{j=1}^{m} y_{ij} \ln \left[ \Phi \left(\frac{\tau_{j}- \beta'X}{\sigma^{2}} \right) - \Phi \left( \frac{\tau_{j-1} - \beta'X)}{\sigma^{2}} \right) \right]  \nonumber 
+\end{eqnarray}
 
-$$ \chi^2 = -2 (ln\mathcal{L}(M_0) - ln\mathcal{L}(M_1))  $$
+and we can parameterize $\sigma^{2}$ as $\exp(z \gamma)$ just as in the binary model.  
 
-The log-likelihoods here are literally the values of the $ln\mathcal{L}$ at the estimated maxima of the functions. Their difference is distributed $\chi^2$ with $k_1-k_0$ degrees of freedom.
 
-The LLR is simple to compute (you can do it in your head), but requires estimating two **nested** models. Recall, two models are nested iff the regressors in the constrained model are a strict subset of those in the unconstrained model, and the samples are identical.
+## Example
 
-### Wald $\chi^2$
+This example uses a dataset on beer quality and price.  The dataset contains the following variables:
 
-The Wald test is similar, but only requires the unconstrained or informed model. During maximization, it examines the distance between $M_0$ and $M_1$, and weights that distance by the rate of change between the two (second derivative). If the distance is large and the rate of change is fast, the informed model improves a good bit on the uninformed one. You can imagine other combinations of distance and curvature. Long (p. 88) has a great illustration of this.
+- `quality`: quality of the beer (1 = fair, 2 = good, 3 = very good, 4 = excellent)
+- `price`: price of the beer
+- `calories`: calories per serving
+- `craftbeer`: indicator for craft beer
+- `bitter`: bitterness score
+- `malty`: maltiness score
 
-### In Practice
+The $y$ variable here is the four category quality score.
 
-These two tests are asymptotically equivalent. In practice, it makes little difference in most cases which you choose, provided the models are nested.
 
-Stata reports LLR for most models, but reports Wald if you request robust standard errors.
+```{r, results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
 
-### Limits
+# Load required libraries
+library(haven)
+library(dplyr)
+library(MASS)
+library(ggplot2)
 
-The limits of these tests is they apply only to nested models - models where the regressors in the constrained model are a strict subset of those in the unconstrained model and where the samples are identical.
+# Read the beer dataset
+beer <- read_dta("/Users/dave/Documents/teaching/606J-mle/2024/topics/ordered-variance/beer.dta")
 
-### Information Criterion Tests
+# Create quality4 variable
+beer <- beer %>%
+  mutate(quality4 = ntile(quality, 4))
 
-Alternatively, we can use information criterion tests - the two most common are the Akaike and Bayesian Information Criteria tests (AIC, BIC). These are both formulated to penalize likelihoods for the number of parameters estimated; this in effect rewards better specification (good variables, but few) and penalizes "garbage can" approaches (including lots of poor predictors).
+# Fit ordered logistic regression model
+model <- polr(factor(quality4) ~ price + calories + craftbeer + bitter + malty, data = beer)
 
-IC tests are useful for either nested or nonnested models. This is a significant though under-appreciated virtue of such tests.
+stargazer::stargazer(model, type = "html")
 
-### Akaike and Bayesian Information Criterion tests
+```
+Let's make predictions of quality over the values of price (at-means):
 
-$$AIC =  -2 ln(\mathcal{L}) + 2k $$
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
 
-$$BIC =  -2 ln(\mathcal{L}) + ln(N) k $$
 
-where $k$ is the number of parameters.
+# at means data
+beersim <- data.frame(
+  calories = 60:200,
+  price = 4.96,
+  craftbeer = 0,
+  bitter = 35.44,
+  malty = 33.13
+)
 
-#### Process
+# Predict probabilities
+probs <- predict(model, newdata = beersim, type = "probs")
+beersim <- cbind(beersim, probs)
+names(beersim)[6:9] <- c("ProbFair", "ProbGood", "ProbVG", "ProbExc")
 
-*AIC:* Estimate model 1; generate the AIC. Estimate model 2; generate the AIC. The model with the smaller AIC is the preferred model (see Long 1997: 110).  
+#  plot
+ggplot(beersim, aes(x = calories)) +
+  geom_line(aes(y = ProbFair, color = "Fair"), size = 1) +
+  geom_line(aes(y = ProbGood, color = "Good"), size = 1, linetype = "dashed") +
+  geom_line(aes(y = ProbVG, color = "Very Good"), size = 1, linetype = "longdash") +
+  geom_line(aes(y = ProbExc, color = "Excellent"), size = 1, linetype = "dotdash") +
+  scale_color_manual(values = c("Fair" = "black", "Good" = "red", "Very Good" = "navy", "Excellent" = "darkgreen")) +
+  labs(y = "Predicted Probabilities", x = "Calories per Serving", color = "Quality") +
+  theme_minimal()
 
-*BIC:* Estimate model 1; generate the BIC. Estimate model 2; generate the BIC. Compute $BIC_1 - BIC_2$ - the smaller BIC value is the preferable model. The strength of the test statistic is given by Rafferty (1996): absolute value of this difference 0-2 = weak; 2-6= Positive; 6-10= Strong; greater than 10 = Very Strong (see Long 1997: 112).
+```
 
-# Rare Events
+And here, let's plot the cumulative probabilities:
 
-Rare events are common^[see what I did there?] in some areas of inquiry in political science - think of coups, wars, etc.  @kingzengexplain argue the such data present a couple of problems and aim to fix those - the paper is aimed at generating case-control-like conditions in large N data analyses. Their motives are:
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
 
--   The problem is not just that the events in question are rare, but that their relative rarity makes generating new data difficult.
--   Another, perhaps more important problem is that ML estimates in binary models of rare events are biased to the extent that the latent probability of a one is different from 0.5.
--   That bias appears in the constant - as the probability of an event falls toward zero, the bias in $\widehat{\beta_0}$ is negative.
--   This is ameliorated as the sample gets larger and larger.
--   Not surprisingly, binary models with symmetric link functions (i.e. probit and logit) do best when the latent probability of an event is at 0.5.
 
-## Rare Events Logit
+# Calculate cumulative probabilities
+beersim <- beersim %>%
+  mutate(
+    CDzero = 0,
+    CDFair = ProbFair,
+    CDGood = ProbFair + ProbGood,
+    CDVG = ProbFair + ProbGood + ProbVG,
+    CDExcellent = ProbFair + ProbGood + ProbVG + ProbExc
+  )
 
-What they propose is:
+# plot
+ggplot(beersim, aes(x = calories)) +
+  geom_area(aes(y = CDExcellent), fill = "gray20") +
+  geom_area(aes(y = CDVG), fill = "gray50") +
+  geom_area(aes(y = CDGood), fill = "gray80") +
+  geom_area(aes(y = CDFair), fill = "white") +
+  geom_line(aes(y = CDExcellent), color = "black") +
+  geom_line(aes(y = CDVG), color = "black") +
+  geom_line(aes(y = CDGood), color = "black") +
+  geom_line(aes(y = CDFair), color = "black") +
+  labs(y = "Cumulative Probabilities", x = "Calories per Serving") +
+  scale_x_continuous(limits = c(60, 200), breaks = seq(60, 200, by = 20)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.2)) +
+  theme_minimal() +
+  theme(legend.position = "none")
 
--   Select all the cases with events (failures).
--   Randomly choose a sample of the non-event (censored) cases (they say 2-5 times the size of the failure group).
--   This smaller sample makes data collection possible (compared to the gigantic number of zeros in some event data).
--   Estimate a logit on the new, smaller sample, and adjust the estimates for the sample.
 
-The Rare Events Logit doesn't appear in the literature much, though it's not uncommon for reviewers to ask for it. In my experience inferences from this model don't vary much from the usual logit. The model does present a major opportunity for data collection efforts. 
+```
+
+
+## Parallel Regression Assumption
+
+
+Ordered models rest on the **parallel regression assumption** (in the ordered logit, this is sometimes called the **proportional odds assumption**).  The parallel regression assumption requires that the effect of $X_{i}$ is $\beta$ for all categories of $Y$.  That is, the regression of $y_i$ on $x$ is parallel to the regression of $y_j$ on $x$ and so forth.  
+
+
+Suppose we have some reason to expect that $X_{i}$ increases the probability of $Y=1$, but decreases the probability of $Y=2$.  First, it seems likely we should revisit whether or not $Y$ is ordinal.  Second, since we're only estimating one value of $\beta$, it cannot simultaneously represent our expectations that $X_{i}$ increases one probability while decreasing another.  So, if we run the ordered model, we will only get one value of $\beta$ and its effect will be the same on all categories of $Y$.
+
+ 
+Here's what non-parallel regressions might look like: 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# Load required libraries
+library(ggplot2)
+library(gridExtra)
+
+# Define Binghamton University colors
+binghamton_green <- "#005A43"
+binghamton_gray <- "#8C8C8C"
+binghamton_black <- "#000000"
+binghamton_light_green <- "#4C7C6F"
+
+# Define education data
+education <- seq(0, 20, by = 0.1)
+
+# Function to calculate cumulative probabilities
+calc_cum_probs <- function(education, beta, thresholds) {
+  xb <- beta * education
+  probs <- lapply(thresholds, function(t) pnorm(t - xb))
+  do.call(cbind, probs)
+}
+
+# Parameters for parallel case
+beta_parallel <- 0.2
+thresholds_parallel <- c(-1, 0, 1)
+
+# Parameters for non-parallel case
+beta_non_parallel <- c(0.1, 0.2, 0.3)
+thresholds_non_parallel <- c(-1, 0, 1)
+
+# Calculate probabilities
+probs_parallel <- calc_cum_probs(education, beta_parallel, thresholds_parallel)
+probs_non_parallel <- cbind(
+  pnorm(thresholds_non_parallel[1] - beta_non_parallel[1] * education),
+  pnorm(thresholds_non_parallel[2] - beta_non_parallel[2] * education),
+  pnorm(thresholds_non_parallel[3] - beta_non_parallel[3] * education)
+)
+
+# Create data frames
+df_parallel <- data.frame(education = education, probs_parallel)
+df_non_parallel <- data.frame(education = education, probs_non_parallel)
+
+# Function to create plot
+create_plot <- function(df, title) {
+  ggplot(df, aes(x = education)) +
+    geom_line(aes(y = X1, color = "Y ≤ 1"), size = 1) +
+    geom_line(aes(y = X2, color = "Y ≤ 2"), size = 1) +
+    geom_line(aes(y = X3, color = "Y ≤ 3"), size = 1) +
+    scale_color_manual(values = c("Y ≤ 1" = binghamton_green,
+                                  "Y ≤ 2" = binghamton_gray,
+                                  "Y ≤ 3" = binghamton_black)) +
+    labs(x = "Years of Education", y = "Cumulative Probability", title = title, color = "Category") +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          axis.title = element_text(color = binghamton_black),
+          axis.text = element_text(color = binghamton_black),
+          panel.grid = element_line(color = "#E0E0E0"),
+          plot.title = element_text(hjust = 0.5, face = "bold"))
+}
+
+# Create plots
+p1 <- create_plot(df_parallel, "Parallel Regression (Assumption Satisfied)")
+p2 <- create_plot(df_non_parallel, "Non-Parallel Regression (Assumption Violated)")
+
+# Combine plots
+combined_plot <- grid.arrange(p1, p2, ncol = 2)
+
+```
+
+
+
+
+
+
+Evaluating the parallel regression assumption:
+
+
+  -  Estimate the ordered logit model and a multinomial model and compare how well they fit the data (compare the log-likelihood $\chi^{2}$ values).  Also examine the MNL estimates of $\beta$ for $x_i$ and see if they are the same across categories. MNL relaxes the parallel regression assumption.
+    -  A second informal way is to estimate $j-1$ individual probit or logit models, one for each additional value of $Y$.  Compare the estimates of $\beta_{j}$ with the ordered probit/logit estimate of $\beta$.  If the estimates are roughly the same, the parallel regression assumption is likely met. This is equivalent to the ordered logit/MNL comparison above.
+  - formal tests exist as well comparing models where parallel regressions is relaxed and where it's not. 
+
+
+
+The parallel lines assumption is, in my experience,  difficult to satisfy. Long & Freese (p. 168) seem to have the same experience. The assumption is extremely restrictive, and perhaps difficult to meet for two reasons:
+
+  - $y$ may not actually be ordered. 
+  - $y | \mathbf{X}$ is very likely not ordered. 
+
+
+## Relaxing Parallel Regression
+
+The Generalized ordered logit/probit is one pathway to relaxing the parallel regression assumption.  The generalized ordered logit/probit allows for the effects of $X$ to vary across categories of $y$, such that the model estimates $k-1$ values of $\beta$. The model can be unstable and produce predictions out of bounds. Here's the same model predicting beer quality, but we're relaxing the parallel regression assumption in the variables "price" and "calories" - you'll note each of these has $k-1$ coefficients. 
+
+
+
+<!-- ```{r results='asis'} -->
+<!-- #| echo: true -->
+<!-- #| code-fold: true -->
+<!-- #| code-summary: "code" -->
+<!-- # Load required libraries -->
+<!-- library(readr) -->
+<!-- library(dplyr) -->
+<!-- library(VGAM) -->
+
+<!-- # ANES 2016 data -->
+<!-- anes <- read_csv("/Users/dave/Documents/teaching/606J-mle/2020/slides/L3_binaryextensions/code/anes_pilot_2016.csv") -->
+
+<!-- # Select variables -->
+<!-- vars_to_keep <- c("bo_muslim", "pid7", "disc_wo", "lazyb", "disc_b", "faminc", "birthyr", "race", "autism", "disc_selfsex", "gender", "vaccine") -->
+<!-- anes <- anes[, vars_to_keep] -->
+
+<!-- # Recode variables -->
+<!-- anes <- anes %>% -->
+<!--   mutate( -->
+<!--     pid7 = as.numeric(pid7), -->
+<!--     bo_muslim = case_when( -->
+<!--       bo_muslim == 2 ~ 0, -->
+<!--       bo_muslim == 1 ~ 1, -->
+<!--       bo_muslim == 8 ~ NA_real_, -->
+<!--       TRUE ~ bo_muslim -->
+<!--     ), -->
+<!--     pid7 = ifelse(pid7 > 7, NA, pid7), -->
+<!--     disc_wo = ifelse(disc_wo > 7, NA, disc_wo), -->
+<!--     lazyb = ifelse(lazyb > 7, NA, lazyb), -->
+<!--     disc_b = ifelse(disc_b > 5, NA, disc_b), -->
+<!--     faminc = ifelse(faminc > 16, NA, faminc), -->
+<!--     age = 2016 - birthyr, -->
+<!--     white = ifelse(race == 1, 1, 0), -->
+<!--     # Reverse coding -->
+<!--     disc_wo = -1 * disc_wo + 6, -->
+<!--     disc_selfsex = -1 * disc_selfsex + 6, -->
+<!--     autism = -1 * autism + 7, -->
+<!--     disc_b = -1 * disc_b + 6 -->
+<!--   ) -->
+
+
+<!-- # Generalized ordered logit using VGAM -->
+<!-- gologit_model <- vglm(factor(disc_wo) ~ disc_selfsex + age + faminc + factor(gender) + pid7 + white, -->
+<!--                       family = cumulative(parallel = FALSE, reverse = TRUE), -->
+<!--                       data = anes) -->
+
+<!-- modelsummary::modelsummary(gologit_model) -->
+
+
+
+<!-- ``` -->
+
+
+
+
+```{r results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(readr)
+library(dplyr)
+library(VGAM)
+library(ggplot2)
+
+beer <- read_dta("/Users/dave/Documents/teaching/606J-mle/2024/topics/ordered-variance/beer.dta")
+
+
+beer <- beer %>%
+  mutate(quality4 = ntile(quality, 4))
+
+# Fit the generalized ordered logit model
+gologit_model <- vglm(quality4 ~ price + calories + craftbeer + bitter + malty,
+      family = cumulative(parallel = FALSE~price+calories, reverse = TRUE), data = beer)
+
+modelsummary::modelsummary(gologit_model)
+
+```
+
+Price and Calories can exert effects in different directions across categories of $y$,  hence relaxing the parallel regression assumption. 
+
+
+## Use Ordered Models with Caution \ldots
+
+My own view is ordered models rarely fit the data - our outcome variables are rarely conditionally ordered, i.e, the expected value of $y$ ordered given the variables in the model. Other models (choice models in particular) are better suited for much of our data - and we are better able to satisfy their assumptions. As the wise man says, just because something can be ordered doesn't mean it should be. Or, as the econometrician Amemyia (1985) says,
+
+"A model is unordered if it is not ordered." (Amemyia 1985, 292).
+
+
+ 
+
+# Constant Variance in Binary Response Models
+
+The assumption of constant variance is potentially a  bigger problem than in the linear model. In the linear model, the estimates are unbiased, but the errors are inefficient. In the ML setting, the estimates are inconsistent (biased) and the errors are wrong.  Consider the probit LLF: 
+
+\begin{eqnarray}
+\ln \mathcal{L} = \sum\limits_{i=1}^{n} y_{i} \ln(\Phi(x_i \beta)) + (1-y_{i}) \ln(1-\Phi(x_i \beta))  \nonumber
+\end{eqnarray}
+
+rewrite with the variance, which in the standard normal is 1, so drops out if we assume constant variance:
+
+\begin{eqnarray}
+\ln \mathcal{L} = \sum\limits_{i=1}^{n} y_{i} \ln \Phi \left( \frac{x_i \beta}{\sigma^{2}} \right) + (1-y_{i}) \ln \left[1- \Phi \left (\frac{x_i \beta}{\sigma^{2}} \right) \right] \nonumber
+\end{eqnarray}
+
+
+
+
+## Parameterizing $\sigma^2$
+
+The notion here is that the variance is neither constant nor random - it potentially arises as a function of variables, so the goal is to write the variance as a systematic function of variables and coefficients. For the probit model, let
+
+\begin{eqnarray}
+Var[\epsilon] = \sigma^{2}=[e^{z\gamma}]^{2} \nonumber \\
+\mbox{so} ~~~\sigma = e^{z\gamma} \nonumber
+\end{eqnarray}
+
+and 
+
+\begin{eqnarray}
+\mathcal{L} = \prod\limits_{i=1}^{n} \left[\Phi \frac{(X \beta)}{e^{z\gamma}} \right ]^{y_{i}} \left[1-\Phi \frac{(X \beta)}{e^{z\gamma}} \right ]^{1-y_{i}}  \nonumber
+\end{eqnarray}
+
+## Heteroskedastic Probit LLF
+
+\begin{eqnarray}
+\ln \mathcal{L} = \sum\limits_{i=1}^{n} y_{i} \ln \Phi \left( \frac{X \beta}{e^{z\gamma}} \right) + (1-y_{i}) \ln \left[1- \Phi \left (\frac{X \beta}{e^{z\gamma}} \right) \right] \nonumber
+\end{eqnarray}
+
+
+The LLF now has two unknowns, $\widehat{\beta}$ and $\widehat{\gamma}$, where $\widehat{\beta}$ represents the effects of $X$ on the mean probability of $y$, and $\widehat{\gamma}$ represents the effects of $Z$ on the variance of $y$. $X$ and $Z$ can be the same - we can anticipate that the same variables (or some of the same variables) influence the mean of $y$ and the variance of $y$.
+
+## Link Distribution for $\sigma^2$
+
+Why is
+
+\begin{eqnarray}
+\sigma^{2}=[e^{z\gamma}]^{2} \nonumber
+\end{eqnarray}
+
+The variance must:
+
+
+  - must be non-negative.
+  - if the effect of $Z$ on the variance is zero, then $\sigma^{2}$ must revert to one.
+
+
+Exponentiating $z \gamma $ accomplishes both of these goals: it will always be positive and if $z\gamma$ equals 0, then $e^{z\gamma}$ will equal one and the model is homoskedastic.  
+
+
+## What if variance is not constant?
+
+You notice that dividing the estimate by the variance presents a significant problem if the variance is larger for some groups in the data, smaller for others, but we restrict it to 1:
+
+
+  - for a group with larger variance, but restricted to 1, we over estimate $\beta$.         - for a group with smaller variance, but restricted to 1, we under estimate $\beta$. 
+
+
+So the estimates are inconsistent and the standard errors are incorrect. The bottom line is the heteroskedasticity is a bigger deal in binary response models than in the linear model. 
+
+
+
+## Thinking about the variance
+
+What does it mean for the variance to be different for different groups in the data? We are accustomed to thinking of groups in the data having different means - this is not so different. 
+
+
+  - one group in the data, given by some $x$ variable, is more diffuse or variant in its behavior on $y$ than another group.
+ - those groups may or may not share the same mean behavior. 
+
+
+
+
+<!-- ## Variances  -->
+
+<!-- ```{r} -->
+<!-- #| echo: true -->
+<!-- #| code-fold: true -->
+<!-- #| code-summary: "code" -->
+
+<!-- # plot normal PDFs with mean 0, var 1; mean -1, var 2; mean 1, var 0.5 -->
+
+<!-- z <- seq(-5, 5, length.out = 1000) -->
+<!-- a <- dnorm(z, mean = 0, sd = 1) -->
+<!-- b <- dnorm(z, mean = -1, sd = sqrt(2)) -->
+<!-- c <- dnorm(z, mean = 1, sd = sqrt(0.5)) -->
+
+<!-- df <- data.frame(z = z, a = a, b = b, c = c) -->
+
+<!-- #plot using binghamton colors and annotate in the plot; exclude legend -->
+<!-- ggplot(df, aes(x = z)) + -->
+<!--   geom_line(aes(y = a, color = "Mean 0, Var 1"), size = 1) + -->
+<!--   geom_line(aes(y = b, color = "Mean -1, Var 2"), size = 1) + -->
+<!--   geom_line(aes(y = c, color = "Mean 1, Var 0.5"), size = 1) + -->
+<!--   scale_color_manual(values = c("Mean 0, Var 1" = binghamton_green, -->
+<!--                                 "Mean -1, Var 2" = binghamton_gray, -->
+<!--                                 "Mean 1, Var 0.5" = binghamton_black)) + -->
+<!--   labs(x = "z", y = "Density", color = "Group") + -->
+<!--   theme_minimal() + -->
+<!--   theme(legend.position = "none") -->
+
+
+
+
+
+<!-- ``` -->
+
+
+## Variance of $\epsilon$
+
+The variance of $\epsilon$ in any model can be thought of like this:
+
+\begin{eqnarray}
+var(\epsilon_i)=var(\epsilon_j) \forall i,j \ldots n \nonumber
+\end{eqnarray}
+
+This is explicitly why we write the variance of the errors without a subscript - var($\epsilon$) - it is constant across all $i$.  
+
+Put slightly differently, the  distribution of $\epsilon$ is the same for all $i$. If this does not hold, then the errors are not independent and identically distributed (i.i.d.) - their distributions are different. This is just another way to state the problem of nonconstant variance. 
+
+This figure illustrates what it means for the variance to be different for different groups in the data. In the top panel, the means differ, but variances are the same. This approximates the homoskedastic case. In the bottom panel, the means differ, as do the variances. This is the heteroskedastic case. 
+
+
+
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+z <- seq(-5, 5, length.out = 1000)
+a <- dnorm(z, mean = -1, sd = .5)
+b <- dnorm(z, mean = 1, sd = .5)
+c <- dnorm(z, mean = -1, sd = .5)
+d <- dnorm(z, mean = 1, sd = sqrt(2))
+
+df1 <- data.frame(z = z, a = a, b = b)
+
+df2 <- data.frame(z = z, c = c, d = d)
+
+#plot using binghamton colors and annotate in the plot; exclude legend
+
+p1 <- ggplot(df1, aes(x = z)) +
+  geom_line(aes(y = a, color = "Mean -1, Var 1"), size = 1) +
+  geom_line(aes(y = b, color = "Mean 1, Var 1"), size = 1) +
+  scale_color_manual(values = c("Mean -1, Var 1" = binghamton_green,
+                                "Mean 1, Var 1" = binghamton_gray)) +
+  labs(x = "z", y = "Density", color = "Group") +
+  theme_minimal() +
+  theme(legend.position = "none")+
+  ggtitle("Constant Variance")
+
+p2 <- ggplot(df2, aes(x = z)) +
+  geom_line(aes(y = c, color = "Mean -1, Var 1"), size = 1) +
+  geom_line(aes(y = d, color = "Mean 1, Var 2"), size = 1) +
+  scale_color_manual(values = c("Mean -1, Var 1" = binghamton_green,
+                                "Mean 1, Var 2" = binghamton_gray)) +
+  labs(x = "z", y = "Density", color = "Group") +
+  theme_minimal() +
+  theme(legend.position = "none")+
+  ggtitle("Non-Constant Variance")
+
+p1/p2
+
+```
+
+
+
+
+
+
+## A Framework for Theory about Variance
+
+We've spent a lot of time fretting about the information in our data w.r.t. maximizing the LLF. A good bit of that information is related to the variability in the data. It makes sense to think about the sources of that variability. In building arguments, quantitative social scientists tend to obsess over central tendency, but to neglect thinking about what the dispersion in the data means. 
+
+Here's an attempt at a basic framework for thinking about variance: 
+
+
+
+
+## Variance Framework
+
+Substantively, what can variance represent?
+
+  - amount of information (certainty, uncertainty)
+   - precision, accuracy 
+   - uniformity, diversity, heterogeneity
+   - choice, constraint
+   - ability, inability 
+   - ambivalence  
+
+
+
+
+Imagine a data set of $y$ and $x$ -- suppose $x$ is binary - it might relate to the mean of $y$ and to the variance of $y$, such that: 
+
+  - an increase in $x$ is related to an increase (decrease) in $y$.
+  - an increase in $x$ is related to an increase (decrease) in the variance of $y$.
+
+
+This might be because: 
+
+   - there are two groups of observations in the data w.r.t. $x$
+   - one group has a higher/lower mean of $y$ than the other.
+   - one group is more/less heterogeneous in $y$ than the other. 
+
+
+Perhaps this is because: 
+
+   - as individuals become more informed, they prefer more $y$. This is an expectation about the mean of $y$ - as $x$ increases, the mean of $y$ increases.
+   - as individuals become more informed, they behave more uniformly in preferring $y$. This is an expectation about the variance of $y$ - as $x$ increases, the variance surrounding $y$ decreases. 
+   - less informed individuals prefer less $y$, but choose more diffusely.
+     - $x$ has two effects - increasing the mean and decreasing the variance of $y$. 
+
+
+
+## Example
+
+As an illustratio, let's estimate a model predicting whether respondents believe Barack Obama is a secret Muslim. This analysis uses data from the ANES 2016 Pilot. We'll specify two models. The probit model regresses responses to a question about whether Obama is a secret Muslim on a set of demographic and political variables; the heteroskedastic probit model posits age affects both the mean (as in the first model) and the variance. The expectation is that older voters are more likely to believe Obama is a secret Muslim, and that older voters believe this less uniformly or more diffusely than do younger voters. So we expect the effect of age on the mean to be positive, and the effect of age on the variance to be negative. Results are below - the first model is the standard probit model, the second is the heteroskedastic probit model. 
+
+
+```{r, results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(Rchoice)
+
+# ANES 2016 data
+anes <- read_csv("/Users/dave/Documents/teaching/606J-mle/2020/slides/L3_binaryextensions/code/anes_pilot_2016.csv")
+
+# Select variables
+vars_to_keep <- c("bo_muslim", "pid7", "disc_wo", "lazyb", "disc_b", "faminc", "birthyr", "race", "autism", "disc_selfsex", "gender", "vaccine")
+anes <- anes[, vars_to_keep]
+
+# Recode variables
+anes <- anes %>%
+  mutate(
+    pid7 = as.numeric(pid7),
+    bo_muslim = case_when(
+      bo_muslim == 2 ~ 0,
+      bo_muslim == 1 ~ 1,
+      bo_muslim == 8 ~ NA_real_,
+      TRUE ~ bo_muslim
+    ),
+    pid7 = ifelse(pid7 > 7, NA, pid7),
+    disc_wo = ifelse(disc_wo > 7, NA, disc_wo),
+    lazyb = ifelse(lazyb > 7, NA, lazyb),
+    disc_b = ifelse(disc_b > 5, NA, disc_b),
+    faminc = ifelse(faminc > 16, NA, faminc),
+    age = 2016 - birthyr,
+    white = ifelse(race == 1, 1, 0),
+    # Reverse coding
+    disc_wo = -1 * disc_wo + 6,
+    disc_selfsex = -1 * disc_selfsex + 6,
+    autism = -1 * autism + 7,
+    disc_b = -1 * disc_b + 6
+  )
+# Ensure disc_wo is binary for probit model
+anes <- anes %>%
+  mutate(disc_wo_binary = ifelse(disc_wo > median(disc_wo, na.rm = TRUE), 1, 0))
+
+# model 
+hetprob_model <- hetprob(bo_muslim ~ white+disc_b+pid7+age+ faminc+autism | age, data = anes, link="probit")
+
+# Compare with standard probit model
+probit_model <- glm(bo_muslim ~ white + disc_b + pid7 + age + faminc + autism, data = anes, family = binomial(link = "probit"))
+
+
+# Load required libraries
+library(Rchoice)
+library(kableExtra)
+library(dplyr)
+
+# Function to extract and format Rchoice model results
+extract_rchoice_results <- function(model) {
+  coef <- tryCatch(coef(model), error = function(e) NULL)
+  vcov_matrix <- tryCatch(vcov(model), error = function(e) NULL)
+  
+  if (is.null(coef) || is.null(vcov_matrix)) {
+    stop("Unable to extract coefficients or variance-covariance matrix from the model.")
+  }
+  
+  se <- sqrt(diag(vcov_matrix))
+  p_value <- 2 * (1 - pnorm(abs(coef / se)))
+  
+  results_df <- data.frame(
+    Estimate = coef,
+    `Std. Error` = se,
+    `Pr(>|z|)` = p_value
+  )
+  
+  return(results_df)
+}
+
+# Function to create a formatted HTML table for two models
+create_two_model_table <- function(model1, model2, model1_name = "Model 1", model2_name = "Model 2") {
+  tryCatch({
+    # Extract results for both models
+    results1 <- extract_rchoice_results(model1)
+    results2 <- extract_rchoice_results(model2)
+    
+    # Combine results
+    combined_results <- full_join(
+      results1 %>% mutate(Variable = rownames(results1)),
+      results2 %>% mutate(Variable = rownames(results2)),
+      by = "Variable",
+      suffix = c(".1", ".2")
+    ) %>%
+      select(Variable, everything()) %>%
+      arrange(Variable)
+    
+    # Rename columns
+    names(combined_results) <- c("Variable",
+                                 "Estimate.1", "Std. Error.1", "Pr(>|z|).1",
+                                 "Estimate.2", "Std. Error.2", "Pr(>|z|).2")
+    
+    # Create HTML table
+    html_table <- kable(combined_results, 
+                        format = "html",
+                        digits = 3,
+                        caption = "Comparison of  Probit Models") %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+      add_header_above(c(" " = 1, 
+                         model1_name = 3, 
+                         model2_name = 3)) 
+    
+    # Save the HTML table to a file
+    #writeLines(as.character(html_table), "two_model_results.html")
+    
+    # Print the HTML code
+    print(html_table)
+  }, error = function(e) {
+    cat("An error occurred:", conditionMessage(e), "\n")
+  })
+}
+
+
+# Usage example (replace with your actual models):
+create_two_model_table(probit_model, hetprob_model, model1_name ="Base Model", model2_name="Extended Model")
+
+
+```
+
+Here are predictions from the two models. The main takeaway is that if you change things, things change - so there's not much substantively to take away from the differences between the predictions. Strong theory expectations would potentially drive expectations about these differences. 
+
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+pred_data <- expand.grid(
+  disc_b = median(anes$disc_selfsex, na.rm = TRUE),
+  age = seq(min(anes$age, na.rm = TRUE), max(anes$age, na.rm = TRUE), length.out = 100),
+  faminc = median(anes$faminc, na.rm = TRUE),
+  pid7 = median(anes$pid7, na.rm = TRUE),
+  autism = median(anes$autism, na.rm = TRUE),
+  white = 1
+)
+
+# Predict probabilities
+pred_probs_het <- predict(hetprob_model, newdata = pred_data, type = "pr")
+pred_probs_std <- predict(probit_model, newdata = pred_data, type = "response")
+
+# Combine predictions
+plot_data <- cbind(pred_data, 
+                   Het_Prob = pred_probs_het,
+                   Std_Prob = pred_probs_std)
+
+# Create the plot
+ggplot(plot_data, aes(x = age)) +
+  geom_line(aes(y = Het_Prob, color = "Heteroskedastic Probit")) +
+  geom_line(aes(y = Std_Prob, color = "Standard Probit")) +
+  labs(x = "Age", y = "Pr(Secret Muslim)", color = "Model") +
+  theme_minimal() +
+  ggtitle("Comparison of Heteroskedastic and Standard Probit Models")
+
+
+
+
+```
+
 
 
 
