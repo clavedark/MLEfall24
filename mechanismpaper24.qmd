@@ -1,0 +1,67 @@
+---
+title: "Mechanism Paper Assignment"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+   html: default
+# filters:
+#   - parse-latex
+---
+
+<!-- rm(list=ls()) -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+
+```
+
+
+
+ 
+**The assignment:** During the semester, write three short papers.The goal is to identify a causal mechanism you find interesting, discuss its mechanics, its use in the literature, and then to propose a new place to apply it, or a modification of the mechanism applied in an existing location. 
+
+
+
+  - paper #1 (max 3 single-spaced pages) - identify a mechanism you find interesting. Explain it in detail. Write a model of it if doing so is helpful. Why is it interesting? **Due before 18 October.**
+  
+  - paper #2 - (max 4 single-spaced pages) - restate the mechanism as clearly as possible; give a real world example; where does this mechanism appear in the literature (give an example of its usage, application, etc.). Is its application successful?  What is your specific application or model? **Due before 22 November.**
+  
+  
+  - paper #3 - (max 3 single-spaced page) - a final articulation of your mechanism and either how you intend to apply it, and any development/advancement you're making to this mechanism. **Due before 12 December.**
+
+**What is a mechanism?** For our purposes, a mechanism is a set of rules and incentives that point actors toward some behavior they might not otherwise choose. A syllabus in a class can be thought of as a set of mechanisms working together to get students to do three things they otherwise would not do: show up; pay attention; read. A cumulative exam incentivizes keeping up during the semester. Requiring a topic page for a paper assignment incentivizes starting the paper earlier than would otherwise happen. Pop quizzes incentivize attendance and reading.
+
+Here's another perhaps less trivial example. 17th century pirate ships needed crew members to be willing to fight hard, not to hold back in fear of injury. If pirates were cautious, they would be less effective at taking ships, and would not develop the reputations pirates needed - those fearsome reputations actually made violence less necessary and pirating somewhat safer. To get the crew to fight, captains often made a practice of providing social benefits including health care to those injured. Instead of throwing incapacitated pirates over the side, they provided social insurance, thereby encouraging others to fight hard knowing that injury did not guarantee death. The result was pirate crews willing to take risks and fight aggressively, success in taking target ships, and reputations as fearsome fighters. Captains who guaranteed social benefits created moral hazard, induced risk-taking behavior that benefited the ship.^[From Peter Leeson's *The Invisible Hook,* available online through BU's library.]
+
+Here's another, even less trivial example, but also a puzzle. Governments of all types extract revenue from citizens via taxation - the more productive citizens are, the more they collect in taxes (holding the rate constant). So governments need to encourage productivity. Productivity requires investment (rather than consumption) - investment pays off in the future while consumption pays off now. For investment to make sense, citizens have to believe the future is valuable and safe.  One way governments might try to encourage investment and persuade them the future is safe is to reassure citizens government will not steal from them - if citizens believe government might "change the deal" and seize assets at any time, citizens will neither save, nor invest - they will consume. How can governments maintain the monopoly on violence, but persuade citizens government won't use that monopoly on violence to seize everything, thereby encouraging investment, and thereby increasing tax revenue? More succinctly, how can a government powerful enough to protect private property guarantee it won't confiscate private property?^[This puzzle appears in a number of places, due in part to Douglas North and Barry Weingast; a form of this is what Weingast calls the fundamental political dilemma of an economic system.]
+
+
+ 
+
+
+

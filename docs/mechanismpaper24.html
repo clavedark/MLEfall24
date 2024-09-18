@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Dave Clark">
+<meta name="dcterms.date" content="2024-09-18">
 
-<title>Slides – MLE - Fall 2024</title>
+<title>Mechanism Paper Assignment – MLE - Fall 2024</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -76,7 +78,7 @@ ul.task-list li input[type="checkbox"] {
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -99,7 +101,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./slides.html" aria-current="page"> 
+    <a class="nav-link" href="./slides.html"> 
 <span class="menu-text">Slides</span></a>
   </li>  
   <li class="nav-item">
@@ -134,46 +136,75 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Mechanism Paper Assignment</h1>
+                      </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author">Dave Clark </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              Binghamton University
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 18, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
         
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Slides</h1>
-</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p><a href="./binarymodels24.html">Binomial Models</a> - <a href="https://youtu.be/ku9L2f2aa7g">video</a></p>
-<p><a href="./prediction24.html">Prediction Methods</a> - <a href="https://youtu.be/1KUWg6bATRk">spring 2024 prediction video</a></p>
-<p><a href="./likelihood24.html">Likelihood Theory and Applications</a></p>
-<p><a href="./llfmax24.html">Maximization Methods</a> - <a href="https://youtu.be/I0KEvpVcDJw">video</a></p>
-<p><a href="./binaryextensions124.html">Binary Model Extensions I</a></p>
-<p><a href="./discretehazards24.html">Discrete Hazards</a></p>
-<p><a href="./binaryextensions224.html">Binary Model Extensions II</a></p>
-<p><a href="./mechanismpaper24.html">Mechanism Paper Assignment</a></p>
+<!-- rm(list=ls()) -->
+<p><strong>The assignment:</strong> During the semester, write three short papers.The goal is to identify a causal mechanism you find interesting, discuss its mechanics, its use in the literature, and then to propose a new place to apply it, or a modification of the mechanism applied in an existing location.</p>
+<ul>
+<li><p>paper #1 (max 3 single-spaced pages) - identify a mechanism you find interesting. Explain it in detail. Write a model of it if doing so is helpful. Why is it interesting? <strong>Due before 18 October.</strong></p></li>
+<li><p>paper #2 - (max 4 single-spaced pages) - restate the mechanism as clearly as possible; give a real world example; where does this mechanism appear in the literature (give an example of its usage, application, etc.). Is its application successful? What is your specific application or model? <strong>Due before 22 November.</strong></p></li>
+<li><p>paper #3 - (max 3 single-spaced page) - a final articulation of your mechanism and either how you intend to apply it, and any development/advancement you’re making to this mechanism. <strong>Due before 12 December.</strong></p></li>
+</ul>
+<p><strong>What is a mechanism?</strong> For our purposes, a mechanism is a set of rules and incentives that point actors toward some behavior they might not otherwise choose. A syllabus in a class can be thought of as a set of mechanisms working together to get students to do three things they otherwise would not do: show up; pay attention; read. A cumulative exam incentivizes keeping up during the semester. Requiring a topic page for a paper assignment incentivizes starting the paper earlier than would otherwise happen. Pop quizzes incentivize attendance and reading.</p>
+<p>Here’s another perhaps less trivial example. 17th century pirate ships needed crew members to be willing to fight hard, not to hold back in fear of injury. If pirates were cautious, they would be less effective at taking ships, and would not develop the reputations pirates needed - those fearsome reputations actually made violence less necessary and pirating somewhat safer. To get the crew to fight, captains often made a practice of providing social benefits including health care to those injured. Instead of throwing incapacitated pirates over the side, they provided social insurance, thereby encouraging others to fight hard knowing that injury did not guarantee death. The result was pirate crews willing to take risks and fight aggressively, success in taking target ships, and reputations as fearsome fighters. Captains who guaranteed social benefits created moral hazard, induced risk-taking behavior that benefited the ship.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>Here’s another, even less trivial example, but also a puzzle. Governments of all types extract revenue from citizens via taxation - the more productive citizens are, the more they collect in taxes (holding the rate constant). So governments need to encourage productivity. Productivity requires investment (rather than consumption) - investment pays off in the future while consumption pays off now. For investment to make sense, citizens have to believe the future is valuable and safe. One way governments might try to encourage investment and persuade them the future is safe is to reassure citizens government will not steal from them - if citizens believe government might “change the deal” and seize assets at any time, citizens will neither save, nor invest - they will consume. How can governments maintain the monopoly on violence, but persuade citizens government won’t use that monopoly on violence to seize everything, thereby encouraging investment, and thereby increasing tax revenue? More succinctly, how can a government powerful enough to protect private property guarantee it won’t confiscate private property?<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 
 
 
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>From Peter Leeson’s <em>The Invisible Hook,</em> available online through BU’s library.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This puzzle appears in a number of places, due in part to Douglas North and Barry Weingast; a form of this is what Weingast calls the fundamental political dilemma of an economic system.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

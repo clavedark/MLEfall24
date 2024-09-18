@@ -15,3 +15,5 @@ title: "Slides"
 [Discrete Hazards](discretehazards24.qmd)
 
 [Binary Model Extensions II](binaryextensions224.qmd)
+
+[Mechanism Paper Assignment](mechanismpaper24.qmd)
