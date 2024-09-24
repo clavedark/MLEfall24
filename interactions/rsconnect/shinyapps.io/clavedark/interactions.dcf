@@ -1,0 +1,12 @@
+name: interactions
+title: interactions
+username: clavedark
+account: clavedark
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12809463
+bundleId: 9139748
+url: https://clavedark.shinyapps.io/interactions/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

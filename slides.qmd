@@ -17,3 +17,5 @@ title: "Slides"
 [Binary Model Extensions II](binaryextensions224.qmd)
 
 [Mechanism Paper Assignment](mechanismpaper24.qmd)
+
+[Interactions in Nonlinear Models](interactions24.qmd)
