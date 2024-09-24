@@ -140,7 +140,7 @@ Compression refers to the different rates of change in the $Pr(Y=1)$ across the 
 
 ## Compression and Interaction
 
-In the simulation below notice how the effects of $x$ on $y$ are different due to compression effects  - that is, the effect of $x$ is greatest at $x=0, y=.5$, and declines as $abs{x}$ increases.  Also, notice how additive changes to the intercept shift the curve left-right, but do not change the slope at $Pr(Y=1)$. Multiplicative (interactive) changes change the derivative of the curve. Notice that compression exists in both the interactive and non-interactive settings. 
+In the simulation below notice how the effects of $x$ on $y$ are different due to compression effects  - that is, the effect of $x$ is greatest at $x=0, y=.5$, and declines as $|x|$ increases.  Also, notice how additive changes to the intercept shift the curve left-right, but do not change the slope at $Pr(Y=1)$. Multiplicative (interactive) changes change the derivative of the curve. Notice that compression exists in both the interactive and non-interactive settings. 
 
 
 ```{r}
