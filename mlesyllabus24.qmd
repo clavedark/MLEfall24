@@ -170,7 +170,7 @@ grading <- tibble::tribble(
 )
 ```
 
-<div class="centered-table">
+<!-- <div class="centered-table"> -->
 
 ```{r show-grades-table, echo=FALSE, results="asis"}
 grading %>%
@@ -178,7 +178,7 @@ grading %>%
                col.names = c("Grade", "Range", "Grade", "Range"))
 ```
 
-<div>
+
 
 ## Course Policies
 
