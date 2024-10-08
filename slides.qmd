@@ -19,3 +19,5 @@ title: "Slides"
 [Mechanism Paper Assignment](mechanismpaper24.qmd)
 
 [Interactions in Nonlinear Models](interactions24.qmd)
+
+[Choice Models I](choiceA24.qmd)

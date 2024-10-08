@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dave Clark">
+<meta name="dcterms.date" content="2024-10-08">
+
+<title>Choice Models – MLE - Fall 2024</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">MLE - Fall 2024</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./slides.html"> 
+<span class="menu-text">Slides</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./mlesyllabus24.html"> 
+<span class="menu-text">MLE Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./code.html"> 
+<span class="menu-text">Code</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label=""><i class="bi bi-github"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://github.com/clavedark/MLEfall24">
+            repo
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Choice Models</h1>
+                      </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author">Dave Clark </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              Binghamton University
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 8, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#multiple-choices" id="toc-multiple-choices" class="nav-link active" data-scroll-target="#multiple-choices">Multiple Choices</a>
+  <ul class="collapse">
+  <li><a href="#unordered-choices" id="toc-unordered-choices" class="nav-link" data-scroll-target="#unordered-choices">Unordered choices</a></li>
+  <li><a href="#probability-model" id="toc-probability-model" class="nav-link" data-scroll-target="#probability-model">Probability Model</a></li>
+  <li><a href="#an-alternative-motivation" id="toc-an-alternative-motivation" class="nav-link" data-scroll-target="#an-alternative-motivation">An alternative motivation</a></li>
+  <li><a href="#discrete-choice-random-utility" id="toc-discrete-choice-random-utility" class="nav-link" data-scroll-target="#discrete-choice-random-utility">Discrete choice, random utility</a></li>
+  <li><a href="#likelihood---multinomial-logit" id="toc-likelihood---multinomial-logit" class="nav-link" data-scroll-target="#likelihood---multinomial-logit">Likelihood - Multinomial Logit</a></li>
+  <li><a href="#extending-the-binary-model" id="toc-extending-the-binary-model" class="nav-link" data-scroll-target="#extending-the-binary-model">Extending the Binary Model</a></li>
+  <li><a href="#mnl-estimation" id="toc-mnl-estimation" class="nav-link" data-scroll-target="#mnl-estimation">MNL Estimation</a>
+  <ul class="collapse">
+  <li><a href="#reference-category" id="toc-reference-category" class="nav-link" data-scroll-target="#reference-category">Reference Category</a></li>
+  </ul></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a>
+  <ul class="collapse">
+  <li><a href="#predictions" id="toc-predictions" class="nav-link" data-scroll-target="#predictions">Predictions</a></li>
+  </ul></li>
+  <li><a href="#mnl" id="toc-mnl" class="nav-link" data-scroll-target="#mnl">MNL</a></li>
+  <li><a href="#conditional-logit" id="toc-conditional-logit" class="nav-link" data-scroll-target="#conditional-logit">Conditional Logit</a></li>
+  <li><a href="#multinomial-v.-conditional-logit" id="toc-multinomial-v.-conditional-logit" class="nav-link" data-scroll-target="#multinomial-v.-conditional-logit">Multinomial v. Conditional Logit</a></li>
+  <li><a href="#conditional-logit-estimation" id="toc-conditional-logit-estimation" class="nav-link" data-scroll-target="#conditional-logit-estimation">Conditional Logit Estimation</a>
+  <ul class="collapse">
+  <li><a href="#examples-of-this-in-class" id="toc-examples-of-this-in-class" class="nav-link" data-scroll-target="#examples-of-this-in-class">Examples of this in class</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<!-- rm(list=ls()) -->
+<section id="multiple-choices" class="level1">
+<h1>Multiple Choices</h1>
+<p>It’s common to have data where individuals choose among multiple, unordered outcomes:</p>
+<ul>
+<li>voters choosing among candidates.</li>
+<li>consumers choosing among products.</li>
+<li>job choice.</li>
+<li>foreign policy choice.</li>
+</ul>
+<section id="unordered-choices" class="level2">
+<h2 class="anchored" data-anchor-id="unordered-choices">Unordered choices</h2>
+<p>The multinomial and conditional logit models are robust, easy to estimate and interpret, and less punitive than some others if you violate assumptions.</p>
+<ul>
+<li>Any outcome can be ordered; not every outcome should be ordered.</li>
+<li>If we use an ordered model on unordered data, the parameters are likely to be biased and not to make sense</li>
+<li>If we use a unordered model on ordered data, we are neglecting to use some of the information in the y variable so our model may be inefficient, but the consequences are not as severe.</li>
+</ul>
+</section>
+<section id="probability-model" class="level2">
+<h2 class="anchored" data-anchor-id="probability-model">Probability Model</h2>
+<p>Following Long (pp.&nbsp;152ff):</p>
+<p>Suppose an unordered, discrete variable <span class="math inline">\(y = j\)</span> where <span class="math inline">\(j = 1,2 \ldots\)</span>. Let <span class="math inline">\(Pr(y=j) = x\beta_j +\epsilon\)</span> so the probability of any value of <span class="math inline">\(y\)</span> is a function of <span class="math inline">\(x_i\)</span> and a vector of outcome-specific coefficients, <span class="math inline">\(\beta_j\)</span>. Because these are probabilities, they cannot be negative, so transform <span class="math inline">\(exp(x\beta_j)\)</span> - but now the sum of these over all values of <span class="math inline">\(j\)</span> exceed 1. So divide by the sum of all the categories, and now we sum to 1 : <span class="math inline">\(\frac{exp(x\beta_j)}{\sum_{j=1}^{J} exp(x\beta_j)}\)</span></p>
+<ul>
+<li>But <span class="math inline">\(\frac{exp(x\beta_j)}{\sum_{j=1}^{J} exp(x\beta_j)}\)</span> does not suggest a single set of solutions <span class="math inline">\(\beta_j\)</span>, so is not identified.</li>
+<li>The usual solution is to assume one <span class="math inline">\(\beta_j=0\)</span>.</li>
+<li>Recalling that <span class="math inline">\(j = 1, 2, \ldots\)</span>, we restrict the first category (<span class="math inline">\(\beta_1=0\)</span>), and rewrite <span class="math inline">\(\frac{exp(x\beta_j)}{\sum_{j=2}^{J} exp(x\beta_j)}\)</span>.</li>
+</ul>
+<p>This means <span class="math inline">\(y=1\)</span> is the reference category, so now <span class="math inline">\(\beta_j\)</span> is compared to <span class="math inline">\(\beta_1\)</span> as if the quantity is now <span class="math inline">\(\beta_j - \beta_1\)</span>. This is, after all, the comparison we usually make: that the effect of <span class="math inline">\(x_i\)</span> is <span class="math inline">\(\beta_j\)</span> relative to the excluded category.</p>
+<p>This leaves us with:</p>
+<p><span class="math display">\[Pr(y=1) = \frac{1}{1+ \sum_{j=2}^{J} exp(x\beta_j)} \]</span></p>
+<p>for <span class="math inline">\(j=1\)</span>, and for <span class="math inline">\(j&gt;1\)</span>, we have:</p>
+<p><span class="math display">\[Pr(y=j) = \frac{exp(x\beta_j)}{\sum_{j=2}^{J} exp(x\beta_j)}\]</span></p>
+<p>Note constraining <span class="math inline">\(\beta_1 = 0\)</span> is arbitrary - we can set any of the categories as the reference.</p>
+</section>
+<section id="an-alternative-motivation" class="level2">
+<h2 class="anchored" data-anchor-id="an-alternative-motivation">An alternative motivation</h2>
+<p>Another, more interesting way, to motivate models for choices over outcomes is from a rational choice framework. We consider individuals making choices over outcomes. Those choices are informed by their utilities for the outcomes.</p>
+</section>
+<section id="discrete-choice-random-utility" class="level2">
+<h2 class="anchored" data-anchor-id="discrete-choice-random-utility">Discrete choice, random utility</h2>
+<p>An individual’s utility for each choice is given by</p>
+<p><span class="math display">\[
+U_{i,j}= \mu_{i,j} + \varepsilon_{i,j}
+\]</span></p>
+<p>where the subscripts indicate the <span class="math inline">\(i^{th}\)</span> individual and the <span class="math inline">\(j^{th}\)</span> outcome. Each individual’s utility for each outcome is a function of a systematic component, <span class="math inline">\(\mu_{i,j}\)</span> and a stochastic component <span class="math inline">\(\varepsilon_{i,j}\)</span>. We can parameterize the systematic component as a function of some variables, $<em>{i,j} =x</em>{i,j} $ :</p>
+<p><span class="math display">\[
+U_{i,j}=x_{i,j} \beta  + \varepsilon_{i,j} \nonumber
+\]</span></p>
+<p>Some variables, <span class="math inline">\(x\)</span> have <span class="math inline">\(\beta\)</span> effect on <span class="math inline">\(i\)</span>’s utility for outcome <span class="math inline">\(j\)</span>. Moreover, each individual has a complete set of preferences over the <span class="math inline">\(J\)</span> outcomes and those preferences are <span class="alert">transitive</span>. Each individual makes choices to maximize their utility, thus comparing choices <span class="math inline">\(j, k \ldots J\)</span> in a pairwise fashion:</p>
+<p><span class="math display">\[Pr(Y=j) = Pr(U_{i,j}&gt;U_{i,k})  \\
+      = Pr(x_{i,j} \beta + \varepsilon_{i,j} &gt;  x_{i,k}\beta  + \varepsilon_{i,k})\\
+       = Pr(\varepsilon_{i,j}-\varepsilon_{i,k} &gt; x_{i,k} \beta -x_{i,j} \beta )
+\]</span></p>
+<p>If the difference in the random components of <span class="math inline">\(j\)</span> and any other outcome, <span class="math inline">\(k\)</span> is greater than the difference between the systematic components, then <span class="math inline">\(j\)</span> maximizes <span class="math inline">\(i\)</span>’s utility. Looking at the last inequality above, we can see this will happen when <span class="math inline">\(\varepsilon_{i,j}\)</span> is big, when <span class="math inline">\(\beta x_{i,j}\)</span> is big, or both.</p>
+<p>To estimate this, we have to make an assumption about how the errors are distributed. The way we’ve derived the model, the errors are actually the difference between the stochastic parts of outcomes <span class="math inline">\(i, j\)</span>:</p>
+<p><span class="math display">\[
+F(\varepsilon_{i,j}) = exp[-exp(-\varepsilon_{i,j})] \nonumber
+\]</span></p>
+<p>assume <span class="math inline">\(\varepsilon_{i,j}\)</span>s are i.i.d Type 1 generalized extreme value (Gumbel); if the errors are i.i.d., their difference is logistic:</p>
+<p>The probability <span class="math inline">\(Y=j\)</span> is</p>
+<p><span class="math display">\[
+Pr(Y=j) = \frac{e^{X_i \beta_j }}{\sum \limits_{j=1}^{J} e^{X_i\beta_j}} \nonumber
+\]</span></p>
+<p>As above, the model is not identified since there is no reference category. So we typically constrain <span class="math inline">\(\beta_{i,j=1}=0\)</span> and estimate the remaining <span class="math inline">\(J-1\)</span> categories:</p>
+<p><span class="math display">\[
+Pr(Y=j) = \frac{e^{x_i \beta_j }}{1+\sum \limits_{j=2}^{J} e^{x_i\beta_k }} \nonumber  \\
+Pr(Y=1) = \frac{1}{1+\sum \limits_{j=2}^{J} e^{\beta_k x_i}} \nonumber
+\]</span></p>
+<p>If <span class="math inline">\(J=2\)</span>, the model is the binary logit - so the binary logit is a special case of the CL or MNL models.</p>
+<hr>
+<p>This motivation is nice because it links the likelihood function to a simple, formal model where individuals make choices over ordered preferences.</p>
+<ul>
+<li>individual <span class="math inline">\(i\)</span></li>
+<li>chooses among <span class="math inline">\(j\)</span> alternatives</li>
+<li>let <span class="math inline">\(d=1\)</span> if <span class="math inline">\(y_i = j\)</span>, else zero.</li>
+<li><span class="math inline">\(Pr(Y=j) = \frac{e^{x_i \beta_j }}{\sum \limits_{j=1}^{J} e^{x_i\beta_k }}\)</span></li>
+</ul>
+</section>
+<section id="likelihood---multinomial-logit" class="level2">
+<h2 class="anchored" data-anchor-id="likelihood---multinomial-logit">Likelihood - Multinomial Logit</h2>
+<p><span class="math display">\[
+\mathcal{L} ( \beta ) = \prod _ { i=1}^{N} \prod_ { j=1}^{J}  Pr \left( y _ {i } = j | x _ { i } \right) ^ { d _ { i j } }
+\]</span></p>
+<p><span class="math display">\[
+\ln \mathcal{L} ( \beta ) = \sum _ { i=1}^{N} \sum_ { j=1}^{J}  d _ { i j } \ln Pr \left( y _ { i } = j | x _ { i } \right)
+\]</span></p>
+<p><span class="math display">\[
+\ln \mathcal{L} ( \beta ) = \sum _ { i=1}^{N}  \sum_ { j=1}^{J} d _ { i j } \ln \left( \frac { \exp \left( x _ { i }  \beta_j \right) } { \sum _ { k } \exp \left( x _ { i  }  \beta_j \right) } \right)
+\]</span></p>
+</section>
+<section id="extending-the-binary-model" class="level2">
+<h2 class="anchored" data-anchor-id="extending-the-binary-model">Extending the Binary Model</h2>
+<p>The logistic CDF is <span class="math display">\[
+Pr(Y=1)=\frac{e^{x_i\beta}}{1+e^{x_i\beta}}\nonumber
+\]</span></p>
+<p>We use this to represent a binary choice.</p>
+<p>Extending this to a trichotomous choice, say among chocolate, vanilla and strawberry icecream is easy:</p>
+<p><span class="math display">\[
+Pr(Y=chocolate)=\frac{e^{x_i\beta_c}}{1+e^{x_i\beta_c}+e^{x_i\beta_v}} \nonumber
+\]</span></p>
+<p>assuming strawberry is the reference category.</p>
+<p>The n-chotomous choice is also easy:</p>
+<p><span class="math display">\[
+Pr(Y=j)=\frac{e^{x_i\beta_j}}{1+\sum\limits_{j=1}^{J}e^{x_i\beta}} \nonumber
+\]</span></p>
+<p>You should be getting the idea the binary logit model is a special case of the more general choice model with errors distributed i.i.d. logistic.</p>
+<p>You should also see that interpretation is a straightforward extension of the binary logit.</p>
+</section>
+<section id="mnl-estimation" class="level2">
+<h2 class="anchored" data-anchor-id="mnl-estimation">MNL Estimation</h2>
+<p>To illustrate the MNL and CL models, I’m going to use data from a paper on foreign policy substitution. The <span class="math inline">\(y\)</span> variable represents the foreign policy choice the US president makes given domestic conditions; it takes on 4 values distributed as follows:</p>
+<ul>
+<li>0 = no action = 61.13 percent the observations</li>
+<li>1 = MID only = 22.6 percent</li>
+<li>2 = GATT only = 11.8 percent</li>
+<li>3 = both MID and GATT = 4.3 percent</li>
+</ul>
+<p>The data are structured with one observation for each US-month between 1945 and 1990, so for each observation, we observe the policy the president selects, 0, 1, 2, or 3. The variables of interest vary across observations (US-months) but not across outcomes; thus, the data structure and the nature of the independent variables suggest MNL is appropriate.</p>
+<p>The main expectation here is that the extent of support in Congress for the President’s legislative agenda will affect foreign policy choice - stronger Presidents have greater latitude to choose more costly policies (e.g.&nbsp;military force). The data include a measure of presidential support in Congress, the unemployment rate, the president’s approval rating, and whether the president is in an election year.</p>
+<div class="cell" data-layout-align="center">
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+1
+</td>
+<td>
+2
+</td>
+<td>
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+unemp2
+</td>
+<td>
+0.089
+</td>
+<td>
+0.256<sup>**</sup>
+</td>
+<td>
+0.609<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.077)
+</td>
+<td>
+(0.106)
+</td>
+<td>
+(0.157)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pressupp
+</td>
+<td>
+0.009
+</td>
+<td>
+-0.043<sup>***</sup>
+</td>
+<td>
+-0.035<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.009)
+</td>
+<td>
+(0.012)
+</td>
+<td>
+(0.018)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pelect
+</td>
+<td>
+0.167
+</td>
+<td>
+0.278
+</td>
+<td>
+-0.521
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.265)
+</td>
+<td>
+(0.330)
+</td>
+<td>
+(0.602)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+approval
+</td>
+<td>
+0.017<sup>*</sup>
+</td>
+<td>
+0.023<sup>*</sup>
+</td>
+<td>
+0.037<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.010)
+</td>
+<td>
+(0.013)
+</td>
+<td>
+(0.021)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-2.996<sup>***</sup>
+</td>
+<td>
+-1.560
+</td>
+<td>
+-5.935<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.058)
+</td>
+<td>
+(1.392)
+</td>
+<td>
+(2.282)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></em></sup><em>p&lt;0.1; <sup><strong></strong></sup><strong>p&lt;0.05; <sup></sup></strong></em>p&lt;0.01
+</td>
+</tr>
+</tbody></table>
+</div>
+<p>Recalling the <span class="math inline">\(y\)</span> variable has 4 categories, the model estimates 3 sets of coefficients, one for each category relative to the reference category. By default, the reference category is the one with the lowest value, in this case, no action. This is something we can change to facilitate interpretation. The coefficients are interpreted as the effect of the variable on the probability of choosing the category relative to the reference category. So you can see presidential support in Congress decreases the chances of GATT action or both military and GATT action relative to doing nothing.</p>
+<section id="reference-category" class="level3">
+<h3 class="anchored" data-anchor-id="reference-category">Reference Category</h3>
+<div class="cell" data-layout-align="center">
+<table style="text-align:center">
+<tbody><tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="6">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+1
+</td>
+<td>
+2
+</td>
+<td>
+3
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+<td>
+(5)
+</td>
+<td>
+(6)
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+unemp2
+</td>
+<td>
+0.089
+</td>
+<td>
+0.256<sup>**</sup>
+</td>
+<td>
+0.609<sup>***</sup>
+</td>
+<td>
+-0.609<sup>***</sup>
+</td>
+<td>
+-0.520<sup>***</sup>
+</td>
+<td>
+-0.354<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.077)
+</td>
+<td>
+(0.106)
+</td>
+<td>
+(0.157)
+</td>
+<td>
+(0.157)
+</td>
+<td>
+(0.164)
+</td>
+<td>
+(0.177)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pressupp
+</td>
+<td>
+0.009
+</td>
+<td>
+-0.043<sup>***</sup>
+</td>
+<td>
+-0.035<sup>*</sup>
+</td>
+<td>
+0.035<sup>*</sup>
+</td>
+<td>
+0.044<sup>**</sup>
+</td>
+<td>
+-0.008
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.009)
+</td>
+<td>
+(0.012)
+</td>
+<td>
+(0.018)
+</td>
+<td>
+(0.018)
+</td>
+<td>
+(0.019)
+</td>
+<td>
+(0.020)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pelect
+</td>
+<td>
+0.167
+</td>
+<td>
+0.278
+</td>
+<td>
+-0.521
+</td>
+<td>
+0.521
+</td>
+<td>
+0.688
+</td>
+<td>
+0.800
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.265)
+</td>
+<td>
+(0.330)
+</td>
+<td>
+(0.602)
+</td>
+<td>
+(0.602)
+</td>
+<td>
+(0.623)
+</td>
+<td>
+(0.644)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+approval
+</td>
+<td>
+0.017<sup>*</sup>
+</td>
+<td>
+0.023<sup>*</sup>
+</td>
+<td>
+0.037<sup>*</sup>
+</td>
+<td>
+-0.037<sup>*</sup>
+</td>
+<td>
+-0.020
+</td>
+<td>
+-0.014
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.010)
+</td>
+<td>
+(0.013)
+</td>
+<td>
+(0.021)
+</td>
+<td>
+(0.021)
+</td>
+<td>
+(0.022)
+</td>
+<td>
+(0.023)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-2.996<sup>***</sup>
+</td>
+<td>
+-1.560
+</td>
+<td>
+-5.935<sup>***</sup>
+</td>
+<td>
+5.935<sup>***</sup>
+</td>
+<td>
+2.938
+</td>
+<td>
+4.373<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.058)
+</td>
+<td>
+(1.392)
+</td>
+<td>
+(2.282)
+</td>
+<td>
+(2.282)
+</td>
+<td>
+(2.381)
+</td>
+<td>
+(2.517)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+<td>
+994.056
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="6" style="text-align:right">
+<sup><em></em></sup><em>p&lt;0.1; <sup><strong></strong></sup><strong>p&lt;0.05; <sup></sup></strong></em>p&lt;0.01
+</td>
+</tr>
+</tbody></table>
+</div>
+<p>Compare the coefficients in the first 3 columns to those in the last 3 columns; notice their similarities but changed signs. Really, changing the reference category has only modest interpretive value. This is especially true because interpreting coefficients is full of pitfalls in the MNL model because, since the effects of variable on one outcome are relative to others, even signs can be misleading. It’s even more essential to compute MNL effects than in most ML cases.</p>
+</section>
+</section>
+<section id="interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation">Interpretation</h2>
+<p>Predicted probabilities are straightforward to compute - they’re an easy extension of the binary logit model.</p>
+<p><span class="math display">\[P(Y=j) =  \frac{e^{\beta_{j}'x_{i}}}{1+\sum\limits_{j=1}^{J}e^{\beta_{j}'x_{i}}}
+\\
+\text{so}~~ P(Y=1) = \frac{e^{X_{1}\beta_1}}{1 + e^{X_{1}\beta_1} +
+e^{X_{2}\beta_2} + e^{X_{3}\beta_3}} \nonumber
+\]</span></p>
+<section id="predictions" class="level3">
+<h3 class="anchored" data-anchor-id="predictions">Predictions</h3>
+<p>Let’s look at some predictions from the first model.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">expand.grid</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">intercept=</span> <span class="dv">1</span>, </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">unemp2 =</span> <span class="fu">median</span>(fpdata<span class="sc">$</span>unemp2, <span class="at">na.rm=</span><span class="cn">TRUE</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">pressupp =</span> <span class="fu">seq</span>(<span class="dv">43</span>,<span class="dv">93</span>, <span class="at">length.out =</span> <span class="dv">50</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">pelect =</span> <span class="dv">0</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">approval =</span> <span class="fu">median</span>(fpdata<span class="sc">$</span>approval, <span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>xb <span class="ot">&lt;-</span> X <span class="sc">%*%</span> <span class="fu">t</span>(<span class="fu">coef</span>(mnl1))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>xb <span class="ot">&lt;-</span><span class="fu">data.frame</span>(xb)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X1)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(xb<span class="sc">$</span>X1)<span class="sc">+</span><span class="fu">exp</span>(xb<span class="sc">$</span>X2)<span class="sc">+</span><span class="fu">exp</span>(xb<span class="sc">$</span>X3))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># decompose vcov matrix</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>v1 <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">vcov</span>(mnl1)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">vcov</span>(mnl1)[<span class="dv">6</span><span class="sc">:</span><span class="dv">10</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>v3 <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">vcov</span>(mnl1)[<span class="dv">11</span><span class="sc">:</span><span class="dv">15</span>,<span class="dv">11</span><span class="sc">:</span><span class="dv">15</span>])</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># compute standard errors</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>se1 <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">as.matrix</span>(X) <span class="sc">%*%</span> v1 <span class="sc">%*%</span> <span class="fu">t</span>(X)))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>se2 <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">as.matrix</span>(X) <span class="sc">%*%</span> v2 <span class="sc">%*%</span> <span class="fu">t</span>(X)))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>se3 <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">as.matrix</span>(X) <span class="sc">%*%</span> v3 <span class="sc">%*%</span> <span class="fu">t</span>(X)))</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># compute  boundary components</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>ub1 <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X1 <span class="sc">+</span> (<span class="fl">1.96</span> <span class="sc">*</span> se1))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>lb1 <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X1 <span class="sc">-</span> (<span class="fl">1.96</span> <span class="sc">*</span> se1))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ub2 <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X2 <span class="sc">+</span> (<span class="fl">1.96</span> <span class="sc">*</span> se2))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>lb2 <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X2 <span class="sc">-</span> (<span class="fl">1.96</span> <span class="sc">*</span> se2))</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ub3 <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X3 <span class="sc">+</span> (<span class="fl">1.96</span> <span class="sc">*</span> se3))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>lb3 <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X3 <span class="sc">-</span> (<span class="fl">1.96</span> <span class="sc">*</span> se3))</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># compute probabilities</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>pmid <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X1)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(xb<span class="sc">$</span>X1)<span class="sc">+</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X2) <span class="sc">+</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X3))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>pgatt <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X2)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(xb<span class="sc">$</span>X1)<span class="sc">+</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X2) <span class="sc">+</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X3))</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>pboth <span class="ot">&lt;-</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X3)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(xb<span class="sc">$</span>X1)<span class="sc">+</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X2) <span class="sc">+</span> <span class="fu">exp</span>(xb<span class="sc">$</span>X3))</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># compute boundaries</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>pubmid <span class="ot">&lt;-</span> ub1<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span>ub1<span class="sc">+</span>ub2<span class="sc">+</span>ub3)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>plbmid <span class="ot">&lt;-</span> lb1<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span>lb1<span class="sc">+</span>lb2<span class="sc">+</span>lb3)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>pubgatt <span class="ot">&lt;-</span> ub2<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span>ub1<span class="sc">+</span>ub2<span class="sc">+</span>ub3)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>plbgatt <span class="ot">&lt;-</span> lb2<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span>lb1<span class="sc">+</span>lb2<span class="sc">+</span>lb3)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>pubboth <span class="ot">&lt;-</span> ub3<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span>ub1<span class="sc">+</span>ub2<span class="sc">+</span>ub3)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>plbboth <span class="ot">&lt;-</span> lb3<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span>lb1<span class="sc">+</span>lb2<span class="sc">+</span>lb3)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co"># data frame </span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X,pmid, pgatt, pboth, pubmid, plbmid, pubgatt, plbgatt, pubboth, plbboth)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co">#plot  "#005A43", "#8C8C8C"</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(probs, <span class="fu">aes</span>(<span class="at">x =</span> pressupp)) <span class="sc">+</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> plbmid, <span class="at">ymax =</span> pubmid), <span class="at">fill =</span> <span class="st">"#005A43"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> plbgatt, <span class="at">ymax =</span> pubgatt), <span class="at">fill =</span> <span class="st">"#005A43"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> plbboth, <span class="at">ymax =</span> pubboth), <span class="at">fill =</span> <span class="st">"#005A43"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pmid), <span class="at">color =</span> <span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pgatt), <span class="at">color =</span> <span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pboth), <span class="at">color =</span> <span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Presidential Support"</span>, <span class="at">y =</span> <span class="st">"Predicted Probability"</span>, <span class="at">color =</span> <span class="st">"Choice"</span>) <span class="sc">+</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">60</span>, <span class="at">y =</span> <span class="fl">0.3</span>, <span class="at">label =</span> <span class="st">"Military Action"</span>) <span class="sc">+</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">75</span>, <span class="at">y =</span> <span class="fl">0.15</span>, <span class="at">label =</span> <span class="st">"GATT"</span>) <span class="sc">+</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">50</span>, <span class="at">y =</span> <span class="fl">0.1</span>, <span class="at">label =</span> <span class="st">"Both"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="choiceA24_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<p>The plot shows the predicted probabilities of each choice as a function of presidential support in Congress. You can see that as support increases, the probability of military action increases, while the probability of GATT action decreases. The probability of both military and GATT action is relatively low and doesn’t change much with support. There appears to be a tradeoff between military and economic action as the president finds greater success in Congress.</p>
+<p>If you look at the code, you’ll notice I’ve computed the predictions by hand. The predict function works only partially and poorly with choice model implementations in R. In this plot, I’ve computed the ML standard errors (<span class="math inline">\(\sqrt(diag(XVX'))\)</span>). In the plot below, I’ve computed the delta method standard errors - the confidence bands a slightly larger, but the inferences are similar. In general, the delta method standard errors are preferable in choice models like this.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compute delta standard errors as p*(1-p)*(XVX')</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>deltamidub <span class="ot">&lt;-</span> pmid <span class="sc">+</span> (<span class="fl">1.96</span> <span class="sc">*</span> (pmid<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pmid)<span class="sc">*</span>se1))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>deltamidlb <span class="ot">&lt;-</span> pmid <span class="sc">-</span> (<span class="fl">1.96</span> <span class="sc">*</span> (pmid<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pmid)<span class="sc">*</span>se1))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>deltagattub <span class="ot">&lt;-</span> pgatt <span class="sc">+</span> (<span class="fl">1.96</span> <span class="sc">*</span> (pgatt<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pgatt)<span class="sc">*</span>se2))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>deltagattlb <span class="ot">&lt;-</span> pgatt <span class="sc">-</span> (<span class="fl">1.96</span> <span class="sc">*</span> (pgatt<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pgatt)<span class="sc">*</span>se2))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>deltabothub <span class="ot">&lt;-</span> pboth <span class="sc">+</span> (<span class="fl">1.96</span> <span class="sc">*</span> (pboth<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pboth)<span class="sc">*</span>se3))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>deltabothlb <span class="ot">&lt;-</span> pboth <span class="sc">-</span> (<span class="fl">1.96</span> <span class="sc">*</span> (pboth<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>pboth)<span class="sc">*</span>se3))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot with delta method confidence intervals</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(probs, <span class="fu">aes</span>(<span class="at">x =</span> pressupp)) <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> deltamidlb, <span class="at">ymax =</span> deltamidub), <span class="at">fill =</span> <span class="st">"#005A43"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> deltagattlb, <span class="at">ymax =</span> deltagattub), <span class="at">fill =</span> <span class="st">"#005A43"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> deltabothlb, <span class="at">ymax =</span> deltabothub), <span class="at">fill =</span> <span class="st">"#005A43"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pmid), <span class="at">color =</span> <span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pgatt), <span class="at">color =</span> <span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pboth), <span class="at">color =</span> <span class="st">"#005A43"</span>) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Presidential Support"</span>, <span class="at">y =</span> <span class="st">"Predicted Probability"</span>, <span class="at">color =</span> <span class="st">"Choice"</span>) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">60</span>, <span class="at">y =</span> <span class="fl">0.3</span>, <span class="at">label =</span> <span class="st">"Military Action"</span>) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">75</span>, <span class="at">y =</span> <span class="fl">0.15</span>, <span class="at">label =</span> <span class="st">"GATT"</span>) <span class="sc">+</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">50</span>, <span class="at">y =</span> <span class="fl">0.1</span>, <span class="at">label =</span> <span class="st">"Both"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="choiceA24_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</section>
+</section>
+<section id="mnl" class="level2">
+<h2 class="anchored" data-anchor-id="mnl">MNL</h2>
+<p>One thing you might have noticed but not thought about is the structure of the data we’ve been using for the MNL model. Each observation is an individual, that individual’s choice, and the characteristics of that individual. So in these data, each line is a US month, what foreign policy choice the US makes, and characteristics of the US.</p>
+<p>What if we have characteristics of the outcomes, say, that some foreign policy choices are more risky than others? How could those enter the model?</p>
+</section>
+<section id="conditional-logit" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-logit">Conditional Logit</h2>
+<p>The CL model generalizes the MNL model by permitting characteristics of the outcomes to vary on the right side. - The CL likelihood is <em>identical</em> to the MNL likelhood. - Specified correctly, the two models are identical. - The difference? How the data are structured. - The CL is a logit with fixed effects denoting which group an observation belongs to.</p>
+</section>
+<section id="multinomial-v.-conditional-logit" class="level2">
+<h2 class="anchored" data-anchor-id="multinomial-v.-conditional-logit">Multinomial v. Conditional Logit</h2>
+<p>The distinction between CL/MNL has to do with the nature of our expectations about how <span class="math inline">\(X\)</span> influences the choices in <span class="math inline">\(y\)</span>. We can consider two types of effects (and the two types of data they would require).</p>
+<div class="center">
+<div id="tab:CLMNL">
+<table class="caption-top table">
+<caption>Comparing CL and MNL</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Independent Variable</strong></td>
+<td style="text-align: left;"><strong>With respect to cases</strong></td>
+<td style="text-align: left;"><strong>With respect to <span class="math inline">\(Y\)</span></strong></td>
+<td style="text-align: left;"><strong>Model</strong></td>
+<td style="text-align: left;"># of <span class="math inline">\(\widehat{\beta}\)</span>s</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Characteristics of the individual</td>
+<td style="text-align: left;">Vary across cases (individuals)</td>
+<td style="text-align: left;">Constant across choices (<span class="math inline">\(Y=j\)</span>)</td>
+<td style="text-align: left;">MNL</td>
+<td style="text-align: left;"><span class="math inline">\(j-1\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Characteristics of the outcome <span class="math inline">\(j\)</span></td>
+<td style="text-align: left;">Constant across cases (individuals)</td>
+<td style="text-align: left;">Vary across outcomes <span class="math inline">\(J=1 ~\mbox{to}~ m\)</span></td>
+<td style="text-align: left;">CL</td>
+<td style="text-align: left;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Individual and case characteristics</td>
+<td style="text-align: left;">Vary across cases</td>
+<td style="text-align: left;">Vary across outcomes <span class="math inline">\(J=1 ~\mbox{to}~ m\)</span></td>
+<td style="text-align: left;">Modified CL</td>
+<td style="text-align: left;"><span class="math inline">\(\beta_{x}\)</span>, <span class="math inline">\(\beta_{0}\)</span> <span class="math inline">\(\beta_{x,0}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The multinomial logit model allows <span class="math inline">\(X\)</span> to vary across cases (individual observations), but not across outcomes.</p>
+<p>Suppose we model vote choice, and we believe that party affiliation and education influence whether an individual votes for Perot, Bush, or Clinton (in 1992). Party affiliation will vary across individual voter, but not across choice; put another way, a Democrat is a Democrat regardless of whether we are considering whether he votes for Bush (0), or Clinton (1), or Perot (2). Education, similarly, varies across individual but not across choice.</p>
+<div class="center">
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Voter</td>
+<td style="text-align: center;">Choice</td>
+<td style="text-align: center;">Party ID</td>
+<td style="text-align: center;">Education</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>where we have on line of data for each individual/case/voter, choice represents the value of <span class="math inline">\(y\)</span> that voter selects (0,1,2). Notice that our two independent variables do not vary across a voter’s alternatives or choice, but they do vary across voters; voter 1 is a smart republican while voter 3 is a not-so-smart democrat. These data are appropriate for a multinomial logit model; we’ll get <span class="math inline">\(j-1\)</span> estimates of <span class="math inline">\(\beta\)</span> for each independent variable representing the effect of <span class="math inline">\(x_{i}\)</span> on the probability <span class="math inline">\(y=j\)</span> rather than <span class="math inline">\(y=k\)</span>.</p>
+<p>CL allows the independent variables to vary for each outcome in <span class="math inline">\(y\)</span>, and with a bit of tweaking, can also allow independent variables that vary across individuals but not outcomes.</p>
+<div class="center">
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Voter</td>
+<td style="text-align: center;">Alternative</td>
+<td style="text-align: center;">Choice</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">Party ID</td>
+<td style="text-align: center;">Education</td>
+<td style="text-align: center;">Spending</td>
+<td style="text-align: center;">Campaign Stops</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>the data include variables specific to voters (constant across alternatives), variables specific to alternatives (constant across voters), and variables that vary across both.</p>
+<p>In these data, <em>voter</em> is just an identification of the case, <em>alternative</em> lists each possible choice for each voter, <em>choice</em> identifies which alternative the voter selected, <em>D</em> is a dummy variable marking which alternative the voter chooses, <em>party id</em> is obvious, <em>education</em> is voter’s years of schooling; note that these last two vary across individual but not across individual choice. <em>Spending</em> measures the amount each candidate spent in the general election campaign; it varies across choice (candidate) but not across individual. Finally, <em>campaign stops</em> is the number of campaign visits a candidate made to a voter’s home town. This variable varies across both voter and alternative.</p>
+<p>You’ll notice these are panel data - the units are the voters, and the panels are by alternatives. This is how the CL makes sense as a logit with fixed effects, grouped by unit, in this case <em>voter</em>.</p>
+<div class="center">
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Voter</td>
+<td style="text-align: center;">Alternative</td>
+<td style="text-align: center;">Choice</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">Party ID</td>
+<td style="text-align: center;">Education</td>
+<td style="text-align: center;">Spending</td>
+<td style="text-align: center;">Campaign Stops</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">R</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">45</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Notice that we have information on each possible choice for each voter because the last two variables vary for each choice available to the voter. Thus, the data structure for the conditional model contains all the information in the multinomial data structure plus additional information regarding independent variables pertaining to each choice available to a voter or to specific both to choice and to individual.</p>
+<p>The CL and MNL models are estimated identically - they have identical likelihood functions.</p>
+<p>What varies between the two are:</p>
+<ul>
+<li>the information contained in the data - do the <span class="math inline">\(x\)</span>s vary across <span class="math inline">\(i\)</span> (thus, <span class="math inline">\(x_i\)</span>) or across <span class="math inline">\(j\)</span> (thus, <span class="math inline">\(x_j\)</span>) or both (thus <span class="math inline">\(x_{i,j}\)</span>)?</li>
+<li>the structure of the data - the CL model will by definition have <span class="math inline">\(J\)</span> times as many observations as the MNL model.</li>
+</ul>
+<p>If the disturbances are i.i.d. logistic, then</p>
+<p><span class="math display">\[
+Pr(Y=j) =  \frac{e^{\beta'z_{i,j}}}{\sum\limits_{j=1}^{J}e^{\beta'z_{i,j}}}\nonumber
+\]</span> where <span class="math inline">\(z_{i,j}\)</span> has two components, <span class="math inline">\(x_{i,j}\)</span> and <span class="math inline">\(w_{i}\)</span> (following Greene’s notation). <span class="math inline">\(x_{i,j}\)</span> varies across choices (<span class="math inline">\(j\)</span>) and possibly across individuals (<span class="math inline">\(i\)</span>) as well; <span class="math inline">\(w_{i}\)</span> varies across individuals. We refer to variation across {<em>choices</em>} (<span class="math inline">\(x_{i,j}\)</span>) as <em>attributes of the choices</em>; we refer to variation across individuals (<span class="math inline">\(w_{i}\)</span>) as <em>characteristics of the individuals</em>.</p>
+<p>Taking the last equation and substituting <span class="math inline">\(x_{i,j}\)</span> and <span class="math inline">\(w_{i}\)</span> for <span class="math inline">\(z\)</span>, we get</p>
+<p><span class="math display">\[
+Pr(Y=j) =\frac{e^{(x_{i,j}\beta)} e^{({w_{i}\gamma})}} {\sum\limits_{j=1}^{J}e^{(x_{i,j}\beta)} e^{({w_{i}\gamma})}}
+\]</span></p>
+<p>and if <span class="math inline">\(w_{i}\)</span> does not vary across individuals, it drops out of the probability leaving</p>
+<p><span class="math display">\[
+Pr(Y=j) =\frac{e^{x_{j}\beta}}{\sum\limits_{j=1}^{J}e^{x_{j}\beta}}\nonumber
+\]</span></p>
+<p>which is the conditional logit because the variables <span class="math inline">\(x\)</span> vary across outcomes, <span class="math inline">\(j\)</span>. The model estimates one parameter <span class="math inline">\(\beta\)</span> for <span class="math inline">\(x_{j}\)</span>, indicating the effect of <span class="math inline">\(x_{j}\)</span> on the probablity of <span class="math inline">\(Y\)</span>. Note that for simplicity, I’ve removed the subscript <span class="math inline">\(i\)</span> so this <span class="math inline">\(x\)</span> varies only by outcome, not by individual; also note that it could vary by individual as well.</p>
+<p>If <span class="math inline">\(x\)</span> only varies across individuals, <span class="math inline">\(i\)</span>, and not across outcomes, <span class="math inline">\(j\)</span>, then the function is</p>
+<p><span class="math display">\[
+Pr(Y=j) =\frac{e^{x_{i}\beta_j}}{\sum\limits_{k=1}^{J}e^{x_{i}\beta_{j}}}
+\]</span></p>
+<p>so the model estimates a parameter <span class="math inline">\(\beta_{j}\)</span> for each outcome <span class="math inline">\(j\)</span> based on a variable that varies across individuals, <span class="math inline">\(i\)</span>. Thus, we can observe the effect of <span class="math inline">\(x_i\)</span> on the probability <span class="math inline">\(Y=j\)</span>. Note again that the model is identified by constraining one of the <span class="math inline">\(\beta\)</span>s to zero and making its associated outcome a reference or comparison category; thus, the <span class="math inline">\(j=1\)</span> rather than zero in the summation limit. This is why we don’t actually estimate <span class="math inline">\(j\)</span> <span class="math inline">\(\beta\)</span>s; we estimate <span class="math inline">\(j-1\)</span> <span class="math inline">\(\beta\)</span>s in the multinomial or conditional logit model.</p>
+<p>After all this effort to distinguish the two models from one another, you’ll be disappointed to learn that the two models, properly specified are identical.</p>
+<p>The LLF is :</p>
+<p><span class="math display">\[\ln \mathcal{L} ( \beta ) = \sum _ { i=1}^{N}  \sum_ { j=1}^{J} d _ { i j } \ln \left( \frac { \exp \left( x _ { i j}  \beta \right) } { \sum _ { k } \exp \left( x _ { i j }  \beta \right) } \right)
+\]</span></p>
+</section>
+<section id="conditional-logit-estimation" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-logit-estimation">Conditional Logit Estimation</h2>
+<p>Suppose that we want to estimate a model including a variable that varies across outcomes, but not across individuals (in this case, constant across US-months). Say we have a measure of risk inherent in any of the 4 foreign policy actions in the dv:</p>
+<div class="center">
+<div id="tab:CLdata">
+<table class="caption-top table">
+<caption>Foreign Policy Data Varying by <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span></caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">year</td>
+<td style="text-align: center;">month</td>
+<td style="text-align: center;">choices</td>
+<td style="text-align: center;">opted</td>
+<td style="text-align: center;">risk</td>
+<td style="text-align: center;">con1</td>
+<td style="text-align: center;">con2</td>
+<td style="text-align: center;">con3</td>
+<td style="text-align: center;">appc1</td>
+<td style="text-align: center;">appc2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">.25</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">81.33334</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">.5</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">81.33334</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.25</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">.25</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">81.33334</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">.5</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">81.33334</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.25</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">.25</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">81.33334</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">.5</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">81.33334</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1945</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.25</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Since I’m interested in how an <em>attribute specific</em> variable (risk) influences foreign policy choice, I need to structure the data so it represents that variable against all possible choices; thus, for January 1945, the data have 4 observations, one for each outcome, and <em>risk</em> indicates the level of risk the president incurs with any single choice.</p>
+<section id="examples-of-this-in-class" class="level3">
+<h3 class="anchored" data-anchor-id="examples-of-this-in-class">Examples of this in class</h3>
+
+
+</section>
+</section>
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
