@@ -1,4 +1,4 @@
-#shiny app to demonstrate the effects of intercept shifts and multiplier changes on the cumulative distribution function (CDF) of different distributions
+#shiny app to demonstrate the effects of intercept shifts and multiplier changes on the cumulative distribution function (CDF) of different distributions; coauthored w/ claude.ai sept 2024
 
 
 library(shiny)

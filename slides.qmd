@@ -21,3 +21,5 @@ title: "Slides"
 [Interactions in Nonlinear Models](interactions24.qmd)
 
 [Choice Models I](choiceA24.qmd)
+
+[Choice Models II](choiceB24.qmd)
