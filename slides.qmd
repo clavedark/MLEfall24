@@ -23,3 +23,5 @@ title: "Slides"
 [Choice Models I](choiceA24.qmd)
 
 [Choice Models II](choiceB24.qmd)
+
+[Count Models I](countA24.qmd)
