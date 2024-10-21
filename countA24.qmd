@@ -1,0 +1,962 @@
+---
+title: "Count Models I"
+author: "Dave Clark"
+institute: "Binghamton University"
+date: "`r Sys.Date()`"
+bibliography: refs606.bib
+#date-format: long
+title-block-banner: TRUE
+format: 
+  html:
+    html-math-method:
+      method: mathjax
+      url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML"
+filters:
+  - parse-latex
+---
+
+<!-- rm(list=ls()) -->
+
+```{r setup, include=FALSE ,echo=FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(fig.retina = 2, fig.align = "center", warning=FALSE, error=FALSE, message=FALSE) 
+  
+library(knitr)
+library(datasets)
+library(tidyverse)
+library(ggplot2)
+library(haven) # read stata w/labels
+library(countrycode)
+library(patchwork)
+library(mvtnorm)
+library(modelsummary)
+library("GGally")
+library(stargazer)
+library(shiny)
+library(faux)
+library(MASS)
+library(ggrepel)
+library(ggpmisc)
+library(sjPlot)
+library(highcharter)
+library(averagemarginaleffects)
+library(plotly)
+library(rnaturalearth)
+library(sf)
+library(rnaturalearthdata)
+library(leaflet)
+library(htmltools)
+library(htmlwidgets)
+library(MASS)
+```
+
+
+
+
+
+# Count variables
+ 
+Counts of events are common in the social sciences, though one of the originators of count models, Lambert, was interested in an engineering question with respect to the number of mistakes a silicon chip press makes. 
+
+@cameron2013regression list examples of event count variables:
+
+  - patents issued
+  - bank failures
+  - accident insurance claims
+  - credit ratings
+  - Presidential appointments to the Supreme Court
+
+
+Event count data have the following characteristics:
+
+  - they are nonnegative - since we cannot have negative events, all values are greater than or equal to zero
+  - they are discrete
+
+
+You should note that these two points also characterize the binary, nominal variables we've considered. 
+
+
+Suppose \ldots}
+
+ Suppose $y$ is whether or not a voter turned out to vote in the 2016 general election in the US. For each voter, $i$, we observe $0|1$. The implied unit of analysis is the voter. 
+
+ Note that we could aggregate voters into groups by census tract, county, congressional district, state, etc. Our binary, perhaps binomial variable is now a discrete count of voters per unit (county, etc.). 
+
+
+Per unit \ldots
+
+We are now observing aggregated Bernoulli events per some unit, sometimes time, sometimes space, sometimes other - examples include:
+
+  - number of cheaters caught per calculus exam.
+  - number of unique visitors to a web page per hour.
+  - number of snicker bars produced without nuts per 8-hour shift.
+  - number of violent social protests per country, per year.
+  - number of flu cases per family. 
+  - number of failed coup attempts per year.
+
+
+Refer to the per unit as the *exposure*, $d$. 
+
+
+This matters because \ldots
+
+Like the binary variables, these aggregations are discrete and strictly non-negative. The exposure, $d$, produces a rate at which these discrete events happen. Such a variable might look like this: 
+
+```{=latex}
+\begin{table}[htp]
+\caption{Snicker Bar Failures per 8-hour shift}
+\begin{center}
+\begin{scriptsize}
+\begin{tabular}{|c|c|}
+Failures  & Hours \\
+0  &  8 \\
+0  &  8 \\
+2  &  8 \\
+1  &  8 \\
+0  &  8 \\
+0  &  8 \\
+\ldots & \ldots\\
+1  &  8 \\
+\end{tabular}
+\end{scriptsize}
+\end{center}
+\label{default}
+\end{table}%
+
+```
+
+Of course, $d$ is constant here, so will factor out.  
+
+
+## Things that are not counts
+
+Generally, if $d$ is known and/or finite, the event variable in question should not be modeled as a count variable. If we know the number of voters, and the number of registered voters, we know the binomial "successes" and the number of trials. Model as a proportion, or as a logit where the unit of analysis is the registered voter, and the $y$ variable indicates vote or not. 
+
+
+## Things that might be counts
+
+If $d$ is unknown or infinite or infinitely divisible (like time, which is a very common $d$), events per $d$ may well be counts. Such a $d$ cannot be the denominator (trials) to produce a proportion, and cannot readily become the unit of analysis.
+
+
+
+
+## Toward the Poisson
+
+ - Suppose events occur at some rate (so $j$ events per $d$); label that rate $\lambda$; and the exposure, $d$, is some period of time with length $d$. 
+
+ - The probability of an event, $j$ occurring during $d$ is $\lambda*d$; the probability of no event during that period is $(1-\lambda)*d$. 
+
+ - Assume the probability of one event occurring  is entirely independent of the probability that any other event occurs in the same period, $d$. 
+
+ - Now, we want to know the probability that $y=j$ events occurring in any period $t$ of length $d$, where $j= 0 , 1, 2, 3 \ldots \infty$. 
+
+
+$$
+Pr(y_i=j) = \frac{e^{-\lambda d} * (\lambda d)^{y_i}}{y_i !} \nonumber
+$$
+
+## Poisson PDF
+
+This is the PDF; the CDF of a discrete distribution is the sum of the PDF. 
+
+$$
+Pr(y_i=j) = \frac{e^{-\lambda d} * (\lambda d)^{y_i}}{y_i !} \nonumber
+$$
+
+
+If $d$ is constant, normalized to one, it drops out:
+
+$$
+Pr(y_i=j) = \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !} \nonumber
+$$
+
+ and we can interpret $\lambda$ as $E[Y]$, the expected number of events per time interval.   
+ 
+ 
+## Poisson QIs
+
+ This should give you the idea that quantities are very easy in the Poisson regression, and that there are three quantities we can generate:
+ 
+  1. the probability $y$ takes on any particular number of events : $$Pr(y_i=j) = \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !}$$.
+  2. the expected number of events given $X$ : $\hat{\lambda}$ which we parameterize as $$\hat{\lambda}=exp(x\widehat{\beta})$$.
+  3. the cumulative probability of $j$ events, so say $$Pr(y \leq 3) = \sum\limits_{j<4}\frac{e^{-\lambda}  \lambda^{y_i}}{y_i !}$$.
+ 
+
+
+## Assumptions
+
+ For the Poisson regression, we assume: 
+
+ - the probabilities of events in a period are independent of one another.
+ - the expected count is equal to the variance; $E[Y]= var[Y]$ - more specifically, $E[Y|X]= var[Y|X]$
+ - the probability of an event, $\lambda$, in any given period, $d$, is constant across $d$ (i.e. \alert{constant rate of arrival})
+
+
+## Poisson distribution
+
+Credited to Simeon Denis Poisson in his study of jury decisions (wrongful convictions, in part), but first put to use by Ladislaus von Bortkiewicz in a study showing the number of Prussian soldiers kicked to death by mules or horses followed a Poisson distribution. 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+library(vcd)
+data("VonBort")
+horse<-data.frame(VonBort)
+horsesum <- horse %>% group_by(deaths) %>% count(deaths) %>% ungroup()
+
+bucolors<-list("#005A43","#6CC24A", "#A7DA92", "#BDBEBD", "#000000" )
+
+hchart(horsesum, "column", hcaes(x=deaths, y=n)) %>% 
+  hc_title(text="Deaths by Horse or Mule Kick") %>% 
+  hc_subtitle(text="Prussian Army, 19th Century") %>% 
+  hc_yAxis(title="Frequency") %>% 
+  hc_colors("#005A43") %>%
+  hc_xAxis(title="Deaths") %>% 
+  hc_legend(enabled=FALSE) %>% 
+  hc_tooltip(pointFormat = "Deaths: {point.x}<br>Frequency: {point.y}") %>% 
+  hc_credits(enabled=TRUE, text="Source: von Bortkiewicz, L. (1898). Das Gesetz der Kleinen Zahlen. Leipzig: Teubner.") 
+
+```
+
+## Rates of Occurence 
+
+Another example - we might observe the number of individuals who catch the flu during a winter out of the number of people in their respective families. Note three things:
+
+ 1. $j$ occurs over $d$; $d$ is exposure which is the family size. 
+ 2. $d$ is not constant; some families are small, some are large. 
+ 3. events are not independent; the probability of one case of flu is related to the probability of another case of flu in the same exposure unit, $d$.
+ 
+
+The Poisson can accommodate the first two of these, but not the third. Actually, you should note that if family size is known, this is probably not a variable we should model as a count; we should compute the proportion instead. 
+
+::: {.callout-note}
+### An aside on events over time
+
+The fact that $d$ is usually some period of time, and that $\lambda$ is a rate of occurrence over time is interesting.
+
+ - these models observe or count events per **spell**.
+ - we can imagine dividing a spell, $d$ into $j+1$ segments of unspecified length; call these units $d_{t,j}$. 
+ - we could count the number of time units between $j=1, j=2, \ldots j=j$, or count the time units within each $d_{t,j}$.
+ - so instead of counting events, we could count time between events. 
+ 
+:::
+
+## Counts and Hazards
+
+
+
+
+
+
+What sort of model does this $y$ variable imply?
+
+Suppose data that look like this:
+
+
+```{=latex}
+\begin{small}
+\begin{table}[!ht]
+\begin{center}  \caption{Events per year} \label{tab:events}
+\begin{tabular}{lccccccccc} 
+\hline \hline \\
+year  &  events\\ \hline \\
+1945  &  0  \\
+1946  &  3 \\
+1947  &  1 \\
+1948  &  0 \\
+1949  &  0 \\
+1950  &  1 \\ \\
+\hline \hline 
+\end{tabular}
+\end{center}
+\end{table}
+\end{small}
+
+```
+
+The same data conceived differently:
+
+```{=latex}
+\begin{small}
+\begin{table}[!ht]
+\begin{center}  \caption{Months since last event} \label{tab:events}
+\begin{tabular}{lccccccccc} 
+\hline \hline \\
+year  &  months& event & event month\\ \hline \\
+1945  &  12 &0  & . \\
+1946  &  15 &1 & March\\
+1946 &    	6 &1 & Sept\\
+1946 & 	1 &1 & Oct \\
+1947  &  4&1 &  Feb \\
+1948  &  20& 0 & .  \\
+1949  &  32 &0 & . \\
+1950  &  35 &1 & March \\
+\hline \hline 
+\end{tabular}
+\end{center}
+\end{table}
+\end{small}
+```
+
+ 
+
+```{=latex}
+\begin{table}[!ht]
+\begin{center}  \caption{Months since last event} \label{tab:events}
+\begin{tabular}{lccccccccc} 
+\hline \hline \\
+year  &  month& event & event month\\ \hline \\
+1945  &  1 &0  &  \\
+1945  &  2 &0 & \\
+1945 &    	3 &0 & \\
+\vdots & \vdots & \vdots \\
+1946 & 	1 &0  \\
+1946  &  2&0 &  \\
+1946  &  3& 1 & March  \\
+1946  &  4 &0 &  \\
+1946  &  5 &0 &  \\
+1946  &  6 &0 &  \\
+1946  &  7 &0 &  \\
+1946  &  8 &0 &  \\
+1946  &  9 &1 & Sept  \\
+1946  &  10 &1 & Oct  \\
+1946  &  11 &0 &   \\
+1946  &  12 &0 & \\
+1947  &  1 &0 & \\
+\vdots & \vdots & \vdots  \\
+\hline \hline 
+\end{tabular}
+\end{center}
+\end{table}
+```
+
+
+
+## Back to the Poisson 
+
+$$
+Pr(y_i=j) = \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !} \nonumber
+$$
+
+Again, emphasizing two assumptions:
+
+  - mean-variance equality; note there is only one parameter. 
+  - event independence \alert{within spell, $d$}.  
+
+
+## Poisson distributions
+ 
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+#plot 4 poisson distributions at lambda values of .1, 1, 5, 10
+
+x <- 0:20
+y1 <- dpois(x, lambda = .1)
+y2 <- dpois(x, lambda = 1)
+y3 <- dpois(x, lambda = 5)
+y4 <- dpois(x, lambda = 10)
+
+df <- data.frame(x = rep(x, 4), y = c(y1, y2, y3, y4), lambda = rep(c(.1, 1, 5, 10), each = 21))
+
+ggplot(df, aes(x = x, y = y, color = factor(lambda))) +
+  geom_line() +
+  labs(title = "Poisson Distributions", x = "Events", y = "Probability") +
+  theme_minimal() +
+  scale_color_manual(values = c("red", "blue", "green", "purple")) +
+  theme(legend.position = "none")
+
+```
+ 
+ 
+  
+
+## Parameterizing $\lambda$
+
+Since $\lambda$ must be nonnegative, the exponential function is an obvious candidate as the link function.  
+
+$$
+\lambda = E[Y] = e^{x_{i} \beta_k} \nonumber
+\$$
+
+The exponential link is also the reason  the poisson model is also known as the exponential poisson regression.
+
+ 
+## Estimation
+
+The Poisson regression model is easy to estimate in ML. 
+
+
+$$
+\ln L (\lambda|Y) = \ln\prod_{i=1}^{n} f(Y|\lambda) \nonumber \\
+ =\sum_{i=1}^{n} \ln \left(\frac{e^{-\lambda}\lambda^{y_i}}{y_i!}\right) \nonumber \\
+ = -n\lambda+\sum_{i=1}^{n}y_i\ln\lambda - \sum_{i=1}^{n}ln(y_i!)\nonumber
+$$
+
+## Quantities of Interest
+
+All the usual techniques apply (at-mean; average; simulated): 
+
+
+  - $exp(\beta_k)$ is the \alert{incident rate ratio (IRR)} - similar to odds ratios in the logistic model.
+  - $E[Y]=\lambda = e^{x_{i} \beta_k}$ - this is the expected number of events per period, conditional on $x \beta$. 
+  - $Pr(y_i=j) = \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !} $ - the PDF (like any) describes the probabilities of all possible values of $y$. So we could examine the probability $y=2$; or $Pr(y<3)$, etc. 
+  - $Pr(y_i < j) = \sum_{y=0}^{j}[ \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !}]$ - since this is a discrete distribution, the CDF is the sum of the PDF up to the value of interest. 
+
+# Example
+
+These are replication data from @hendrix2012climate. Models in the paper evaluate how climate disruptions shape social conflict; these below examine effect on violent social conflict (protests); they expect and show a u-shaped relationship across deviations from normal rainfall. The models control for rain deviations lag, polity, log pop, pop growth, log gdp/pc, growth in gdp/pc, UCDP active conflict incidents, and a time trend. 
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+
+rain <- rain %>% group_by(violent_events_no_onset) %>% count(violent_events_no_onset) %>% ungroup()
+
+#column chart of violent events using highcharter
+
+
+hchart(rain, "column", hcaes(x=violent_events_no_onset, y=n)) %>% 
+  hc_title(text="Violent Events") %>% 
+  hc_yAxis(title="Frequency") %>% 
+  hc_colors("#005A43") %>%
+  hc_xAxis(categories = rain$violent_events_no_onset, title="Violent Events") %>% 
+  hc_legend(enabled=FALSE) %>% 
+  hc_tooltip(pointFormat = "Violent Events: {point.x}<br>Frequency: {point.y}") %>% 
+  hc_credits(enabled = TRUE, text = "Source: Hendrix and Salehyan (2012)")
+
+
+
+
+
+
+
+
+
+```
+
+Visualizing count variables is useful insofar as it helps us understand the rareness of events, the nature of outliers (high numbers of events), and the frequency of zeros.
+
+Mapping geographically distributed count variables like the one here can also be useful. I'm going to present a *chloropleth* map of Africa, showing the number of violent events in each country. To do this, we need to join the count data to a geographic shapefile. Since we want to plot events over countries, we need to collapse the count data to one observation per country, with a variable indicated the total number of events in each country. After that, we need to join geographic data indicating the shape of the country. In the end, each row in the data is a country, with a variable indicating the number of events in that country, and then information regarding the shape of the country (what are called "polygons"). Once we have the data set up appropriately, we can plot the map in any number of ways. 
+
+Here are three (very similar) maps meant to illustrate different ways to map in R. The first one is a static map generated using `ggplot2`. 
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+#  Africa map data from Natural Earth
+africa <- ne_countries(scale = "medium", continent = "Africa", returnclass = "sf")
+
+# replication data
+
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+# use countrycode to get iso3c codes matched to ccode
+
+rain$iso3c <- countrycode(sourcevar = rain$country, origin = "country.name", destination = "iso3c")
+
+# collapse by country
+country_totals <- rain %>%
+  group_by(iso3c) %>%
+  summarize(total_events = sum(violent_events_no_onset, na.rm = TRUE))
+
+# join collapsed data and Natural Earth data
+africa_data <- left_join(africa, country_totals, by = c("sov_a3" = "iso3c"))
+
+# map using ggplot
+ggplot(data = africa_data) +
+  geom_sf(aes(fill = total_events)) +
+  geom_sf_text(aes(label = sovereignt, geometry = geometry),
+               size = 2, check_overlap = TRUE)+
+    scale_fill_gradient(low = "#E8F5E9", high = "#005A43",
+                      name = "Total Violent Events",
+                      na.value = "grey90") +
+  theme_minimal() +
+  labs(title = "Frequency of Violent Events in Africa (1989-2008)",
+       caption = "Source: Hendrix and Salehyan (2012)") +
+  theme(legend.position = "right")
+ 
+
+```
+
+This map is interactive, built using `highcharter` - this is an R port of a JavaScript package called `highcharts`. Documentation for JavaScript is extensive, less so for R; the translation to R takes a lot of work. You'll see the map shows the number of violent events in each country in Africa when the user flies over the map.
+
+
+
+```{r warning=FALSE, message=FALSE }
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# replication data
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+# Use countrycode to get iso3c codes matched to ccode
+rain$iso_a3 <- countrycode(sourcevar = rain$country, origin = "country.name", destination = "iso3c")
+
+# Collapse by country
+country_totals <- rain %>%
+  group_by(iso_a3, country) %>%
+  summarize(total_events = sum(violent_events_no_onset, na.rm = TRUE))
+
+# highcharter map - downloads from https://code.highcharts.com/mapdata/, looking for custom/africa.js
+
+hcmap <- hcmap("custom/africa", data = country_totals, value = "total_events",
+               joinBy = c("iso-a3", "iso_a3"), name = "Violent Events",
+               dataLabels = list(enabled = TRUE, format = "{point.name}"),
+               borderColor = "#333333", # Darker border color
+               borderWidth = 0.5, # Increased border width
+               tooltip = list(valueSuffix = " events")) %>%
+  hc_title(text = "Violent Events in Africa") %>%
+  hc_colorAxis(minColor = "#E8F5E9", maxColor = "#005A43") %>%
+  hc_mapNavigation(enabled = TRUE)
+
+# map
+hcmap
+```
+
+Once more turning a `ggplot` object into a `plotly` object.
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Africa map data from Natural Earth
+africa <- ne_countries(scale = "medium", continent = "Africa", returnclass = "sf")
+
+# replication data 
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+# Use countrycode to get iso3c codes matched to ccode
+rain$iso3c <- countrycode(sourcevar = rain$country, origin = "country.name", destination = "iso3c")
+
+# Collapse by country
+country_totals <- rain %>%
+  group_by(iso3c) %>%
+  summarize(total_events = sum(violent_events_no_onset, na.rm = TRUE))
+
+# Join collapsed data and Natural Earth data
+africa_data <- left_join(africa, country_totals, by = c("iso_a3" = "iso3c"))
+
+# Calculate centroid for each country for label placement
+africa_data$centroid <- st_centroid(africa_data$geometry)
+africa_data$label_x <- st_coordinates(africa_data$centroid)[,1]
+africa_data$label_y <- st_coordinates(africa_data$centroid)[,2]
+
+# Create the ggplot map
+g <- ggplot(africa_data) +
+  geom_sf(aes(fill = total_events, text = paste(name, "<br>Violent Events:", total_events)),
+          color = "#333333", size = 0.2) +
+  geom_sf_text(aes(label = name, geometry = centroid), size = 2, check_overlap = TRUE) +
+  scale_fill_gradient(low = "#E8F5E9", high = "#005A43", name = "Violent Events") +
+  coord_sf(expand = FALSE) +  # Ensures map fills the plot area
+  scale_x_continuous(breaks = seq(-20, 60, by = 20)) +  # Longitude breaks
+  scale_y_continuous(breaks = seq(-40, 40, by = 20)) +  # Latitude breaks
+  theme_minimal() +
+  theme(
+    axis.text = element_text(size = 8),
+    axis.title = element_text(size = 10),
+    panel.grid = element_blank(),  # Remove all grid lines
+    panel.background = element_rect(fill = "white", color = NA),  # White background
+    plot.background = element_rect(fill = "white", color = NA)  # White plot area
+  ) +
+  labs(title = "Violent Events in Africa",
+       x = "Longitude",
+       y = "Latitude")
+
+# Convert ggplot to plotly
+p <- ggplotly(g, tooltip = "text")
+
+# Adjust layout for better map display
+p <- p %>% layout(
+  geo = list(
+    showframe = TRUE,
+    showcoastlines = TRUE,
+    projection = list(type = "mercator"),
+    fitbounds = "locations"
+  )
+)
+
+# map
+p
+
+```
+
+
+Let's estimate a poisson regression examining how deviations from normal rainfall affect the number of violent events in Africa. 
+
+```{r results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+#filter to remove ccode 520 (Somalia)
+rain <- filter(rain, ccode != 520)
+
+# Estimate the model
+
+poisson <- glm(violent_events_no_onset ~violent_events_no_onset_l+ GPCP_precip_mm_deviation_sd + GPCP_precip_mm_deviation_sd_sq + GPCP_precip_mm_deviation_sd_l + GPCP_precip_mm_deviation_sd_l_sq + polity2 + polity2_sq + log_pop_pwt + log_pop_pwt_fd + log_rgdpch_pwt + grgdpch_pwt +incidence + ttrend , data = rain, family = poisson(link = "log"))
+
+# table using stargazer
+
+stargazer(poisson, type = "html")
+
+```
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# predictions
+
+# Estimate the model
+
+poisson <- glm(violent_events_no_onset ~ violent_events_no_onset_l + GPCP_precip_mm_deviation_sd + GPCP_precip_mm_deviation_sd_sq + GPCP_precip_mm_deviation_sd_l + 
+GPCP_precip_mm_deviation_sd_l_sq + polity2 + polity2_sq + 
+log_pop_pwt + log_pop_pwt_fd + log_rgdpch_pwt + grgdpch_pwt + 
+incidence + ttrend, 
+data = rain, family = poisson(link = "log"))
+  
+# design matrix
+n <- 60
+df <- data.frame(
+  violent_events_no_onset_l = rep(3, n),
+  GPCP_precip_mm_deviation_sd = (1:n - 31) / 10,
+  GPCP_precip_mm_deviation_sd_sq = ((1:n - 31) / 10)^2,
+  GPCP_precip_mm_deviation_sd_l = rep(0.022, n),
+  GPCP_precip_mm_deviation_sd_l_sq = rep(0.96, n),
+  polity2 = rep(-0.21, n),
+  polity2_sq = rep(30, n),
+  log_pop_pwt = rep(9.03, n),
+  log_pop_pwt_fd = rep(0.024, n),
+  log_rgdpch_pwt = rep(7.6, n),
+  grgdpch_pwt = rep(1.07, n),
+  incidence = rep(0, n),
+  ttrend = rep(10, n)
+)
+
+# Predict lambda
+df$lambda <- predict(poisson, newdata = df, type = "response")
+
+
+# Calculate by hand and with EPT bounds
+df$xb <- predict(poisson, newdata = df, type = "link")
+df$se <- predict(poisson, newdata = df, type = "link", se.fit = TRUE)$se.fit
+df$ey <- exp(df$xb)
+df$ub <- exp(df$xb + 1.96 * df$se)
+df$lb <- exp(df$xb - 1.96 * df$se)
+
+# Plot with confidence intervals
+ggplot(df, aes(x = GPCP_precip_mm_deviation_sd)) +
+  geom_ribbon(aes(ymin = lb, ymax = ub), alpha = 0.2) +
+  geom_line(aes(y = ey)) +
+  labs(x = "Deviation in rainfall", y = "Expected Count")
+
+``` 
+
+# Assumptions
+
+  - events arrive at distinct times (not simultaneously).
+  - events are independent.
+  - the event arrival rate is constant across $d$. 
+
+ The Poisson distribution imposes a mean-variance equality assumption merely by the fact the distribution only has mean (location) parameter.  The negative binomial relaxes that assumption and allows us to capture *extra poissonness* in the conditional variance and to adjust estimates of the conditional mean based on that extra poissonness.  
+ 
+::: {.callout-note}
+It's not crazy to think of this  extra poissonness in the variance as resembling heteroskedasticity. 
+:::
+
+
+## What causes extra poissonness?
+
+Extra poissonness is that there is excess variance (that the ratio of mean to variance is less than one). What causes it? 
+
+Interesting processes:
+
+ - over dispersion (perhaps  due to heterogeneous spells).
+ - positive contagion  such that one event increases the chances of another event in the same spell. 
+ - heterogeneous events - some events are "bigger" than others, e.g. militarized disputes. 
+ - dual processes producing spells with zero events and those with more than zero events. 
+
+
+
+### Positive Contagion
+
+Imagine we were modeling the number of family members who catch the flu each winter.  It's not hard to see that if one person catches the flu, the probability someone else catches the flu increases; thus, the probabilities of events are not independent of one another and there is a (literal) contagion across events.  If events are not independent, then it is very likely that the variance in $Y$ will be quite different from the mean, and violating the mean-variance equality assumption has bad effects on inference. 
+
+
+ Here are (fake) data on flu cases per household:
+
+\begin{center} $\left(
+\begin{array}{cccccccccccccc}
+0 &0 &0 &5 &  0 & 0 & 6 & 0 & 3 & 0 & 2 & 2 & 0 \\
+\end{array} \right)$
+\end{center}
+
+ The observed mean is 1.39 and the variance is 4.42, obviously suggesting that the mean-variance equality requirement is not met. Note this is different from the conditional expectations of the mean and variance and thus is not a formal test of the mean-variance equality restriction - for that, see @cameron1990count. My quick test in this nonparametric setting, however, suggests these data suffer positive contagion which manifests as overdispersion; the occurrence of one event increases the probability of more events.
+ 
+::: {.callout-note}
+Bad news, friends
+
+  If we model these data using a Poisson model because the Poisson restricts the mean to be equal to the variance.  Think about the practical result - the variance will be restricted to be smaller than it actually is, so it will be underestimated.  If we underestimate the variance, the estimated standard errors will be smaller than they really should be, so we will conclude coefficients are statistically significant when they really are not - this is bad and it's Type I error time.  
+:::
+
+
+### Negative contagion
+
+What if, instead of modeling the number of family members with the flu, we are modeling the number of high school students a teacher catches cheating during an exam.  When the teacher nails the first student, the others are going to become much more cautious; this means that fewer may actually cheat and the ones who do cheat will be very careful.  Thus, catching one reduces the probability of catching a second student. This is called negative contagion; it manifests as  underdispersion.
+
+
+So what are the consequences of negative contagion?  If we estimate the Poisson model and thus constrain the variance to be equal to the mean and therefore larger than it actually is, we overestimate the variance and thus overestimate our standard errors.  As a result, we're likely to make Type II errors, failing to find relationships that actually exist in the data.
+
+ In reality, negative contagion or underdispersion is relatively rare in political science (and social science) data.  Most econometric work develops models for overdispersion (like the negative binomial model) - models like the continuous parameter binomial regression (and others) will measure underdispersion. 
+
+## A test for overdispersion
+
+@cameron1990count propose a regression based test for overdispersion. It's computed as follows. 
+  
+  - compute $\lambda$ in-sample
+  - generate estimated variance, u (see code below)
+  - regress u on $\lambda$
+  - the null hypothesis is equidispersion; rejecting the null is evidence of overdispersion in $y|X$.
+  
+While this process is instructive, really there's no need to do this because we can estimate the negative binomial to measure $\alpha$.
+
+
+
+```{r results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+
+# Predict lambda (expected counts) in-sample
+rain$lambda <- predict(poisson, type = "response", newdata=rain)
+
+# Generate estimated variance, u
+rain$u <- ((rain$violent_events_no_onset - rain$lambda)^2 - rain$violent_events_no_onset) /
+          (rain$lambda * sqrt(2))
+
+# Regress u on lambda
+overdispersion_test <- lm(u ~ lambda, data = rain)
+
+# Print the summary of the regression
+stargazer(overdispersion_test, type = "html")
+
+
+```
+
+The regression indicates we can reject the null hypothesis of equidispersion, so we have some evidence of overdispersion in the model. 
+
+
+# Negative Binomial Regression
+
+  The Poisson function described above has only one estimable parameter, $\lambda$, the mean of the Poisson distributed variable, $y$.  The model assumes the conditional expected mean and variance are equal, so one parameter captures both central tendency and dispersion. Thus, heterogeneity is restricted in the model by construction, such that:
+
+$$E[Y]= var[Y] ~~~\mbox{so} \nonumber \\
+\frac{E[Y]}{var[Y]} = 1 \nonumber \\
+\mbox{so we only need to estimate one parameter, $\lambda$} \nonumber
+$$
+
+ 
+We can motivate the negative binomial model by thinking about unobserved heterogeneity in the data arising as variance different from the mean, arising, for example, from outliers. Let's begin with the observed heterogeneity:
+
+$$
+\lambda = e^{X \beta} \nonumber 
+$$
+ 
+so the observed variability in the data are modeled via the $X$ variables; put another way, we model or observe the heterogeneity in the data.  However if the data are overdispersed, we can say that $X$ does not adequately capture the heterogeneity in the variable $y$.  In other words, there is some error in our specification, so we might restate our expectation of the mean, $\lambda$ as:
+
+$$
+\tilde{\lambda} = e^{X \beta + \varepsilon} \nonumber 
+$$
+
+$\tilde{\lambda}$ is a random variable and $\varepsilon$ is an error term (uncorrelated with $X$) that represents the effects of omitted variables.  So suppose that some unobserved (and therefore omitted) variables produce the positive contagion in the model of family members with the flu - we have effectively relegated the effects of those variables to an error term, $\varepsilon$.  
+
+Thus, $\lambda$, the expected value of $y$, is not just a function of $X$, but is a function of excluded variables or unobserved heterogeneity - this heterogeneity is specifically the source of the contagion in the data.  As a result, cases with the same value of $X$ can have different expected values of $y$, $\lambda$.   
+
+Let's separate these terms:
+
+$$
+\tilde{\lambda} = e^{X \beta + \varepsilon} \nonumber \\
+= e^{X \beta} e^{\varepsilon} \nonumber 
+$$
+
+ 
+and, recalling that $\lambda=e^{X \beta}$, let's substitute $\lambda$ and let's call $e^{\varepsilon}$ $\upsilon$, so
+
+$$
+\tilde{\lambda} = \lambda \upsilon \nonumber 
+$$
+
+$\lambda$ is simply the conditional expected mean of $y$ from the Poisson model and is thus Poisson distributed.  $\upsilon$ is the random error, the unobserved heterogeneity.  In combination, these produce $\tilde{\lambda}$; so we are conditioning the Poisson estimate of $\lambda$ on the unobserved heterogeneity.  We already know $\lambda$ is Poisson distributed, but now we need to describe the distribution of $\upsilon$, the error term, or more appropriately, the variance.  
+
+
+Typically, we assume $\upsilon$ is follows a gamma distribution with mean = 1 ($E[\upsilon]=1$) and variance of $\alpha^{-1}$.  The combination (mixture) of the Poisson distributed systematic portion of the model and the Gamma distributed random component produces a marginal distribution of $Y$ called {\it negative binomial}. 
+
+$$
+Pr(Y_{i}| \lambda,\alpha)=\frac{\Gamma(y+\alpha^{-1})}{y!\Gamma(\alpha^{-1})} \left( \frac{\alpha^{-1}}{\alpha^{-1}+\lambda}\right) ^{\alpha^{-1}} \left( \frac{\lambda}{\alpha^{-1}+\lambda}\right) ^{y} \nonumber
+$$
+
+
+The negative binomial model allows the variance to exceed the mean; when the variance, $\alpha$ is equal to zero, the model reduces to the Poisson.  Stata provides a log-likelihood test of whether the variance parameter $\alpha$ is different from zero - if it is (if the resulting $\chi^{2}$ is signficant) then $\alpha$ is greater than zero and the data are overdispersed due to some unobserved heterogeneity. 
+ 
+If it is not significant, then $\alpha = 0$, so the Poisson is the correct model.  Additionally, just as we have modeled the variance specifically as a function of some variables, $z$, we can model $\alpha$, the variance in this model as a function of variables. Such a model would suggest we have some theoretical idea about what variables influence the variance in $Y$ and thus are the sources of the unobserved heterogeneity.
+
+## Negative Binomial Example
+
+Here's a negative binomial regression, specified exactly as the Poisson model above. 
+```{r results='asis'}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+#filter to remove ccode 520 (Somalia)
+rain <- filter(rain, ccode != 520)
+
+# Estimate the model
+
+nb <- glm.nb(violent_events_no_onset ~violent_events_no_onset_l+ GPCP_precip_mm_deviation_sd + GPCP_precip_mm_deviation_sd_sq + GPCP_precip_mm_deviation_sd_l + GPCP_precip_mm_deviation_sd_l_sq + polity2 + polity2_sq + log_pop_pwt + log_pop_pwt_fd + log_rgdpch_pwt + grgdpch_pwt +incidence + ttrend , data = rain)
+
+# 1/nb$theta
+
+# table using stargazer
+
+stargazer(nb, type = "html")
+
+```
+
+In the negative binomial model, $\theta$ is the inverse of the variance parameter, $\alpha$: 
+
+$$ \alpha = \frac{1}{\theta} \nonumber $$
+
+so for the model above, 
+
+$$ \alpha = \frac{1}{1.203} = .831 \nonumber $$
+
+Note that $\theta$ is statistically different from zero, so we can reject the null hypothesis of equidispersion. Put differently, the disperson parameter is not zero, indicating there is overdispersion. 
+
+## Negative Binomial Predictions
+
+
+```{r}
+#| echo: true
+#| code-fold: true
+#| code-summary: "code"
+
+# predictions using library(averagemarginaleffects)
+
+rain <- read_dta("/Users/dave/Documents/teaching/606J-mle/2022/slides/L10_count1/code/H_S_JPR_491_Replication_Revised.dta")
+
+#filter to remove ccode 520 (Somalia)
+rain <- filter(rain, ccode != 520)
+
+# Estimate the model
+
+nb <- glm.nb(violent_events_no_onset ~violent_events_no_onset_l+ GPCP_precip_mm_deviation_sd + GPCP_precip_mm_deviation_sd_sq + GPCP_precip_mm_deviation_sd_l + GPCP_precip_mm_deviation_sd_l_sq + polity2 + polity2_sq + log_pop_pwt + log_pop_pwt_fd + log_rgdpch_pwt + grgdpch_pwt +incidence + ttrend , data = rain)
+
+# #identify the estimation sample, copy df
+# rain$used <- TRUE
+# rain$used[na.action(nb)] <- FALSE
+# df <- rain %>%  filter(used=="TRUE")
+# 
+# avgeffects <-compute_average_effects(nb, 
+#   data=df, 
+#   x_variable = "GPCP_precip_mm_deviation_sd",
+#   polynomial = list(vars = c("GPCP_precip_mm_deviation_sd",        "GPCP_precip_mm_deviation_sd_sq"), order = 2),
+#   num_points = 60, pred_type = "link")
+# 
+# avgeffects$ub <- exp(avgeffects$median_prediction + 1.96 * avgeffects$median_se)
+# avgeffects$lb <- exp(avgeffects$median_prediction - 1.96 * avgeffects$median_se)
+# avgeffects$ey <- exp(avgeffects$median_prediction)
+# 
+# # plot
+# 
+# ggplot(avgeffects, aes(x = x)) +
+#   geom_ribbon(aes(ymin = lb, ymax = ub), alpha = 0.2) +
+#   geom_line(aes(y = ey)) +
+#   labs(x = "Deviation in rainfall", y = "Expected Count")
+
+
+#identify the estimation sample, copy df
+rain$used <- TRUE
+rain$used[na.action(nb)] <- FALSE
+df <- rain %>%  filter(used=="TRUE")
+
+# loop over values of rain
+
+temp<-NULL
+xb<-0
+se<-0
+i=1
+for (r in seq(-3, 3, .1)) {
+  df$GPCP_precip_mm_deviation_sd <- r
+  df$GPCP_precip_mm_deviation_sd_sq <- r^2
+  temp <- data.frame(predict(nb, newdata = df, type = "link", se.fit = TRUE))
+  xb[i] <- median(temp$fit, na.rm = TRUE)
+  se[i] <- median(temp$se.fit, na.rm = TRUE)
+  i=i+1
+}
+
+preds <- data.frame(x = seq(-3, 3, .1), xb = xb, se = se)
+preds$ey <- exp(preds$xb)
+preds$ub <- exp(preds$xb + 1.96 * preds$se)
+preds$lb <- exp(preds$xb - 1.96 * preds$se)
+
+# plot
+
+ggplot(preds, aes(x = x)) +
+  geom_ribbon(aes(ymin = lb, ymax = ub), alpha = 0.2) +
+  geom_line(aes(y = ey)) +
+  labs(x = "Deviation in rainfall", y = "Expected Violent Events")
+
+
+
+```
+
+## $\alpha$ indicates poor model specification?
+
+ If the overdispersion arises from unobserved heterogeneity, then the problem really could be one of model specification; if we could specify the sources of that heterogeneity in the data, we could include those variables in the model and account explicitly for the factors leading to overdispersion. 
+
+
+ Thus, as we change the specification of the model, evidence of overdispersion disappears.  So, $\alpha \neq 0|X_{c}$ but  $\alpha = 0|X_{f}$.
+
+ 
+
+Emphasizing \ldots
+
+The  **ancillary parameter** $\alpha$, like many such parameters, soaks up heterogeneity we are failing to measure adequately in the model. Such parameters are almost always best thought of as indicators of poor model specification. 
+
+If $\alpha$ is different from zero, we should be asking what variables (excluded) would explain the heterogeneity in the data - the heterogeneity in these models will be due to excess variance, most probably given by outlying values of $y$. Because the left limit is zero, outliers are higher counts. 
+
+So what variables would predict the higher (extra poisson) counts? 
+
+
+
+::: {.callout-note}
+### Advice
+
+Always estimate the NB first. If $\alpha=0$, the model is Poisson, but inefficient because you estimated an additional, unnecessary parameter. So now, estimate and report the Poisson. Say clearly in the text that you report the Poisson because the NB showed no evidence of overdispersion.
+:::
+
+ 
