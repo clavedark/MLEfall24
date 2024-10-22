@@ -190,7 +190,7 @@ $$
 
  - the probabilities of events in a period are independent of one another.
  - the expected count is equal to the variance; $E[Y]= var[Y]$ - more specifically, $E[Y|X]= var[Y|X]$
- - the probability of an event, $\lambda$, in any given period, $d$, is constant across $d$ (i.e. \alert{constant rate of arrival})
+ - the probability of an event, $\lambda$, in any given period, $d$, is constant across $d$ (i.e. constant rate of arrival)
 
 
 ## Poisson distribution
@@ -344,7 +344,7 @@ $$
 Again, emphasizing two assumptions:
 
   - mean-variance equality; note there is only one parameter. 
-  - event independence \alert{within spell, $d$}.  
+  - event independence within spell, $d$.  
 
 
 ## Poisson distributions
@@ -402,7 +402,7 @@ $$
 All the usual techniques apply (at-mean; average; simulated): 
 
 
-  - $exp(\beta_k)$ is the \alert{incident rate ratio (IRR)} - similar to odds ratios in the logistic model.
+  - $exp(\beta_k)$ is the incident rate ratio (IRR) - similar to odds ratios in the logistic model.
   - $E[Y]=\lambda = e^{x_{i} \beta_k}$ - this is the expected number of events per period, conditional on $x \beta$. 
   - $Pr(y_i=j) = \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !} $ - the PDF (like any) describes the probabilities of all possible values of $y$. So we could examine the probability $y=2$; or $Pr(y<3)$, etc. 
   - $Pr(y_i < j) = \sum_{y=0}^{j}[ \frac{e^{-\lambda}  \lambda^{y_i}}{y_i !}]$ - since this is a discrete distribution, the CDF is the sum of the PDF up to the value of interest. 
@@ -727,7 +727,7 @@ What if, instead of modeling the number of family members with the flu, we are m
 
 So what are the consequences of negative contagion?  If we estimate the Poisson model and thus constrain the variance to be equal to the mean and therefore larger than it actually is, we overestimate the variance and thus overestimate our standard errors.  As a result, we're likely to make Type II errors, failing to find relationships that actually exist in the data.
 
- In reality, negative contagion or underdispersion is relatively rare in political science (and social science) data.  Most econometric work develops models for overdispersion (like the negative binomial model) - models like the continuous parameter binomial regression (and others) will measure underdispersion. 
+In reality, negative contagion or underdispersion is relatively rare in political science (and social science) data.  Most econometric work develops models for overdispersion (like the negative binomial model) - models like the continuous parameter binomial regression (and others) will measure underdispersion. 
 
 ## A test for overdispersion
 
