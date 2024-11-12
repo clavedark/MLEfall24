@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Dave Clark">
+<meta name="dcterms.date" content="2024-11-12">
+
+<title>Continuous Time Hazards – MLE - Fall 2024</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">MLE - Fall 2024</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./slides.html"> 
+<span class="menu-text">Slides</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./mlesyllabus24.html"> 
+<span class="menu-text">MLE Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./code.html"> 
+<span class="menu-text">Code</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools tools-wide">
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label=""><i class="bi bi-github"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://github.com/clavedark/MLEfall24">
+            repo
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Continuous Time Hazards</h1>
+                      </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author">Dave Clark </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              Binghamton University
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 12, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#continuous-time-models" id="toc-continuous-time-models" class="nav-link active" data-scroll-target="#continuous-time-models">Continuous Time Models</a></li>
+  <li><a href="#a-general-estimation-approach" id="toc-a-general-estimation-approach" class="nav-link" data-scroll-target="#a-general-estimation-approach">A general estimation approach</a></li>
+  <li><a href="#quantities" id="toc-quantities" class="nav-link" data-scroll-target="#quantities">Quantities</a></li>
+  <li><a href="#censoring" id="toc-censoring" class="nav-link" data-scroll-target="#censoring">Censoring</a>
+  <ul class="collapse">
+  <li><a href="#all-uncensored-using-b-sj-notation" id="toc-all-uncensored-using-b-sj-notation" class="nav-link" data-scroll-target="#all-uncensored-using-b-sj-notation">All Uncensored (using B-S&amp;J notation) }</a></li>
+  <li><a href="#censoring-using-b-sj-notation" id="toc-censoring-using-b-sj-notation" class="nav-link" data-scroll-target="#censoring-using-b-sj-notation">Censoring (using B-S&amp;J notation)}</a></li>
+  <li><a href="#general-lf-with-censoring-using-b-sj-notation" id="toc-general-lf-with-censoring-using-b-sj-notation" class="nav-link" data-scroll-target="#general-lf-with-censoring-using-b-sj-notation">General LF with censoring (using B-S&amp;J notation)}</a></li>
+  <li><a href="#asides" id="toc-asides" class="nav-link" data-scroll-target="#asides">Asides</a></li>
+  </ul></li>
+  <li><a href="#parametric-models" id="toc-parametric-models" class="nav-link" data-scroll-target="#parametric-models">Parametric Models</a>
+  <ul class="collapse">
+  <li><a href="#exponential-hazards" id="toc-exponential-hazards" class="nav-link" data-scroll-target="#exponential-hazards">Exponential hazards</a></li>
+  <li><a href="#exponential-llf" id="toc-exponential-llf" class="nav-link" data-scroll-target="#exponential-llf">Exponential LLF</a></li>
+  <li><a href="#weibull-hazards" id="toc-weibull-hazards" class="nav-link" data-scroll-target="#weibull-hazards">Weibull hazards</a>
+  <ul class="collapse">
+  <li><a href="#weibull-parts" id="toc-weibull-parts" class="nav-link" data-scroll-target="#weibull-parts">Weibull parts</a></li>
+  </ul></li>
+  <li><a href="#hazard-ratios" id="toc-hazard-ratios" class="nav-link" data-scroll-target="#hazard-ratios">Hazard Ratios</a></li>
+  <li><a href="#accelerated-failure-time-aft" id="toc-accelerated-failure-time-aft" class="nav-link" data-scroll-target="#accelerated-failure-time-aft">Accelerated Failure Time (AFT)</a></li>
+  </ul></li>
+  <li><a href="#proportional-hazards" id="toc-proportional-hazards" class="nav-link" data-scroll-target="#proportional-hazards">Proportional Hazards</a>
+  <ul class="collapse">
+  <li><a href="#coxs-proportional-hazards-model" id="toc-coxs-proportional-hazards-model" class="nav-link" data-scroll-target="#coxs-proportional-hazards-model">Cox’s Proportional Hazards Model</a>
+  <ul class="collapse">
+  <li><a href="#semi-parametric-alism" id="toc-semi-parametric-alism" class="nav-link" data-scroll-target="#semi-parametric-alism">Semi-parametric-alism?</a></li>
+  <li><a href="#war-duration-example" id="toc-war-duration-example" class="nav-link" data-scroll-target="#war-duration-example">War duration example</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#issues-in-ph-models" id="toc-issues-in-ph-models" class="nav-link" data-scroll-target="#issues-in-ph-models">Issues in PH models</a>
+  <ul class="collapse">
+  <li><a href="#ties" id="toc-ties" class="nav-link" data-scroll-target="#ties">Ties</a></li>
+  <li><a href="#non-proportionality" id="toc-non-proportionality" class="nav-link" data-scroll-target="#non-proportionality">Non-Proportionality</a>
+  <ul class="collapse">
+  <li><a href="#why-would-hazards-be-non-proportional" id="toc-why-would-hazards-be-non-proportional" class="nav-link" data-scroll-target="#why-would-hazards-be-non-proportional">Why would hazards be non proportional?</a></li>
+  <li><a href="#tests-for-ph-in-the-cox-model" id="toc-tests-for-ph-in-the-cox-model" class="nav-link" data-scroll-target="#tests-for-ph-in-the-cox-model">Tests for PH in the Cox model</a></li>
+  <li><a href="#schoenfeld-residuals" id="toc-schoenfeld-residuals" class="nav-link" data-scroll-target="#schoenfeld-residuals">Schoenfeld Residuals</a></li>
+  <li><a href="#what-if-my-hazards-are-non-proportional" id="toc-what-if-my-hazards-are-non-proportional" class="nav-link" data-scroll-target="#what-if-my-hazards-are-non-proportional">What if my hazards are non proportional?</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<!-- rm(list=ls()) -->
+<p>The Plan</p>
+<ul>
+<li>Continuous time hazards</li>
+<li>Parametric models</li>
+<li>Cox Semi-parametric model</li>
+<li>Issues</li>
+<li>Topics</li>
+</ul>
+<section id="continuous-time-models" class="level2">
+<h2 class="anchored" data-anchor-id="continuous-time-models">Continuous Time Models</h2>
+<p>Continuous time models aggregate the duration data into observations that indicate the total amount of time that has elapsed thus far. Two variations on the continuous time models depend exclusively on whether the independent variables vary over time or not. These are known as time-varying covariate (TVC) and non-time-varying covariate models (NTVC).</p>
+<p>Data for an NTVC model might appear as follows, where we observe each individual once, we know how long that individual lasted before experiencing the hazard, we know whether or not the observation “failed” or experienced the hazard (if not, the observation is censored), and we have an <span class="math inline">\(X\)</span> variable:</p>
+<div class="tiny">
+<div class="center">
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Individual</td>
+<td style="text-align: center;">Duration</td>
+<td style="text-align: center;">Failure</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1.4</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">.12</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">.6</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">.5</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">n</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.1</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>On the other hand, the same data for TVC would appear as follows:\</p>
+<div class="tiny">
+<div class="center">
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Individual</td>
+<td style="text-align: center;">Duration</td>
+<td style="text-align: center;">Failure</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.4</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.3</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.5</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.8</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.4</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.4</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.12</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0.12</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.92</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0.65</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.62</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.5</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.25</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.45</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.5</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.5</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">…</td>
+<td style="text-align: center;">…</td>
+<td style="text-align: center;">…</td>
+<td style="text-align: center;">…</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="a-general-estimation-approach" class="level2">
+<h2 class="anchored" data-anchor-id="a-general-estimation-approach">A general estimation approach</h2>
+<ul>
+<li>Quantity of interest is either expected duration or hazard.</li>
+<li>In either case, failure depends on survival function.</li>
+<li>In either case, some observations fail, others are censored - failure if unobserved but nonzero probability. Recall censoring is almost always due to decisions the analyst makes.</li>
+<li>In some (many) social science treatments, observations can fail more than once (multiple failure).</li>
+<li>In some cases, there is more than one way to fail (competing risks).</li>
+</ul>
+</section>
+<section id="quantities" class="level2">
+<h2 class="anchored" data-anchor-id="quantities">Quantities</h2>
+<p>Suppose a variable, <span class="math inline">\(t\)</span>, measuring duration. The cumulative probability of surviving up to <span class="math inline">\(t\)</span> is :</p>
+<p><span class="math display">\[
+F(t)= \int_0^t f(u)d(u) = Pr (T\leq t) \nonumber  
+\]</span></p>
+<p>The density is the probability of failure at any point in time:</p>
+<p><span class="math display">\[
+f(t) = \frac{dF(t)}{d(t)} \nonumber
+\]</span></p>
+<p>Survivor function - probability a unit survives to <span class="math inline">\(t\)</span>; proportion of units surviving to <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+S(t)= 1-F(t) = Pr(T \geq t) \nonumber
+\]</span></p>
+<p>Hazard rate - rate of failure at <span class="math inline">\(t\)</span> given survival to <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+h(t)= \frac{f(t)}{S(t)} \nonumber
+\]</span></p>
+<p>All together now:</p>
+<p><span class="math display">\[\begin{aligned}
+F(t)= \int_0^t f(u)d(u) = Pr (T\leq t) \nonumber  \\
+f(t) = \frac{dF(t)}{d(t)} \nonumber \\
+S(t)= 1-F(t) = Pr(T \geq t) \nonumber \\ \nonumber \\
+h(t)= \frac{f(t)}{S(t)} \nonumber
+\end{aligned}\]</span></p>
+</section>
+<section id="censoring" class="level2">
+<h2 class="anchored" data-anchor-id="censoring">Censoring</h2>
+<p><span class="math display">\[
+S(t)= 1-F(t) = Pr(T \geq t) \nonumber \\
+  S(t)= 1- \int_0^t f(u)d(u)   \nonumber \\ \nonumber \\
+S(t)= \int_t^{t=C_i} f(u)d(u)  \nonumber  
+\]</span></p>
+<section id="all-uncensored-using-b-sj-notation" class="level3">
+<h3 class="anchored" data-anchor-id="all-uncensored-using-b-sj-notation">All Uncensored (using B-S&amp;J notation) }</h3>
+<p><span class="math display">\[
+\mathcal{L} =  \prod_i^n f(t_i) \nonumber
+\]</span></p>
+</section>
+<section id="censoring-using-b-sj-notation" class="level3">
+<h3 class="anchored" data-anchor-id="censoring-using-b-sj-notation">Censoring (using B-S&amp;J notation)}</h3>
+<p>Define <span class="math inline">\(t^*\)</span> is the maximum observed duration for censored observations. Suppose two types of observations such that</p>
+<p><span class="math display">\[\delta_{i} = \left\{ \begin{array}{ll}
+         1, &amp; \mbox{if $t_i\leq t^* $} \\
+         0, &amp; \mbox{if $t_i &gt;  t^* $}
+         \end{array}
+     \right.
+     \]</span></p>
+<p>where <span class="math inline">\(\delta_i = 1\)</span> if the observation <span class="math inline">\(i\)</span> fails during the period of study.</p>
+</section>
+<section id="general-lf-with-censoring-using-b-sj-notation" class="level3">
+<h3 class="anchored" data-anchor-id="general-lf-with-censoring-using-b-sj-notation">General LF with censoring (using B-S&amp;J notation)}</h3>
+<p><span class="math display">\[
+\mathcal{L} =  \prod_{i=1}^n \Bigg\{ f(t_i) \Bigg\} ^{\delta_i} \Bigg\{ S(t_i) \Bigg\} ^{1-\delta_i}  \nonumber
+\]</span></p>
+<ul>
+<li>uncensored cases provide information about failure probability (hazard), and about survival probability.</li>
+<li>uncensored cases contribute their density; recall density is exact probability of an event, failure in this case.</li>
+<li>censored cases provide information about survival probability.</li>
+</ul>
+<p>Taking logs and adding covariates:</p>
+<p><span class="math display">\[
+\ln \mathcal{L} =  \sum_{i=1}^n \bigg\{ \delta \ln(f(t| x \beta)) + (1-\delta) \ln(S(t_i | x\beta)) \bigg\} \nonumber
+\]</span></p>
+</section>
+<section id="asides" class="level3">
+<h3 class="anchored" data-anchor-id="asides">Asides</h3>
+<p>This likelihood should remind you of the LF for binary response models. - Two processes at work here: survival (continuous); failure (binary). - Think of survival as counting periods until failure; cumulative probability of survival. - Think of failure as the occurrence of events; probability survival ends. - Think of censoring as the absence of events; it’s the probability that failure always equals zero in-sample.</p>
+</section>
+</section>
+<section id="parametric-models" class="level1">
+<h1>Parametric Models</h1>
+<p>Parametric models are in the framework described above, but where we make parametric assumptions about the density, <span class="math inline">\(f(t)\)</span>, and in turn, about the shape of the estimated hazard function.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="parametrics.png" class="img-fluid figure-img"></p>
+<figcaption>Parametric hazards from Stata’s <code>streg</code> documentation</figcaption>
+</figure>
+</div>
+<p>Common distributions for hazard models - these are Stata’s parameterizations, etc. (from <code>streg</code> documentation). Note that different software implements these differently.</p>
+<section id="exponential-hazards" class="level2">
+<h2 class="anchored" data-anchor-id="exponential-hazards">Exponential hazards</h2>
+<p>Let <span class="math inline">\(h(t) = \lambda\)</span>. The hazard is constant with respect to time, varying only with changes in <span class="math inline">\(x\)</span> variables, which we’ve not yet entered here.</p>
+<ul>
+<li>the density is <span class="math inline">\(f(t) = \lambda exp(-\lambda t)\)</span>; the probability of failure is not cumulative, but varies only with values of <span class="math inline">\(t\)</span>.</li>
+<li>the model requires that, for each period of time, the baseline hazard is the same, deviations arising only from the value of <span class="math inline">\(t\)</span> and any covariates <span class="math inline">\(x\)</span>.</li>
+<li>covariates - since the hazard (often denoted <span class="math inline">\(\lambda\)</span>) has to be positive, the effects have to be bounded, so it’s pretty natural to let <span class="math inline">\(x\)</span> variables enter exponentially such that <span class="math inline">\(h(t) = \lambda = exp(x \beta)\)</span>.</li>
+</ul>
+<p>Rewriting <span class="math inline">\(f(t)\)</span>:</p>
+<p><span class="math display">\[
+f(t) = \lambda exp(-\lambda t) \nonumber \\  \nonumber \\
+= exp(x\beta) exp(-exp(x\beta) t) \nonumber
+\]</span></p>
+<p>and <span class="math inline">\(S(t) = exp(-\lambda t)\)</span> or with covariates, <span class="math inline">\(S(t) = exp(-exp(x\beta) t)\)</span></p>
+</section>
+<section id="exponential-llf" class="level2">
+<h2 class="anchored" data-anchor-id="exponential-llf">Exponential LLF</h2>
+<p>The LLF with censoring is:</p>
+<p><span class="math display">\[
+\ln \mathcal{L} =  \sum_{i=1}^n \bigg\{ \delta \ln(f(t| x \beta)) + (1-\delta) \ln(S(t_i | x\beta)) \bigg\} \nonumber \\
+=  \sum_{i=1}^n \bigg\{ \delta \bigg[ \ln(exp(x\beta) exp(-e^{(x\beta)} t)) \bigg] + (1-\delta) \ln(exp(-e^{(x\beta)} t)) \bigg\} \nonumber \\
+=  \sum_{i=1}^n \bigg\{ \delta \bigg[ x\beta (-exp(x\beta) t)) \bigg]+ (1-\delta) (-exp(x\beta) t)) \bigg\} \nonumber
+\]</span></p>
+<p>Looking at the exponential LLF, <span class="math display">\[
+=  \sum_{i=1}^n \bigg\{ \delta  \bigg[ x\beta (-exp(x\beta) t)) \bigg] + (1-\delta) (-exp(x\beta) t)) \bigg\} \nonumber
+\]</span></p>
+<p>you should note:</p>
+<ul>
+<li>the absence of memory; the effects of <span class="math inline">\(x\beta\)</span> are evaluated <span class="math inline">\(at\)</span> points in time, <span class="math inline">\(t\)</span>, but not with respect to what has happened previously.</li>
+<li>this is what we mean when we say the baseline hazard is constant. another way to think about this is the baseline hazard “resets” at each <span class="math inline">\(t\)</span>; no memory.</li>
+</ul>
+</section>
+<section id="weibull-hazards" class="level2">
+<h2 class="anchored" data-anchor-id="weibull-hazards">Weibull hazards</h2>
+<p>In the Weibull model,</p>
+<p><span class="math display">\[
+h(t)= \lambda p (\lambda t)^{p-1} \nonumber
+\]</span></p>
+<ul>
+<li>the baseline hazard varies by <span class="math inline">\(p\)</span>, and thus does not have to remain constant over time.</li>
+<li>if <span class="math inline">\(p=1\)</span>, then the model reduces to the exponential model.<br>
+-else, <span class="math inline">\(p\)</span> determines whether the hazard is increasing or decreasing at a faster rate; values greater than 1 indicate an increasing hazard rate and values less than 1 indicate a declining hazard.</li>
+</ul>
+<section id="weibull-parts" class="level3">
+<h3 class="anchored" data-anchor-id="weibull-parts">Weibull parts</h3>
+<section id="hazard" class="level4">
+<h4 class="anchored" data-anchor-id="hazard">Hazard:</h4>
+<p><span class="math display">\[
+h(t)= \lambda p (\lambda t)^{p-1} \nonumber
+\]</span></p>
+</section>
+<section id="density" class="level4">
+<h4 class="anchored" data-anchor-id="density">Density:</h4>
+<p><span class="math display">\[
+f(t)= \lambda p (\lambda t)^{p-1} (exp(-\lambda t)^{p})\nonumber
+\]</span></p>
+</section>
+<section id="survivor" class="level4">
+<h4 class="anchored" data-anchor-id="survivor">Survivor:</h4>
+<p><span class="math display">\[
+S(t)= exp(- \lambda t)^p \nonumber
+\]</span></p>
+<p>As above, LLF combines the density and the survivor functions. Note again, the exponential is the special case where p=1.</p>
+</section>
+</section>
+</section>
+<section id="hazard-ratios" class="level2">
+<h2 class="anchored" data-anchor-id="hazard-ratios">Hazard Ratios</h2>
+<p>Hazard ratios are formed by the hazards for two different values of an <span class="math inline">\(x\)</span> variable; so the comparison of two observations that vary on that <span class="math inline">\(x\)</span> variable.</p>
+<p><span class="math display">\[
+\mbox{haz. ratio}_k  = \frac{h(t)|x_k = 1}{h(t)|x_k = 0} \nonumber \\
+= \frac{exp(\beta_0+ x_1\beta_1+ \ldots + x_k \beta_k(1))}{exp(\beta_0+ x_1\beta_1+ \ldots + x_k \beta_k(0))} \nonumber \\
+=\frac{exp(\beta_k(1))}{exp(\beta_k(0))} \nonumber \\
+= exp(\beta_k) \nonumber
+\]</span></p>
+<p>The interpretation of <span class="math inline">\(exp(\beta_k)\)</span> is therefore relative to a one unit change in <span class="math inline">\(x_k\)</span>.</p>
+</section>
+<section id="accelerated-failure-time-aft" class="level2">
+<h2 class="anchored" data-anchor-id="accelerated-failure-time-aft">Accelerated Failure Time (AFT)</h2>
+<p>Alternatively, we can think of the model as a regression of the log of duration on a set of covariates (a log-linear regression). Thus,</p>
+<p><span class="math display">\[
+t_i = exp(x \beta^*) * u \nonumber \\
+\ln(u) = \epsilon \nonumber \\
+\epsilon = \ln(t_i) - x \beta^* \nonumber
+%t_{i} = e^{\lambda_{0} + \lambda_{1}X} \ast \sigma u \nonumber
+\]</span></p>
+<p>where <span class="math inline">\(\beta^*\)</span> indicates covariate effects of a different from than in the hazard formulation. This formulation has residuals; the difference between observed and residual enter the LLF and form the basis for the MLEs.</p>
+<p>The model resembles a linear model and actually has an error term where the error can take on any positive value (thus suggesting we can generate meaningful residuals). The two derivations of the Weibull model are equivalent because <span class="math inline">\(p=\frac{1}{\sigma}\)</span> and <span class="math inline">\(\beta= \frac{-\lambda}{\sigma}\)</span>.</p>
+<ul>
+<li>the coefficients are equivalent though scaled differently.<br>
+</li>
+<li>The hazard motivation produces what Stata calls <strong>log relative hazard</strong> estimates.</li>
+<li>The regression-based motivation produces <strong>accelerated failure time</strong> coefficients.</li>
+</ul>
+<p>Though how we interpret them is different, they are substantively the same. - AFT coefficients are relative to duration or survival time; hazard coefficients are relative to the hazard rate. - AFTs and h(t) coefficients will always be in opposite directions.</p>
+<p>The relationship between the AFT and log-hazard formulations is as follows (for the Weibull):</p>
+<p>The hazard for the Weibull model is:</p>
+<p><span class="math display">\[
+h(t)= \lambda p (\lambda t)^{p-1} \nonumber
+\]</span></p>
+<p>Recalling <span class="math inline">\(\lambda=exp(x\widehat{\beta})\)</span>, let’s rewrite the hazard:</p>
+<p><span class="math display">\[
+h(t)= exp(x\widehat{\beta}) p (exp(x\widehat{\beta}) t)^{p-1} \nonumber
+\]</span></p>
+<p>where <span class="math inline">\(\beta\)</span> is the PH formulated estimate. The PH/AFT equivalence is:</p>
+<p><span class="math display">\[ \beta_{ph} = \frac{- \beta_{aft}}{1/p} \]</span></p>
+<p>To compute the Weibull hazard for Weibull AFT coefficients:</p>
+<p><span class="math display">\[  
+h(t)= exp(\frac{ -\beta}{1/p} ) * p * (exp(\frac{ -\beta}{1/p} ) * t)^{p-1} \nonumber
+\]</span></p>
+</section>
+</section>
+<section id="proportional-hazards" class="level1">
+<h1>Proportional Hazards</h1>
+<p>Proportional hazards is the idea the ratio of two hazards are a fixed proportion regardless of time. The Weibull/exponential models are PH; so is the Cox PH model which we’ll discuss next. For Cox, the hazard rate for an individual observation is (see BS &amp; J, pp 48 ff):</p>
+<p><span class="math display">\[
+h_i(t) = h_0(t) exp(X \beta) \nonumber
+\]</span></p>
+<p>The hazard ratio is:</p>
+<p><span class="math display">\[
+\frac{h_i(t)}{h_0(t)} =  exp(\beta(x_i-x_j) \nonumber
+\]</span></p>
+<p>which is independent of time, and therefore a fixed proportion regardless of time.</p>
+<section id="coxs-proportional-hazards-model" class="level2">
+<h2 class="anchored" data-anchor-id="coxs-proportional-hazards-model">Cox’s Proportional Hazards Model</h2>
+<p>The Cox model is one of the most general continuous time hazard models. It is semi-parametric and estimates a partial likelihood function. This means that it makes no specific distributional assumptions about the shape of the baseline hazard. The model is conceptually very similar to the discrete time (logit) model.</p>
+<p>Repeating, the Cox hazard for an individual is:</p>
+<p><span class="math display">\[
+h_i(t) = h_0(t) exp(x \beta) \nonumber
+\]</span></p>
+<p>but unlike the parametric models above, the baseline, <span class="math inline">\(h_0(t)\)</span> remains an unknown in the Cox model; it is not estimated in the model, and therefore, we make no assumptions about its shape. Hence, the model is semi-parametric because there is no parameterization of the baseline hazard - there is no constant. Since the hazards change with <span class="math inline">\(x\)</span> variables, you can see why the hazards for one individual to another are especially important - so proportional hazards are central to this model insofar as they only make sense relative to one another.</p>
+<p>The Cox assumes a baseline hazard <span class="math inline">\(h_{0}\)</span> that shifts depending on covariates, <span class="math inline">\(X\)</span>. Covariates enter the model exponentially:</p>
+<p><span class="math display">\[
+h(t)=h_{0}(t)exp(X \beta) \nonumber
+\]</span></p>
+<p>Now, imagine what happens when <span class="math inline">\(X\)</span> is equal to zero (so the null or constant-only model) - we’re left with:</p>
+<p><span class="math display">\[
+h(t)=h_{0}(t) \nonumber
+\]</span></p>
+<p>Note that the value of <span class="math inline">\(h_{0}\)</span> doesn’t matter because the effects of <span class="math inline">\(x_i\)</span> are relative to <span class="math inline">\(x_j\)</span>. If <span class="math inline">\(X\)</span> is not zero, the effects of <span class="math inline">\(X\)</span> on the baseline probability are <strong>proportional</strong> to changes in <span class="math inline">\(X\)</span>.</p>
+<p>Thus, the interpretation of the model is simply the relative effect of <span class="math inline">\(X\)</span> on the hazard. That is, a change in <span class="math inline">\(x\)</span> from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> has effect <span class="math inline">\(exp(\hat{\beta})\)</span>.</p>
+<p>The model is especially flexible (just as in the discrete case) because it makes no assumptions about a distribution. This is the principle virtue of the Cox model and the main reason it has become the preferred model in a lot of political science (and other) research.</p>
+<section id="semi-parametric-alism" class="level3">
+<h3 class="anchored" data-anchor-id="semi-parametric-alism">Semi-parametric-alism?</h3>
+<p>What does it mean for the model to be semi-parametric? It’s that in derivation, we do not assume anything specific about the functional form of the hazard or event times, though the model is based on a parametric regression - hence, “semi.” The model depends on:</p>
+<ul>
+<li>independence of observations.</li>
+<li>unique failure times - no two individuals fail simultaneously.</li>
+<li>proportionality</li>
+</ul>
+</section>
+<section id="war-duration-example" class="level3">
+<h3 class="anchored" data-anchor-id="war-duration-example">War duration example</h3>
+<p>Here are two models using data from <span class="citation" data-cites="benstam96">Bennett and Stam (<a href="#ref-benstam96" role="doc-biblioref">1996</a>)</span>; their paper was one of the early applications of the continuous time hazard models in the discipline.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>war <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"/Users/dave/Documents/teaching/606J-mle/2022/slides/L12_hazards2/code/one_per_war.csv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># First, create the Cox model</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming your data is in a dataframe called 'df'</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>cox_model <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(length, censor) <span class="sc">~</span> oadm <span class="sc">+</span> demosumb <span class="sc">+</span> sumpopbg <span class="sc">+</span> rterrain, </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> war)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Weibull model</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>weib_model <span class="ot">&lt;-</span> <span class="fu">survreg</span>(<span class="fu">Surv</span>(length, censor) <span class="sc">~</span> oadm <span class="sc">+</span> demosumb <span class="sc">+</span> sumpopbg <span class="sc">+</span> rterrain, </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> war, </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                      <span class="at">dist =</span> <span class="st">"weibull"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">modelsummary</span>(<span class="fu">list</span>(cox_model, weib_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<!-- preamble start -->
+
+    <script>
+      function styleCell_rsjxw3c7ldi1p6jmujbj(i, j, css_id) {
+        var table = document.getElementById("tinytable_rsjxw3c7ldi1p6jmujbj");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_rsjxw3c7ldi1p6jmujbj');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_rsjxw3c7ldi1p6jmujbj(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_rsjxw3c7ldi1p6jmujbj");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(0, 0, 'tinytable_css_idlkmu36f2cf8x1ni4kxqu') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(0, 1, 'tinytable_css_idgf0k70zpjksodi1aw95r') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(0, 2, 'tinytable_css_idgf0k70zpjksodi1aw95r') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(1, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(1, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(1, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(2, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(2, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(2, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(3, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(3, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(3, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(4, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(4, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(4, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(5, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(5, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(5, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(6, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(6, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(6, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(7, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(7, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(7, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(8, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(8, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(8, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(9, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(9, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(9, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(10, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(10, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(10, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(11, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(11, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(11, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(12, 0, 'tinytable_css_id832lwgts07zb3a32xv5m') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(12, 1, 'tinytable_css_idxgqz4it34q4y0668z1vi') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(12, 2, 'tinytable_css_idxgqz4it34q4y0668z1vi') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(13, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(13, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(13, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(14, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(14, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(14, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(15, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(15, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(15, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(16, 0, 'tinytable_css_idgnawztnfq7nghbsl5coc') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(16, 1, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+window.addEventListener('load', function () { styleCell_rsjxw3c7ldi1p6jmujbj(16, 2, 'tinytable_css_id5d1vd4ktqe5ecjsx9l8s') })
+    </script>
+
+    <style>
+    .table td.tinytable_css_idlkmu36f2cf8x1ni4kxqu, .table th.tinytable_css_idlkmu36f2cf8x1ni4kxqu {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idgf0k70zpjksodi1aw95r, .table th.tinytable_css_idgf0k70zpjksodi1aw95r {  text-align: center;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idgnawztnfq7nghbsl5coc, .table th.tinytable_css_idgnawztnfq7nghbsl5coc {  text-align: left; }
+    .table td.tinytable_css_id5d1vd4ktqe5ecjsx9l8s, .table th.tinytable_css_id5d1vd4ktqe5ecjsx9l8s {  text-align: center; }
+    .table td.tinytable_css_id832lwgts07zb3a32xv5m, .table th.tinytable_css_id832lwgts07zb3a32xv5m {  border-bottom: solid 0.05em black;  text-align: left; }
+    .table td.tinytable_css_idxgqz4it34q4y0668z1vi, .table th.tinytable_css_idxgqz4it34q4y0668z1vi {  border-bottom: solid 0.05em black;  text-align: center; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_rsjxw3c7ldi1p6jmujbj" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">(1)</th>
+                <th scope="col">(2)</th>
+              </tr>
+        </thead>
+        
+        <tbody>
+                <tr>
+                  <td>oadm       </td>
+                  <td>0.268  </td>
+                  <td>-0.584 </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>(0.434)</td>
+                  <td>(0.661)</td>
+                </tr>
+                <tr>
+                  <td>demosumb   </td>
+                  <td>0.056  </td>
+                  <td>-0.072 </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>(0.028)</td>
+                  <td>(0.042)</td>
+                </tr>
+                <tr>
+                  <td>sumpopbg   </td>
+                  <td>0.000  </td>
+                  <td>0.000  </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>(0.000)</td>
+                  <td>(0.000)</td>
+                </tr>
+                <tr>
+                  <td>rterrain   </td>
+                  <td>0.755  </td>
+                  <td>-1.190 </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>(0.589)</td>
+                  <td>(0.895)</td>
+                </tr>
+                <tr>
+                  <td>(Intercept)</td>
+                  <td>       </td>
+                  <td>3.007  </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>       </td>
+                  <td>(0.439)</td>
+                </tr>
+                <tr>
+                  <td>Log(scale) </td>
+                  <td>       </td>
+                  <td>0.435  </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>       </td>
+                  <td>(0.087)</td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.   </td>
+                  <td>77     </td>
+                  <td>77     </td>
+                </tr>
+                <tr>
+                  <td>AIC        </td>
+                  <td>522.0  </td>
+                  <td>543.4  </td>
+                </tr>
+                <tr>
+                  <td>BIC        </td>
+                  <td>531.4  </td>
+                  <td>557.5  </td>
+                </tr>
+                <tr>
+                  <td>RMSE       </td>
+                  <td>1.00   </td>
+                  <td>24.28  </td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
+</div>
+</div>
+<p>Here are predictions from the two models. You’ll note (as you would have in the table above) the effects are in opposite directions. This is because the Weibull model is parameterized as AFTE, while the Cox model is parameterized as PH.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create prediction data</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pred_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">demosumb =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">17</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">oadm =</span> <span class="dv">0</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sumpopbg =</span> <span class="dv">159139</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">rterrain =</span> <span class="fl">0.34</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Get predictions for Cox model</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>cox_preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(cox_model, </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                     <span class="at">newdata =</span> pred_data, </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">"risk"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Get predictions for Weibull model</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>weib_preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(weib_model, </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                      <span class="at">newdata =</span> pred_data, </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                      <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine predictions into a data frame for plotting</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">demosumb =</span> pred_data<span class="sc">$</span>demosumb,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">cox =</span> cox_preds,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">weibull =</span> weib_preds</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_data, <span class="fu">aes</span>(<span class="at">x =</span> demosumb)) <span class="sc">+</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> weibull, <span class="at">color =</span> <span class="st">"Weibull Model"</span>), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Weibull Model"</span>,</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"demosumb"</span>,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Predicted Risk"</span>) <span class="sc">+</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_data, <span class="fu">aes</span>(<span class="at">x =</span> demosumb)) <span class="sc">+</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> cox, <span class="at">color =</span> <span class="st">"Cox Model"</span>), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Cox model"</span>,</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"demosumb"</span>,</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Predicted Risk"</span>) <span class="sc">+</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>patchwork<span class="sc">::</span><span class="fu">wrap_plots</span>(w, c)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="haz-cont24_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="issues-in-ph-models" class="level1">
+<h1>Issues in PH models</h1>
+<p>Two main issues you need to be aware of in proportional hazards models are:</p>
+<ul>
+<li>ties or non-unique failure times - what happens in this model when individuals fail at the same instant?</li>
+<li>proportional hazards assumption - what does it mean; what happens if it fails; how can we know</li>
+</ul>
+<p>These are two (among several) important issues - I’m treating them superficially here because of time; don’t let that persuade you these lack importance. B-S&amp;J treat them in much greater detail.</p>
+<section id="ties" class="level2">
+<h2 class="anchored" data-anchor-id="ties">Ties</h2>
+<p>If events (failures) are measured to occur at the same time, those events are ties.</p>
+<p>What happens if (when) two individuals fail simultaneously? It’s reasonable to assume we never have ties if we think time is continuous (infinitely divisible); but since we can’t <em>measure</em> failures over time at infinitely small intervals, this assumption doesn’t really hold.</p>
+<p>There are three main approaches for handling ties.</p>
+<ul>
+<li>Breslow - adjusts the denominator of the LF for the possible orderings of tied events (Stata’s default).</li>
+<li>Efron - an improvement to Breslow - the default in R’s <code>survival</code> library.</li>
+<li>Exact methods - more complex, more accurate.</li>
+</ul>
+<p>Which to choose? In general, if you have few ties, these all produce similar results so it doesn’t matter. If you have a lot of ties, prefer Efron or Exact, though Exact is very computationally demanding.</p>
+<p>One other possibility in data with lots of ties is that the failure events either occur in discrete time (they can only occur at certain intervals), or we observe events at certain time points such that they appear discrete. If this is the case, it may make sense to recast the data as discrete, and estimate a discrete time model.</p>
+</section>
+<section id="non-proportionality" class="level2">
+<h2 class="anchored" data-anchor-id="non-proportionality">Non-Proportionality</h2>
+<p>The models we’ve talked about thus far (exponential, Weibull, Cox) are <em>proportional hazards</em> models.</p>
+<p>As noted above, proportional hazards imply the hazard ratio for two individuals is constant over time. So two individuals may have different hazards, but the ratio of the hazard for <span class="math inline">\(i\)</span> to the hazard for <span class="math inline">\(j\)</span> does not vary with <span class="math inline">\(t\)</span>. This means the effect of any covariate <span class="math inline">\(x\)</span> is invariant to time. Though this assumption is different, it should remind you of the proportionality representation of IIA in choice models.</p>
+<p>If the hazards are non proportional, the estimates and standard errors are both wrong, so our inferences are as well.</p>
+<section id="why-would-hazards-be-non-proportional" class="level3">
+<h3 class="anchored" data-anchor-id="why-would-hazards-be-non-proportional">Why would hazards be non proportional?</h3>
+<ul>
+<li>a covariate has a diminishing or threshold effect on survival - perhaps <span class="math inline">\(x\)</span> increases survival, but only up to some point after which it has no effect - e.g.&nbsp;drug resistance. Hazards for two individuals, one treatment, one control, will converge at some point as the treatment individual gets smaller and smaller effect from the drug, relative to the control individual.</li>
+<li>a covariate measures learning such that it decreases the difference between an individual learning something and an individual who already learned.</li>
+<li>a covariate increases the disparity in survival between individuals over time, so their hazards diverge. -hazards for individuals converge and then cross; a common example is the survival effects of surgery versus radiation or drug treatment for cancer patients. The hazard for surgery patients is high at first, but declines; for radiation/drug patients, the hazards are low at first, but increase with time. In the long run, surgery patients’ hazards usually crosses beneath that of radiation patients.</li>
+</ul>
+<p>In all these cases, the hazards for individuals change over time <em>at different rates or in different directions</em>. This means the ratio of their hazards is not constant over time. So variation over time is the common factor here and implies tests for non proportionality and solutions to it.</p>
+<p>In what follows, I’m focusing only on the Cox model.</p>
+</section>
+<section id="tests-for-ph-in-the-cox-model" class="level3">
+<h3 class="anchored" data-anchor-id="tests-for-ph-in-the-cox-model">Tests for PH in the Cox model</h3>
+<p>There are several, I’m only presenting two residual-based methods appropriate for the Cox model:</p>
+<ul>
+<li>Plot the Schoenfeld residuals against some function of time.</li>
+<li>Generate a test statistic measuring the relationship between the Schoenfeld residuals and time.</li>
+</ul>
+</section>
+<section id="schoenfeld-residuals" class="level3">
+<h3 class="anchored" data-anchor-id="schoenfeld-residuals">Schoenfeld Residuals</h3>
+<p>The math here is difficult and not informative.</p>
+<p><img src="billmurray.jpeg" class="img-fluid"></p>
+<p>The idea is that we can get residuals for each individual, at each event time, for each covariate (by differentiating the Cox LL w.r.t. <span class="math inline">\(\beta\)</span>). Each residual is the estimated difference between the observed and predicted hazard for each variable, individual, time.</p>
+<p>Using the Schoenfeld residuals (or their scaled version), we can either plot them over time, or generate a test statistic. The latter, due to Grambsch and Therneau’s (1994) article, produces what amounts to a correlation between the residuals for each variable and time; it’s <span class="math inline">\(\chi^2\)</span> distributed, so hypothesis testing is simple. The null is that there is no systematic relationship between the residuals and time. They also have a “global” test - it evaluates all the residuals for the model.</p>
+<p>In Stata, the command after <code>stcox</code> is <code>estat phtest, detail</code>. In R, use the <code>cox.zph</code> function in the <code>survival</code> package.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit Cox model</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cox_model <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(length, censor) <span class="sc">~</span> oadm <span class="sc">+</span> demosumb <span class="sc">+</span> sumpopbg <span class="sc">+</span> rterrain, </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> war)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">modelsummary</span>(cox_model, <span class="at">stars =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<!-- preamble start -->
+
+    <script>
+      function styleCell_2v0trd5umk4r1db7dskw(i, j, css_id) {
+        var table = document.getElementById("tinytable_2v0trd5umk4r1db7dskw");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_2v0trd5umk4r1db7dskw');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_2v0trd5umk4r1db7dskw(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_2v0trd5umk4r1db7dskw");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(0, 0, 'tinytable_css_idpjp9nucce1s91ka1d5es') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(0, 1, 'tinytable_css_idt2fz3w9dy3s0f5gpnmzb') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(1, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(1, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(2, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(2, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(3, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(3, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(4, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(4, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(5, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(5, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(6, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(6, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(7, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(7, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(8, 0, 'tinytable_css_id4xyteyx27q4uf11rygwi') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(8, 1, 'tinytable_css_id7zxdwcb823cc98zf0eqh') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(9, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(9, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(10, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(10, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(11, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(11, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(12, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(12, 1, 'tinytable_css_id4sa5psu4zmytvydesja6') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(13, 0, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+window.addEventListener('load', function () { styleCell_2v0trd5umk4r1db7dskw(13, 1, 'tinytable_css_id9fok5gef217gqlou3bhm') })
+    </script>
+
+    <style>
+    .table td.tinytable_css_idpjp9nucce1s91ka1d5es, .table th.tinytable_css_idpjp9nucce1s91ka1d5es {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idt2fz3w9dy3s0f5gpnmzb, .table th.tinytable_css_idt2fz3w9dy3s0f5gpnmzb {  text-align: center;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_id9fok5gef217gqlou3bhm, .table th.tinytable_css_id9fok5gef217gqlou3bhm {  text-align: left; }
+    .table td.tinytable_css_id4sa5psu4zmytvydesja6, .table th.tinytable_css_id4sa5psu4zmytvydesja6 {  text-align: center; }
+    .table td.tinytable_css_id4xyteyx27q4uf11rygwi, .table th.tinytable_css_id4xyteyx27q4uf11rygwi {  border-bottom: solid 0.05em black;  text-align: left; }
+    .table td.tinytable_css_id7zxdwcb823cc98zf0eqh, .table th.tinytable_css_id7zxdwcb823cc98zf0eqh {  border-bottom: solid 0.05em black;  text-align: center; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_2v0trd5umk4r1db7dskw" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">(1)</th>
+              </tr>
+        </thead>
+        <tfoot><tr><td colspan="2">+ p &lt; 0.1, * p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001</td></tr></tfoot>
+        <tbody>
+                <tr>
+                  <td>oadm    </td>
+                  <td>0.268  </td>
+                </tr>
+                <tr>
+                  <td>        </td>
+                  <td>(0.434)</td>
+                </tr>
+                <tr>
+                  <td>demosumb</td>
+                  <td>0.056* </td>
+                </tr>
+                <tr>
+                  <td>        </td>
+                  <td>(0.028)</td>
+                </tr>
+                <tr>
+                  <td>sumpopbg</td>
+                  <td>0.000  </td>
+                </tr>
+                <tr>
+                  <td>        </td>
+                  <td>(0.000)</td>
+                </tr>
+                <tr>
+                  <td>rterrain</td>
+                  <td>0.755  </td>
+                </tr>
+                <tr>
+                  <td>        </td>
+                  <td>(0.589)</td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.</td>
+                  <td>77     </td>
+                </tr>
+                <tr>
+                  <td>AIC     </td>
+                  <td>522.0  </td>
+                </tr>
+                <tr>
+                  <td>BIC     </td>
+                  <td>531.4  </td>
+                </tr>
+                <tr>
+                  <td>RMSE    </td>
+                  <td>1.00   </td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
+</div>
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check proportional hazards assumption</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>coxphtest <span class="ot">&lt;-</span> <span class="fu">cox.zph</span>(cox_model)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>coxphtest</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         chisq df     p
+oadm     3.368  1 0.066
+demosumb 0.802  1 0.371
+sumpopbg 0.335  1 0.563
+rterrain 1.261  1 0.261
+GLOBAL   6.352  4 0.174</code></pre>
+</div>
+</div>
+<p>We can also plot the residuals in the same package:</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot Schoenfeld residuals</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcoxzph</span>(<span class="fu">cox.zph</span>(cox_model))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="haz-cont24_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is a great book - and these scholars have done a lot to develop and extend survival models.</p>
+<p><img src="book.jpg" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="what-if-my-hazards-are-non-proportional" class="level3">
+<h3 class="anchored" data-anchor-id="what-if-my-hazards-are-non-proportional">What if my hazards are non proportional?</h3>
+<p>If the hazards for some <span class="math inline">\(x\)</span> vary with time, then why not control for their interaction. After all, NPH means that the effect of <span class="math inline">\(x\)</span> changes as <span class="math inline">\(t\)</span> changes - and when that’s what we expect, we interact stuff, right?</p>
+<p><img src="mic_drop.jpg" class="img-fluid"></p>
+<p>We usually use <span class="math inline">\(ln(t) * x\)</span>; the interaction coefficient measures the marginal effect of <span class="math inline">\(x\)</span> at time <span class="math inline">\(t\)</span>. We do <strong>not</strong> include the constituent term <span class="math inline">\(ln(t)\)</span>.</p>
+
+
+
+</section>
+</section>
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-benstam96" class="csl-entry" role="listitem">
+Bennett, D. Scott, and Allan C. Stam. 1996. <span>“The Duration of Interstate Wars, 1816-1985.”</span> <em>American Political Science Review</em> 90: 239–57.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

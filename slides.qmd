@@ -27,3 +27,5 @@ title: "Slides"
 [Count Models I](countA24.qmd)
 
 [Count Models II](countB24.qmd)
+
+[Continuous Time Hazards](haz-cont24.qmd)
