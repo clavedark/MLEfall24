@@ -96,7 +96,7 @@ n & 14 & 0 & 2.1 \\
 ```
 
 
- On the other hand, the same data for TVC would appear as follows:\\
+ On the other hand, the same data for TVC would appear as follows:
 
 ```{=latex}
 
@@ -499,7 +499,7 @@ modelsummary(list(cox_model, weib_model))
 ```
 
 
-Here are predictions from the two models. You'll note (as you would have in the table above) the effects are in opposite directions. This is because the Weibull model is parameterized as AFTE, while the Cox model is parameterized as PH.
+Here are predictions from the two models. You'll note (as you would have in the table above) the effects are in opposite directions. This is because the Weibull model is parameterized as AFT, while the Cox model is parameterized as PH.
 
 
 ```{r}
@@ -560,7 +560,7 @@ Two main issues you need to be aware of in proportional hazards models are:
 
 
   - ties or non-unique failure times - what happens in this model when individuals fail at the same instant? 
-  - proportional hazards assumption - what does it mean; what happens if it fails; how can we know
+  - proportional hazards assumption - what does it mean; what happens if it fails; how can we know?
 
 
 These are two (among several) important issues - I'm treating them superficially here because of time; don't let that persuade you these lack importance. B-S&J treat them in much greater detail. 
