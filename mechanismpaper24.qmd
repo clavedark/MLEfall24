@@ -49,7 +49,7 @@ library(highcharter)
 
   - paper #1 (max 3 single-spaced pages) - identify a mechanism you find interesting. Explain it in detail. Write a model of it if doing so is helpful. Why is it interesting? **Due before 18 October.**
   
-  - paper #2 - (max 4 single-spaced pages) - restate the mechanism as clearly as possible; give a real world example; where does this mechanism appear in the literature (give an example of its usage, application, etc.). Is its application successful?  What is your specific application or model? **Due before 22 November.**
+  - paper #2 - (max 4 single-spaced pages) - restate the mechanism as clearly as possible; give a real world example; where does this mechanism appear in the literature (give an example of its usage, application, etc.). Is its application successful?  What is your specific application or model? **Due before 26 November.**
   
   
   - paper #3 - (max 3 single-spaced page) - a final articulation of your mechanism and either how you intend to apply it, and any development/advancement you're making to this mechanism. **Due before 12 December.**
