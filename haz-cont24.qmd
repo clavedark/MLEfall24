@@ -484,12 +484,11 @@ war <- read.csv("/Users/dave/Documents/teaching/606J-mle/2022/slides/L12_hazards
 
 
 
-# First, create the Cox model
-# Assuming your data is in a dataframe called 'df'
+# cox
 cox_model <- coxph(Surv(length, censor) ~ oadm + demosumb + sumpopbg + rterrain, 
                    data = war)
 
-# Create Weibull model
+# Weibull 
 weib_model <- survreg(Surv(length, censor) ~ oadm + demosumb + sumpopbg + rterrain, 
                       data = war, 
                       dist = "weibull")
@@ -538,17 +537,17 @@ w <- ggplot(plot_data, aes(x = demosumb)) +
   geom_line(aes(y = weibull, color = "Weibull Model"), size = 1) +
   labs(title = "Weibull Model",
        x = "demosumb",
-       y = "Predicted Risk") +
+       y = "Expected Duration") +
   theme_minimal()
 
 c <- ggplot(plot_data, aes(x = demosumb)) +
   geom_line(aes(y = cox, color = "Cox Model"), size = 1) +
   labs(title = "Cox model",
        x = "demosumb",
-       y = "Predicted Risk") +
+       y = "Predicted Hazard") +
   theme_minimal()
 
-patchwork::wrap_plots(w, c)
+w/c
 
 
 ```
@@ -602,7 +601,7 @@ If the hazards are non proportional, the estimates and standard errors are both 
   - a covariate has a diminishing or threshold effect on survival - perhaps $x$ increases survival, but only up to some point after which it has no effect - e.g. drug resistance. Hazards for two individuals, one treatment, one control, will converge at some point as the treatment individual gets smaller and smaller effect from the drug, relative to the control individual.
   - a covariate measures learning such that it decreases the difference between an individual learning something and an individual who already learned. 
   - a covariate increases the disparity in survival between individuals over time, so their hazards diverge. 
-  -hazards for individuals converge and then cross; a common example is the survival effects of surgery versus radiation or drug treatment for cancer patients. The hazard for surgery patients is high at first, but declines; for radiation/drug patients, the hazards are low at first, but increase with time. In the long run, surgery patients' hazards usually crosses beneath that of radiation patients. 
+  -hazards for individuals converge and then cross; a common example is the survival effects of surgery versus radiation or drug treatment for cancer patients. The hazard for surgery patients is high at first, but declines; for radiation/drug patients, the hazards are low at first, but increase with time. In the long run, surgery patients' hazard usually crosses beneath that of radiation patients. 
 
 
 In all these cases, the hazards for individuals change over time *at different rates or in different directions*. This means the ratio of their hazards is not constant over time. So variation over time is the common factor here and implies tests for non proportionality and solutions to it.  
