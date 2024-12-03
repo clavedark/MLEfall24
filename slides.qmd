@@ -30,4 +30,4 @@ title: "Slides"
 
 [Continuous Time Hazards](haz-cont24.qmd)
 
-[Trucation and Censoring](selection  24.qmd)
+[Trucation and Censoring](selection24.qmd)
