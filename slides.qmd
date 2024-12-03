@@ -29,3 +29,5 @@ title: "Slides"
 [Count Models II](countB24.qmd)
 
 [Continuous Time Hazards](haz-cont24.qmd)
+
+[Trucation and Censoring](selection  24.qmd)
